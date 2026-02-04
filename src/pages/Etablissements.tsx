@@ -34,6 +34,7 @@ import {
   Refresh as RefreshIcon,
   OpenInNew as OpenInNewIcon,
   Visibility as VisibilityIcon,
+  Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
@@ -187,11 +188,14 @@ const Etablissements: React.FC = () => {
   return (
     <Box>
       {/* En-tête */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
         <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
-            Établissements
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <BusinessIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+            <Typography variant="h4" fontWeight={700}>
+              Établissements
+            </Typography>
+          </Box>
           <Typography variant="body1" color="text.secondary">
             Gérez les établissements partenaires de ScholarWay
           </Typography>
@@ -200,7 +204,8 @@ const Etablissements: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAdd}
-          sx={{ height: 'fit-content' }}
+          size="large"
+          sx={{ borderRadius: 2 }}
         >
           Ajouter un établissement
         </Button>

@@ -225,46 +225,33 @@ const Notifications: React.FC = () => {
   return (
     <Box>
       {/* En-tête */}
-      <Box sx={{ mb: 4 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ md: 'center' }} spacing={2}>
-          <Box>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Avatar
-                sx={{
-                  width: 56,
-                  height: 56,
-                  bgcolor: alpha(theme.palette.warning.main, 0.1),
-                  color: 'warning.main',
-                }}
-              >
-                <NotificationsActive sx={{ fontSize: 28 }} />
-              </Avatar>
-              <Box>
-                <Typography variant="h4" fontWeight={700}>
-                  Centre de notifications
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Alertes système et événements importants
-                </Typography>
-              </Box>
-            </Stack>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <NotificationsActive sx={{ fontSize: 40, color: 'primary.main' }} />
+            <Typography variant="h4" fontWeight={700}>
+              Notifications
+            </Typography>
           </Box>
-          <Stack direction="row" spacing={1}>
-            {unreadCount > 0 && (
-              <Button
-                variant="outlined"
-                startIcon={<MarkEmailRead />}
-                onClick={handleMarkAllAsRead}
-              >
-                Tout marquer comme lu
-              </Button>
-            )}
-            <Tooltip title="Actualiser">
-              <IconButton color="primary" sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <Typography variant="body1" color="text.secondary">
+            Alertes système et événements importants
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1}>
+          {unreadCount > 0 && (
+            <Button
+              variant="outlined"
+              startIcon={<MarkEmailRead />}
+              onClick={handleMarkAllAsRead}
+            >
+              Tout marquer comme lu
+            </Button>
+          )}
+          <Tooltip title="Actualiser">
+            <IconButton color="primary" sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Box>
 

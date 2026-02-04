@@ -150,39 +150,78 @@ const DashboardLayout: React.FC = () => {
       {/* AppBar */}
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           width: { md: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%' },
           ml: { md: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
-          bgcolor: 'white',
+          // Glassy header: semi-transparent + blur, no border radius
+          bgcolor: alpha(theme.palette.background.paper, 0.64),
           color: 'text.primary',
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+          borderBottom: '1px solid rgba(0,0,0,0.06)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          boxShadow: 'none',
+          borderRadius: 0,
           transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: { xs: 64, md: 70 }, px: { xs: 2, md: 3 } }}>
+          {/* Menu burger */}
           <IconButton
-            color="inherit"
             aria-label="ouvrir menu"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2 }}
+            sx={{ 
+              mr: 2,
+              color: 'grey.600',
+              '&:hover': { 
+                bgcolor: 'grey.100',
+                color: 'primary.main',
+              },
+            }}
           >
             <MenuIcon />
           </IconButton>
 
+          {/* Titre et date */}
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" noWrap fontWeight={600}>
-              Administration ScholarWay
+            <Typography 
+              variant="h6" 
+              noWrap 
+              fontWeight={700}
+              sx={{ 
+                color: 'grey.800',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              ScholarWay
+              <Typography 
+                component="span" 
+                sx={{ 
+                  color: 'primary.main', 
+                  fontWeight: 700,
+                  ml: 0.5,
+                }}
+              >
+                Admin
+              </Typography>
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: 'grey.500',
+                display: 'block',
+                mt: -0.3,
+              }}
+            >
               {currentTime.toLocaleDateString('fr-TG', {
                 weekday: 'long',
-                year: 'numeric',
-                month: 'long',
                 day: 'numeric',
+                month: 'long',
+                year: 'numeric',
               })}
             </Typography>
           </Box>
@@ -190,31 +229,53 @@ const DashboardLayout: React.FC = () => {
           {/* Notifications */}
           <IconButton
             onClick={(e) => setNotifAnchor(e.currentTarget)}
-            sx={{
-              bgcolor: notifAnchor ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-              '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.1) },
+            sx={{ 
+              color: 'grey.600',
+              '&:hover': { 
+                bgcolor: 'grey.100',
+                color: 'primary.main',
+              },
             }}
           >
-            <Badge badgeContent={unreadCount} color="error">
+            <Badge 
+              badgeContent={unreadCount} 
+              color="error"
+              sx={{
+                '& .MuiBadge-badge': {
+                  fontSize: '0.7rem',
+                  minWidth: 18,
+                  height: 18,
+                },
+              }}
+            >
               <NotificationsIcon />
             </Badge>
           </IconButton>
 
+          {/* Séparateur */}
+          <Divider orientation="vertical" flexItem sx={{ mx: 1.5, my: 1.5 }} />
+
           {/* Profil */}
           <IconButton
             onClick={(e) => setProfileAnchor(e.currentTarget)}
-            sx={{
-              ml: 1,
-              bgcolor: profileAnchor ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-              '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.1) },
+            sx={{ 
+              p: 0.5,
+              '&:hover': { 
+                bgcolor: 'transparent',
+              },
             }}
           >
             <Avatar
               sx={{
                 bgcolor: 'primary.main',
-                width: 36,
-                height: 36,
-                fontSize: '0.9rem',
+                width: 38,
+                height: 38,
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                },
               }}
             >
               {user?.firstName?.charAt(0) || 'A'}

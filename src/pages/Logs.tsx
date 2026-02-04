@@ -291,57 +291,58 @@ export default function Logs() {
 
     return (
         <Box>
-            {/* Header */}
-            <Box sx={{ mb: 4 }}>
-                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ md: 'center' }} spacing={2}>
-                    <Box>
-                        <Typography variant="h4" fontWeight="bold" gutterBottom>
+            {/* En-tête */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                        <Timeline sx={{ fontSize: 40, color: 'primary.main' }} />
+                        <Typography variant="h4" fontWeight={700}>
                             Journal d'activité
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Suivi de toutes les actions effectuées sur la plateforme
-                        </Typography>
                     </Box>
-                    <Stack direction="row" spacing={1}>
-                        <Tooltip title="Vue tableau">
-                            <IconButton
-                                onClick={() => setViewMode('table')}
-                                color={viewMode === 'table' ? 'primary' : 'default'}
-                                sx={{
-                                    bgcolor: viewMode === 'table' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                                }}
-                            >
-                                <ViewList />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Vue timeline">
-                            <IconButton
-                                onClick={() => setViewMode('timeline')}
-                                color={viewMode === 'timeline' ? 'primary' : 'default'}
-                                sx={{
-                                    bgcolor: viewMode === 'timeline' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                                }}
-                            >
-                                <Timeline />
-                            </IconButton>
-                        </Tooltip>
-                        <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                        <Tooltip title="Actualiser">
-                            <IconButton onClick={fetchLogs} color="primary">
-                                <Refresh />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Exporter">
-                            <IconButton onClick={handleExport} color="primary">
-                                <Download />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Nettoyer les anciens logs">
-                            <IconButton onClick={() => setClearDialog(true)} color="error">
-                                <Delete />
-                            </IconButton>
-                        </Tooltip>
-                    </Stack>
+                    <Typography variant="body1" color="text.secondary">
+                        Suivi de toutes les actions effectuées sur la plateforme
+                    </Typography>
+                </Box>
+                <Stack direction="row" spacing={1}>
+                    <Tooltip title="Vue tableau">
+                        <IconButton
+                            onClick={() => setViewMode('table')}
+                            color={viewMode === 'table' ? 'primary' : 'default'}
+                            sx={{
+                                bgcolor: viewMode === 'table' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                            }}
+                        >
+                            <ViewList />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Vue timeline">
+                        <IconButton
+                            onClick={() => setViewMode('timeline')}
+                            color={viewMode === 'timeline' ? 'primary' : 'default'}
+                            sx={{
+                                bgcolor: viewMode === 'timeline' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                            }}
+                        >
+                            <Timeline />
+                        </IconButton>
+                    </Tooltip>
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                    <Tooltip title="Actualiser">
+                        <IconButton onClick={fetchLogs} color="primary">
+                            <Refresh />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Exporter">
+                        <IconButton onClick={handleExport} color="primary">
+                            <Download />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Nettoyer les anciens logs">
+                        <IconButton onClick={() => setClearDialog(true)} color="error">
+                            <Delete />
+                        </IconButton>
+                    </Tooltip>
                 </Stack>
             </Box>
 

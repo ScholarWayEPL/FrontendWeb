@@ -33,6 +33,7 @@ import {
   Refresh,
   MoreVert,
   EmojiEvents,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import {
   AreaChart,
@@ -132,12 +133,15 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box>
-      {/* En-tête avec refresh */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      {/* En-tête */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
         <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
-            Tableau de bord
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <DashboardIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+            <Typography variant="h4" fontWeight={700}>
+              Tableau de bord
+            </Typography>
+          </Box>
           <Typography variant="body1" color="text.secondary">
             Bienvenue sur le panneau d'administration ScholarWay
           </Typography>
@@ -148,7 +152,7 @@ const Dashboard: React.FC = () => {
           )}
         </Box>
         <Tooltip title="Actualiser les données">
-          <IconButton onClick={handleRefresh} disabled={loading} color="primary">
+          <IconButton onClick={handleRefresh} disabled={loading} color="primary" size="large">
             <Refresh sx={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
           </IconButton>
         </Tooltip>

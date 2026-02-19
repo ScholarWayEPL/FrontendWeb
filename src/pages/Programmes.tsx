@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import { formatCFA } from '../constants';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { BORDER_RADIUS, SHADOWS } from '../constants';
 import {
   fetchProgrammes,
   fetchDomaines,
@@ -179,7 +180,7 @@ const Programmes: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease-in-out',
-          borderRadius: 2,
+          borderRadius: BORDER_RADIUS.md,
           borderTop: `4px solid ${niveauConfig.color}`,
           '&:hover': {
             transform: 'translateY(-4px)',
@@ -246,7 +247,7 @@ const Programmes: React.FC = () => {
             {/* Durée */}
             <Box sx={{ 
               p: 1.5, 
-              borderRadius: 1.5, 
+              borderRadius: BORDER_RADIUS.md, 
               bgcolor: 'rgba(2, 136, 209, 0.08)',
               border: '1px solid',
               borderColor: 'rgba(2, 136, 209, 0.2)',
@@ -265,7 +266,7 @@ const Programmes: React.FC = () => {
             {/* Frais */}
             <Box sx={{ 
               p: 1.5, 
-              borderRadius: 1.5, 
+              borderRadius: BORDER_RADIUS.md, 
               bgcolor: programme.fraisScolarite === 0 ? 'rgba(46, 125, 50, 0.08)' : 'rgba(237, 108, 2, 0.08)',
               border: '1px solid',
               borderColor: programme.fraisScolarite === 0 ? 'rgba(46, 125, 50, 0.2)' : 'rgba(237, 108, 2, 0.2)',
@@ -285,7 +286,7 @@ const Programmes: React.FC = () => {
           {/* Débouchés */}
           <Box sx={{ 
             p: 1.5, 
-            borderRadius: 1.5, 
+            borderRadius: BORDER_RADIUS.md, 
             bgcolor: 'grey.50',
             border: '1px solid',
             borderColor: 'grey.200',
@@ -321,7 +322,7 @@ const Programmes: React.FC = () => {
             variant="outlined"
             startIcon={<EditIcon />}
             onClick={() => handleEdit(programme)}
-            sx={{ borderRadius: 1.5, textTransform: 'none' }}
+            sx={{ borderRadius: BORDER_RADIUS.md, textTransform: 'none' }}
           >
             Modifier
           </Button>
@@ -331,7 +332,7 @@ const Programmes: React.FC = () => {
             color="error"
             startIcon={<DeleteIcon />}
             onClick={() => handleDeleteClick(programme)}
-            sx={{ borderRadius: 1.5, textTransform: 'none' }}
+            sx={{ borderRadius: BORDER_RADIUS.md, textTransform: 'none' }}
           >
             Supprimer
           </Button>
@@ -376,7 +377,7 @@ const Programmes: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleAdd}
           size="large"
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}
         >
           Ajouter un programme
         </Button>

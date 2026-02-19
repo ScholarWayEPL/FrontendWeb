@@ -19,6 +19,7 @@ import {
   Tabs,
   Badge,
 } from '@mui/material';
+import { BORDER_RADIUS, SHADOWS } from '../constants';
 import {
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
@@ -290,7 +291,7 @@ const Notifications: React.FC = () => {
       </Grid>
 
       {/* Onglets */}
-      <Paper sx={{ mb: 3, borderRadius: 2 }}>
+      <Paper sx={{ mb: 3, borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
         <Tabs
           value={activeTab}
           onChange={(_, val) => {

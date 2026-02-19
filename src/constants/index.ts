@@ -1,5 +1,68 @@
 // Constantes pour ScholarWay - Togo
 
+// ============================================
+// CONSTANTES DE STYLE UI
+// ============================================
+
+// Border radius standardisés (en pixels pour cohérence visuelle)
+export const BORDER_RADIUS = {
+  xs: '4px',      // Petits éléments (chips, badges)
+  sm: '8px',      // Boutons
+  md: '12px',     // Cards, modals, papers (moyennement arrondi)
+  lg: '16px',     // Grandes sections
+  xl: '20px',     // Éléments spéciaux
+  input: '10px',  // Champs et inputs (doux et moderne)
+  table: '10px',  // Tableaux
+  full: '9999px', // Cercles parfaits
+} as const;
+
+// Espacements standardisés
+export const SPACING = {
+  page: { xs: 2, sm: 3 },           // Padding des pages
+  card: { xs: 2, sm: 3 },           // Padding intérieur des cards
+  section: { xs: 2, sm: 4 },        // Espacement entre sections
+  grid: { xs: 2, sm: 3 },           // Espacement des grids
+} as const;
+
+// Ombres personnalisées
+export const SHADOWS = {
+  card: '0px 4px 12px rgba(0, 0, 0, 0.08)',
+  cardHover: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+  button: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+  modal: '0px 24px 48px rgba(0, 0, 0, 0.2)',
+} as const;
+
+// Transitions
+export const TRANSITIONS = {
+  fast: '0.15s ease-in-out',
+  normal: '0.25s ease-in-out',
+  slow: '0.35s ease-in-out',
+} as const;
+
+// Tailles d'avatar
+export const AVATAR_SIZES = {
+  xs: 24,
+  sm: 32,
+  md: 40,
+  lg: 56,
+  xl: 80,
+} as const;
+
+// Statuts avec couleurs
+export const STATUS_COLORS = {
+  active: 'success',
+  inactive: 'error',
+  pending: 'warning',
+  draft: 'default',
+  published: 'info',
+  closed: 'error',
+  open: 'success',
+} as const;
+
+// ============================================
+// CONSTANTES MÉTIER - TOGO
+// ============================================
+
 // Régions du Togo
 export const REGIONS_TOGO = [
   'Maritime',

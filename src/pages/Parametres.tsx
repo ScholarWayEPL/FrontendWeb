@@ -26,6 +26,7 @@ import {
   Tabs,
   LinearProgress,
 } from '@mui/material';
+import { BORDER_RADIUS } from '../constants';
 import {
   Person as PersonIcon,
   Lock as LockIcon,
@@ -184,7 +185,7 @@ const Parametres: React.FC = () => {
           mb: 4,
           background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: 'white',
-          borderRadius: 3,
+          borderRadius: BORDER_RADIUS.md,
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -300,7 +301,7 @@ const Parametres: React.FC = () => {
       </Paper>
 
       {/* Onglets */}
-      <Paper sx={{ borderRadius: 2, mb: 3 }}>
+      <Paper sx={{ borderRadius: BORDER_RADIUS.md, mb: 3 }}>
         <Tabs
           value={activeTab}
           onChange={(_, val) => setActiveTab(val)}
@@ -427,7 +428,7 @@ const Parametres: React.FC = () => {
                 <Box
                   sx={{
                     p: 2,
-                    borderRadius: 2,
+                    borderRadius: BORDER_RADIUS.md,
                     bgcolor: alpha(theme.palette.success.main, 0.1),
                     border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
                     mb: 2,
@@ -560,7 +561,7 @@ const Parametres: React.FC = () => {
                   Sessions actives
                 </Typography>
                 <List>
-                  <ListItem sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: 2, mb: 1 }}>
+                  <ListItem sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: BORDER_RADIUS.md, mb: 1 }}>
                     <ListItemIcon>
                       <Avatar sx={{ bgcolor: 'success.main', width: 36, height: 36 }}>
                         <CheckCircleIcon sx={{ fontSize: 20 }} />
@@ -627,7 +628,7 @@ const Parametres: React.FC = () => {
                     sx={{
                       p: 2,
                       border: `1px solid ${notifSettings[key as keyof NotificationSettings] ? theme.palette.primary.main : theme.palette.divider}`,
-                      borderRadius: 2,
+                      borderRadius: BORDER_RADIUS.md,
                       bgcolor: notifSettings[key as keyof NotificationSettings] ? alpha(theme.palette.primary.main, 0.02) : 'transparent',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -693,7 +694,7 @@ const Parametres: React.FC = () => {
                           p: 2.5,
                           textAlign: 'center',
                           border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: 2,
+                          borderRadius: BORDER_RADIUS.md,
                         }}
                       >
                         <Avatar

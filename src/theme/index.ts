@@ -102,7 +102,7 @@ const scholarwayTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 4, // Uniforme avec les constantes
   },
   shadows: [
     'none',
@@ -135,7 +135,7 @@ const scholarwayTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: '8px',
           padding: '10px 24px',
           fontSize: '0.875rem',
         },
@@ -150,7 +150,7 @@ const scholarwayTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: '12px',
           boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
         },
       },
@@ -158,7 +158,7 @@ const scholarwayTheme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: '12px',
         },
       },
     },
@@ -166,8 +166,15 @@ const scholarwayTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
+            borderRadius: '10px',
           },
+        },
+      },
+    },
+    MuiTableContainer: {
+      styleOverrides: {
+        root: {
+          borderRadius: '10px',
         },
       },
     },

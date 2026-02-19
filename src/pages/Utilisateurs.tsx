@@ -41,6 +41,7 @@ import {
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { BORDER_RADIUS, SHADOWS } from '../constants';
 import {
   fetchBacheliers,
   fetchSeries,
@@ -229,7 +230,7 @@ const Utilisateurs: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleAdd}
           size="large"
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}
         >
           Ajouter un utilisateur
         </Button>

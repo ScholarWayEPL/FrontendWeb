@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Card, CardContent, Typography, type SvgIconProps } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
+import { BORDER_RADIUS, SHADOWS } from '../constants';
 
 interface StatCardProps {
   title: string;
@@ -26,10 +27,12 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }
     <Card
       sx={{
         height: '100%',
+        borderRadius: BORDER_RADIUS.md,
+        boxShadow: SHADOWS.card,
         transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+          boxShadow: SHADOWS.cardHover,
         },
       }}
     >
@@ -68,7 +71,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }
             sx={{
               width: 56,
               height: 56,
-              borderRadius: 2,
+              borderRadius: BORDER_RADIUS.sm,
               bgcolor: colorMap[color].light,
               display: 'flex',
               alignItems: 'center',

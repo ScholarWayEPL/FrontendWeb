@@ -44,7 +44,7 @@ import { logout } from '../store/slices/authSlice';
 const DRAWER_WIDTH = 280;
 
 interface AdminNotification {
-  id: number;
+  readonly id: number;
   type: 'info' | 'success' | 'warning' | 'error';
   title: string;
   message: string;
@@ -441,7 +441,7 @@ const DashboardLayout: React.FC = () => {
           </Typography>
           <Chip
             icon={<AdminPanelSettings sx={{ fontSize: 16 }} />}
-            label="Super Admin"
+            label={user?.role === 'admin_etablissement' ? 'Admin Établissement' : 'Super Admin'}
             size="small"
             sx={{
               mt: 1,

@@ -34,6 +34,7 @@ import {
     useTheme,
     LinearProgress,
 } from '@mui/material';
+import { BORDER_RADIUS } from '../constants';
 import {
     Search,
     FilterList,
@@ -394,11 +395,11 @@ export default function Logs() {
                                         sx={{
                                             mt: 1.5,
                                             height: 4,
-                                            borderRadius: 2,
+                                            borderRadius: BORDER_RADIUS.md,
                                             bgcolor: alpha(logType.color, 0.1),
                                             '& .MuiLinearProgress-bar': {
                                                 bgcolor: logType.color,
-                                                borderRadius: 2,
+                                                borderRadius: BORDER_RADIUS.md,
                                             },
                                         }}
                                     />
@@ -525,7 +526,7 @@ export default function Logs() {
             {viewMode === 'timeline' ? (
                 <TimelineView />
             ) : (
-                <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 2 }}>
+                <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: BORDER_RADIUS.md }}>
                     <TableContainer sx={{ maxHeight: 600 }}>
                         <Table stickyHeader size="small">
                             <TableHead>
@@ -657,7 +658,7 @@ export default function Logs() {
                 maxWidth="sm"
                 fullWidth
                 PaperProps={{
-                    sx: { borderRadius: 2 },
+                    sx: { borderRadius: BORDER_RADIUS.md },
                 }}
             >
                 {selectedLog && (
@@ -766,7 +767,7 @@ export default function Logs() {
                                                 p: 1.5,
                                                 mt: 0.5,
                                                 bgcolor: 'grey.50',
-                                                borderRadius: 1,
+                                                borderRadius: BORDER_RADIUS.xs,
                                                 fontFamily: 'monospace',
                                                 fontSize: '0.8rem',
                                                 overflow: 'auto',

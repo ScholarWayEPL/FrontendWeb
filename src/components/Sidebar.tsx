@@ -18,7 +18,13 @@ import {
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   History as HistoryIcon,
+  Business as BusinessIcon,
+  Assignment as AssignmentIcon,
+  PublishedWithChanges as PublishedWithChangesIcon,
+  Category as CategoryIcon,
+  VerifiedUser as VerifiedUserIcon,
 } from '@mui/icons-material';
+import { useAppSelector } from '../store/hooks';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -30,13 +36,24 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const mainNavItems: NavItem[] = [
+// Menu pour Super Admin
+const superAdminMainNavItems: NavItem[] = [
   { title: 'Tableau de bord', path: '/', icon: <DashboardIcon /> },
+  { title: 'Validation Inscriptions', path: '/validations', icon: <VerifiedUserIcon /> },
   { title: 'Utilisateurs', path: '/utilisateurs', icon: <PeopleIcon /> },
   { title: 'Établissements', path: '/etablissements', icon: <SchoolIcon /> },
   { title: 'Programmes', path: '/programmes', icon: <MenuBookIcon /> },
   { title: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
   { title: 'Logs', path: '/logs', icon: <HistoryIcon /> },
+];
+
+// Menu pour Admin Établissement
+const adminEtablissementMainNavItems: NavItem[] = [
+  { title: 'Tableau de bord', path: '/etablissement/dashboard', icon: <DashboardIcon /> },
+  { title: 'Mon Établissement', path: '/etablissement/infos', icon: <BusinessIcon /> },
+  { title: 'Offre de Formation', path: '/etablissement/offre', icon: <CategoryIcon /> },
+  { title: 'Candidatures', path: '/etablissement/candidatures', icon: <AssignmentIcon /> },
+  { title: 'Résultats', path: '/etablissement/resultats', icon: <PublishedWithChangesIcon /> },
 ];
 
 const secondaryNavItems: NavItem[] = [
@@ -46,6 +63,12 @@ const secondaryNavItems: NavItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAppSelector((state) => state.auth);
+
+  // Sélection du menu selon le rôle
+  const mainNavItems = user?.role === 'admin_etablissement' 
+    ? adminEtablissementMainNavItems 
+    : superAdminMainNavItems;
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -57,6 +80,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/' || location.pathname === '/dashboard';
+    }
+    if (path === '/etablissement/dashboard') {
+      return location.pathname === '/etablissement/dashboard' || location.pathname === '/etablissement';
+    }
+    // Pour éviter la confusion entre /etablissements (Super Admin) et /etablissement/* (Admin Etablissement)
+    if (path === '/etablissements') {
+      return location.pathname === '/etablissements';
     }
     return location.pathname.startsWith(path);
   };
@@ -99,7 +129,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             ScholarWay
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Administration
+            {user?.role === 'admin_etablissement' ? 'Espace Établissement' : 'Administration'}
           </Typography>
         </Box>
       </Box>

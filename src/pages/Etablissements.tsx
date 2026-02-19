@@ -37,6 +37,7 @@ import {
   Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { BORDER_RADIUS, SHADOWS } from '../constants';
 import {
   fetchEtablissements,
   setFilters,
@@ -205,7 +206,7 @@ const Etablissements: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleAdd}
           size="large"
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}
         >
           Ajouter un établissement
         </Button>

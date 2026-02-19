@@ -78,7 +78,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
       maxWidth="md"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: 3, overflow: 'hidden' },
+        sx: { borderRadius: 10, overflow: 'hidden' },
       }}
     >
       {/* Header avec gradient */}
@@ -299,7 +299,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               sx={{
                 p: 2,
                 bgcolor: 'grey.50',
-                borderRadius: 2,
+                borderRadius: 8,
                 lineHeight: 1.7,
               }}
             >

@@ -15,6 +15,11 @@ import {
     FormControlLabel,
     Link,
     Fade,
+    Slide,
+    Divider,
+    Stepper,
+    Step,
+    StepLabel,
 } from '@mui/material';
 import {
     Person as PersonIcon,
@@ -26,6 +31,14 @@ import {
     AutoGraph,
     Groups,
     MenuBook,
+    Business as BusinessIcon,
+    ArrowBack as ArrowBackIcon,
+    Email as EmailIcon,
+    Phone as PhoneIcon,
+    LocationOn as LocationOnIcon,
+    Language as LanguageIcon,
+    CloudUpload as CloudUploadIcon,
+    CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -64,11 +77,30 @@ const FeatureItem: React.FC<FeatureItemProps> = ({ icon, title, description }) =
     </Stack>
 );
 
+// Interface pour le formulaire d'inscription
+interface InscriptionForm {
+    nomEtablissement: string;
+    emailPro: string;
+    telephonePro: string;
+    localisation: string;
+    siteWeb: string;
+    description: string;
+    documentAccreditation: File | null;
+}
+
+const inscriptionSteps = ['Informations générales', 'Coordonnées', 'Documents'];
+
 const Login: React.FC = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { loading, error } = useAppSelector((state) => state.auth);
+
+    // État pour basculer entre login et inscription
+    const [showInscription, setShowInscription] = useState(false);
+    const [inscriptionStep, setInscriptionStep] = useState(0);
+    const [inscriptionSuccess, setInscriptionSuccess] = useState(false);
+    const [inscriptionLoading, setInscriptionLoading] = useState(false);
 
     const [credentials, setCredentials] = useState({
         username: '',
@@ -77,6 +109,18 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
+    // État du formulaire d'inscription
+    const [inscriptionForm, setInscriptionForm] = useState<InscriptionForm>({
+        nomEtablissement: '',
+        emailPro: '',
+        telephonePro: '',
+        localisation: '',
+        siteWeb: '',
+        description: '',
+        documentAccreditation: null,
+    });
+    const [inscriptionError, setInscriptionError] = useState<string | null>(null);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setCredentials((prev) => ({ ...prev, [name]: value }));
@@ -84,9 +128,141 @@ const Login: React.FC = () => {
         if (error) dispatch(setError(null));
     };
 
+    const handleInscriptionInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setInscriptionForm((prev) => ({ ...prev, [name]: value }));
+        if (inscriptionError) setInscriptionError(null);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setInscriptionForm((prev) => ({ ...prev, documentAccreditation: e.target.files![0] }));
+        }
+    };
+
     const handleTogglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
     };
+
+    const handleNextStep = () => {
+        // Validation par étape
+        if (inscriptionStep === 0) {
+            if (!inscriptionForm.nomEtablissement || !inscriptionForm.description) {
+                setInscriptionError('Veuillez remplir le nom et la description de l\'établissement');
+                return;
+            }
+        } else if (inscriptionStep === 1) {
+            if (!inscriptionForm.emailPro || !inscriptionForm.telephonePro || !inscriptionForm.localisation) {
+                setInscriptionError('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+        }
+        setInscriptionStep((prev) => prev + 1);
+    };
+
+    const handlePrevStep = () => {
+        setInscriptionStep((prev) => prev - 1);
+    };
+
+    const handleSubmitInscription = () => {
+        if (!inscriptionForm.documentAccreditation) {
+            setInscriptionError('Veuillez téléverser le document d\'accréditation');
+            return;
+        }
+
+        setInscriptionLoading(true);
+        // Simulation d'envoi
+        setTimeout(() => {
+            setInscriptionLoading(false);
+            setInscriptionSuccess(true);
+        }, 2000);
+    };
+
+    const handleBackToLogin = () => {
+        setShowInscription(false);
+        setInscriptionStep(0);
+        setInscriptionSuccess(false);
+        setInscriptionForm({
+            nomEtablissement: '',
+            emailPro: '',
+            telephonePro: '',
+            localisation: '',
+            siteWeb: '',
+            description: '',
+            documentAccreditation: null,
+        });
+        setInscriptionError(null);
+    };
+
+    // Définition des comptes de démo
+    const demoAccounts = [
+        {
+            username: 'admin',
+            password: 'admin',
+            user: {
+                id: '1',
+                firstName: 'KOUMONDJI',
+                lastName: 'H. Timothée Klaus',
+                email: 'admin@scholarway.tg',
+                role: 'super_admin' as const,
+                status: 'active' as const,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            },
+            redirect: '/',
+        },
+        {
+            username: 'etab_ul',
+            password: 'etab123',
+            user: {
+                id: '2',
+                firstName: 'Université',
+                lastName: 'de Lomé',
+                email: 'admin@ul.tg',
+                role: 'admin_etablissement' as const,
+                status: 'active' as const,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                etablissementId: 1,
+                etablissementNom: 'Université de Lomé',
+            },
+            redirect: '/etablissement/dashboard',
+        },
+        {
+            username: 'etab_esgis',
+            password: 'etab123',
+            user: {
+                id: '3',
+                firstName: 'ESGIS',
+                lastName: 'Togo',
+                email: 'admin@esgis.tg',
+                role: 'admin_etablissement' as const,
+                status: 'active' as const,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                etablissementId: 2,
+                etablissementNom: 'ESGIS Togo',
+            },
+            redirect: '/etablissement/dashboard',
+        },
+        {
+            username: 'etab_ucao',
+            password: 'etab123',
+            user: {
+                id: '4',
+                firstName: 'UCAO',
+                lastName: 'UUT',
+                email: 'admin@ucao-uut.tg',
+                role: 'admin_etablissement' as const,
+                status: 'active' as const,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                etablissementId: 3,
+                etablissementNom: 'UCAO-UUT',
+            },
+            redirect: '/etablissement/dashboard',
+        },
+    ];
 
     const handleLogin = async () => {
         // Validation
@@ -95,8 +271,12 @@ const Login: React.FC = () => {
             return;
         }
 
-        // Pour l'instant, accepter "admin" dans les deux champs
-        if (credentials.username !== 'admin' || credentials.password !== 'admin') {
+        // Recherche du compte correspondant
+        const account = demoAccounts.find(
+            (acc) => acc.username === credentials.username && acc.password === credentials.password
+        );
+
+        if (!account) {
             dispatch(setError('Identifiants invalides'));
             return;
         }
@@ -106,20 +286,9 @@ const Login: React.FC = () => {
         dispatch(setError(null));
 
         setTimeout(() => {
-            dispatch(
-                setUser({
-                    id: '1',
-                    firstName: 'KOUMONDJI',
-                    lastName: 'H. Timothée Klaus',
-                    email: 'admin@scholarway.tg',
-                    role: 'admin',
-                    status: 'active',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                })
-            );
+            dispatch(setUser(account.user));
             dispatch(setLoading(false));
-            navigate('/');
+            navigate(account.redirect);
         }, 1200);
     };
 
@@ -254,9 +423,10 @@ const Login: React.FC = () => {
                     alignItems: 'center',
                     p: { xs: 3, sm: 6 },
                     bgcolor: 'white',
+                    overflow: 'hidden',
                 }}
             >
-                <Box sx={{ width: '100%', maxWidth: 440 }}>
+                <Box sx={{ width: '100%', maxWidth: 480, position: 'relative' }}>
                     {/* Header mobile */}
                     <Box sx={{ display: { lg: 'none' }, mb: 4, textAlign: 'center' }}>
                         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5} sx={{ mb: 1 }}>
@@ -266,10 +436,13 @@ const Login: React.FC = () => {
                             </Typography>
                         </Stack>
                         <Typography variant="body2" color="text.secondary">
-                            Panneau d'administration
+                            {showInscription ? 'Inscription Établissement' : 'Panneau d\'administration'}
                         </Typography>
                     </Box>
 
+                    {/* ===== FORMULAIRE DE CONNEXION ===== */}
+                    <Slide direction="right" in={!showInscription} mountOnEnter unmountOnExit>
+                        <Box>
                     {/* Titre du formulaire */}
                     <Box sx={{ mb: 4 }}>
                         <Typography variant="h4" fontWeight={700} gutterBottom>
@@ -431,25 +604,86 @@ const Login: React.FC = () => {
                         <Typography variant="subtitle2" color="info.dark" fontWeight={600} gutterBottom>
                             🔐 Identifiants de démo
                         </Typography>
-                        <Stack direction="row" spacing={4}>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">
-                                    Utilisateur
-                                </Typography>
-                                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
-                                    admin
-                                </Typography>
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">
-                                    Mot de passe
-                                </Typography>
-                                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
-                                    admin
-                                </Typography>
-                            </Box>
-                        </Stack>
+                        
+                        {/* Super Admin */}
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="primary.main" fontWeight={600}>
+                                Super Admin
+                            </Typography>
+                            <Stack direction="row" spacing={4}>
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Utilisateur
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
+                                        admin
+                                    </Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Mot de passe
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
+                                        admin
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                        </Box>
+
+                        {/* Admin Établissement */}
+                        <Box>
+                            <Typography variant="caption" color="secondary.main" fontWeight={600}>
+                                Admin Établissement
+                            </Typography>
+                            <Stack direction="row" spacing={4}>
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Utilisateur
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
+                                        etab_ul / etab_esgis / etab_ucao
+                                    </Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Mot de passe
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
+                                        etab123
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                        </Box>
                     </Box>
+
+                    {/* Séparateur */}
+                    <Divider sx={{ my: 3 }}>
+                        <Typography variant="body2" color="text.secondary">
+                            ou
+                        </Typography>
+                    </Divider>
+
+                    {/* Bouton inscription établissement */}
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        size="large"
+                        onClick={() => setShowInscription(true)}
+                        startIcon={<BusinessIcon />}
+                        sx={{
+                            py: 1.5,
+                            borderRadius: 2,
+                            fontSize: '0.95rem',
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderWidth: 2,
+                            '&:hover': {
+                                borderWidth: 2,
+                            },
+                        }}
+                    >
+                        Inscrire mon établissement
+                    </Button>
 
                     {/* Footer */}
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
@@ -458,6 +692,341 @@ const Login: React.FC = () => {
                             Contactez le support
                         </Link>
                     </Typography>
+                        </Box>
+                    </Slide>
+
+                    {/* ===== FORMULAIRE D'INSCRIPTION ===== */}
+                    <Slide direction="left" in={showInscription} mountOnEnter unmountOnExit>
+                        <Box>
+                            {inscriptionSuccess ? (
+                                /* Message de succès */
+                                <Fade in={inscriptionSuccess}>
+                                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                                        <Box
+                                            sx={{
+                                                width: 80,
+                                                height: 80,
+                                                borderRadius: '50%',
+                                                bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                mx: 'auto',
+                                                mb: 3,
+                                            }}
+                                        >
+                                            <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main' }} />
+                                        </Box>
+                                        <Typography variant="h5" fontWeight={700} gutterBottom>
+                                            Demande envoyée !
+                                        </Typography>
+                                        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                                            Votre demande d'inscription a été soumise avec succès. 
+                                            Vous recevrez un email de confirmation une fois votre dossier validé par notre équipe.
+                                        </Typography>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleBackToLogin}
+                                            startIcon={<ArrowBackIcon />}
+                                            sx={{
+                                                py: 1.5,
+                                                px: 4,
+                                                borderRadius: 2,
+                                                fontWeight: 600,
+                                                textTransform: 'none',
+                                            }}
+                                        >
+                                            Retour à la connexion
+                                        </Button>
+                                    </Box>
+                                </Fade>
+                            ) : (
+                                <>
+                                    {/* Header inscription */}
+                                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                                        <IconButton onClick={handleBackToLogin} sx={{ bgcolor: alpha(theme.palette.grey[500], 0.1) }}>
+                                            <ArrowBackIcon />
+                                        </IconButton>
+                                        <Box>
+                                            <Typography variant="h5" fontWeight={700}>
+                                                Inscription Établissement
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Remplissez le formulaire pour demander l'accès
+                                            </Typography>
+                                        </Box>
+                                    </Stack>
+
+                                    {/* Stepper */}
+                                    <Stepper activeStep={inscriptionStep} sx={{ mb: 4 }}>
+                                        {inscriptionSteps.map((label) => (
+                                            <Step key={label}>
+                                                <StepLabel>{label}</StepLabel>
+                                            </Step>
+                                        ))}
+                                    </Stepper>
+
+                                    {/* Message d'erreur */}
+                                    <Fade in={!!inscriptionError}>
+                                        <Box sx={{ mb: 2 }}>
+                                            {inscriptionError && (
+                                                <Alert severity="error" sx={{ borderRadius: 2 }}>
+                                                    {inscriptionError}
+                                                </Alert>
+                                            )}
+                                        </Box>
+                                    </Fade>
+
+                                    {/* Étape 1: Informations générales */}
+                                    {inscriptionStep === 0 && (
+                                        <Stack spacing={3}>
+                                            <TextField
+                                                fullWidth
+                                                label="Nom de l'établissement *"
+                                                name="nomEtablissement"
+                                                value={inscriptionForm.nomEtablissement}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="Ex: Université de Lomé"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <BusinessIcon sx={{ color: 'text.secondary' }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Description de l'établissement *"
+                                                name="description"
+                                                value={inscriptionForm.description}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="Décrivez votre établissement, ses formations, ses atouts..."
+                                                multiline
+                                                rows={4}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                        </Stack>
+                                    )}
+
+                                    {/* Étape 2: Coordonnées */}
+                                    {inscriptionStep === 1 && (
+                                        <Stack spacing={3}>
+                                            <TextField
+                                                fullWidth
+                                                label="Email professionnel *"
+                                                name="emailPro"
+                                                type="email"
+                                                value={inscriptionForm.emailPro}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="contact@etablissement.tg"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <EmailIcon sx={{ color: 'text.secondary' }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Téléphone *"
+                                                name="telephonePro"
+                                                value={inscriptionForm.telephonePro}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="+228 90 00 00 00"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <PhoneIcon sx={{ color: 'text.secondary' }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Localisation *"
+                                                name="localisation"
+                                                value={inscriptionForm.localisation}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="Lomé, Boulevard du 13 Janvier"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <LocationOnIcon sx={{ color: 'text.secondary' }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Site web (optionnel)"
+                                                name="siteWeb"
+                                                value={inscriptionForm.siteWeb}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="https://www.etablissement.tg"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <LanguageIcon sx={{ color: 'text.secondary' }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                        </Stack>
+                                    )}
+
+                                    {/* Étape 3: Documents */}
+                                    {inscriptionStep === 2 && (
+                                        <Stack spacing={3}>
+                                            <Box
+                                                sx={{
+                                                    p: 4,
+                                                    borderRadius: 2,
+                                                    border: `2px dashed ${inscriptionForm.documentAccreditation ? theme.palette.success.main : theme.palette.grey[300]}`,
+                                                    bgcolor: inscriptionForm.documentAccreditation ? alpha(theme.palette.success.main, 0.05) : theme.palette.grey[50],
+                                                    textAlign: 'center',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                    '&:hover': {
+                                                        borderColor: theme.palette.primary.main,
+                                                        bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                                    },
+                                                }}
+                                                component="label"
+                                            >
+                                                <input
+                                                    type="file"
+                                                    hidden
+                                                    accept=".pdf,.doc,.docx"
+                                                    onChange={handleFileChange}
+                                                />
+                                                {inscriptionForm.documentAccreditation ? (
+                                                    <>
+                                                        <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+                                                        <Typography variant="subtitle1" fontWeight={600} color="success.main">
+                                                            Document sélectionné
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {inscriptionForm.documentAccreditation.name}
+                                                        </Typography>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CloudUploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                                                        <Typography variant="subtitle1" fontWeight={600}>
+                                                            Document d'accréditation *
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Cliquez ou glissez votre fichier ici (PDF, DOC)
+                                                        </Typography>
+                                                    </>
+                                                )}
+                                            </Box>
+
+                                            <Alert severity="info" sx={{ borderRadius: 2 }}>
+                                                <Typography variant="body2">
+                                                    Le document d'accréditation sera examiné par notre équipe. 
+                                                    Assurez-vous qu'il soit lisible et à jour.
+                                                </Typography>
+                                            </Alert>
+                                        </Stack>
+                                    )}
+
+                                    {/* Boutons de navigation */}
+                                    <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
+                                        {inscriptionStep > 0 && (
+                                            <Button
+                                                variant="outlined"
+                                                onClick={handlePrevStep}
+                                                sx={{
+                                                    flex: 1,
+                                                    py: 1.5,
+                                                    borderRadius: 2,
+                                                    fontWeight: 600,
+                                                    textTransform: 'none',
+                                                }}
+                                            >
+                                                Précédent
+                                            </Button>
+                                        )}
+                                        {inscriptionStep < 2 ? (
+                                            <Button
+                                                variant="contained"
+                                                onClick={handleNextStep}
+                                                sx={{
+                                                    flex: 1,
+                                                    py: 1.5,
+                                                    borderRadius: 2,
+                                                    fontWeight: 600,
+                                                    textTransform: 'none',
+                                                    boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
+                                                }}
+                                            >
+                                                Suivant
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="contained"
+                                                color="success"
+                                                onClick={handleSubmitInscription}
+                                                disabled={inscriptionLoading}
+                                                sx={{
+                                                    flex: 1,
+                                                    py: 1.5,
+                                                    borderRadius: 2,
+                                                    fontWeight: 600,
+                                                    textTransform: 'none',
+                                                    boxShadow: `0 4px 14px ${alpha(theme.palette.success.main, 0.4)}`,
+                                                }}
+                                            >
+                                                {inscriptionLoading ? (
+                                                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                                                ) : (
+                                                    'Soumettre la demande'
+                                                )}
+                                            </Button>
+                                        )}
+                                    </Stack>
+                                </>
+                            )}
+                        </Box>
+                    </Slide>
                 </Box>
             </Box>
         </Box>

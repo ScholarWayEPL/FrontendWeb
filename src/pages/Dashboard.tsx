@@ -50,6 +50,7 @@ import {
   Bar,
   Legend,
 } from 'recharts';
+import { BORDER_RADIUS } from '../constants';
 import StatCard from '../components/StatCard';
 import { type ActivityItem } from '../types';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -235,7 +236,7 @@ const Dashboard: React.FC = () => {
                     contentStyle={{ 
                       backgroundColor: theme.palette.background.paper,
                       border: `1px solid ${theme.palette.divider}`,
-                      borderRadius: 8,
+                      borderRadius: BORDER_RADIUS.md,
                     }}
                   />
                   <Legend />
@@ -364,7 +365,7 @@ const Dashboard: React.FC = () => {
                   <ListItem
                     key={activity.id}
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: BORDER_RADIUS.md,
                       mb: 1,
                       bgcolor: alpha(theme.palette.primary.main, 0.04),
                       '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.08) },
@@ -439,7 +440,7 @@ const Dashboard: React.FC = () => {
                     <LinearProgress
                       variant="determinate"
                       value={programme.taux}
-                      sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
+                      sx={{ flexGrow: 1, height: 6, borderRadius: 8 }}
                       color={programme.taux >= 70 ? 'success' : programme.taux >= 50 ? 'warning' : 'error'}
                     />
                     <Typography variant="caption" color="text.secondary" sx={{ minWidth: 35 }}>
@@ -466,7 +467,7 @@ const Dashboard: React.FC = () => {
                     <Box
                       sx={{
                         p: 2,
-                        borderRadius: 2,
+                        borderRadius: BORDER_RADIUS.md,
                         bgcolor: alpha(theme.palette[stat.color].main, 0.08),
                         border: `1px solid ${alpha(theme.palette[stat.color].main, 0.2)}`,
                         textAlign: 'center',

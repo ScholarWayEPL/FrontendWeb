@@ -10,3 +10,6 @@ export { default as Sidebar } from './Sidebar';
 export { default as StatCard } from './StatCard';
 export { default as UtilisateurDetails } from './UtilisateurDetails';
 export { default as UtilisateurModal } from './UtilisateurModal';
+
+// Export des composants UI réutilisables
+export * from './ui';

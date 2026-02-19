@@ -27,8 +27,11 @@ import {
     School as SchoolIcon,
     Info as InfoIcon,
 } from '@mui/icons-material';
-import { PageHeader, StatusChip, DataCard } from '../../components/ui';
-import { BORDER_RADIUS, SHADOWS } from '../../constants';
+import { PageHeader, StatusChip } from '../../components/ui';
+import { BORDER_RADIUS } from '../../constants';
+import { readExcel, generateResultatsTemplate } from '../../utils/excelUtils';
+import { generateResultatsPDF } from '../../utils/pdfUtils';
+import { useAppSelector } from '../../store/hooks';
 
 interface Campagne {
     id: number;
@@ -72,24 +75,59 @@ const mockCampagnes: Campagne[] = [
 
 const Resultats: React.FC = () => {
     const theme = useTheme();
+    const { user } = useAppSelector((state) => state.auth);
     const [selectedCampagne, setSelectedCampagne] = useState<Campagne | null>(mockCampagnes[0]);
     const [phase1File, setPhase1File] = useState<File | null>(null);
     const [phase2File, setPhase2File] = useState<File | null>(null);
     const [dateConcoursEcrit, setDateConcoursEcrit] = useState('');
     const [activeStep, setActiveStep] = useState(0);
 
-    const handlePhase1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhase1Upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setPhase1File(file);
+            try {
+                // Valider que c'est un fichier Excel
+                if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+                    alert('Veuillez sélectionner un fichier Excel (.xlsx ou .xls)');
+                    return;
+                }
+
+                // Lire le fichier Excel pour validation
+                const data = await readExcel(file);
+                console.log('Données Excel Phase 1:', data);
+
+                setPhase1File(file);
+            } catch (error) {
+                console.error('Erreur lors de la lecture du fichier:', error);
+                alert('Erreur lors de la lecture du fichier Excel');
+            }
         }
     };
 
-    const handlePhase2Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhase2Upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setPhase2File(file);
+            try {
+                // Valider que c'est un fichier Excel
+                if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+                    alert('Veuillez sélectionner un fichier Excel (.xlsx ou .xls)');
+                    return;
+                }
+
+                // Lire le fichier Excel pour validation
+                const data = await readExcel(file);
+                console.log('Données Excel Phase 2:', data);
+
+                setPhase2File(file);
+            } catch (error) {
+                console.error('Erreur lors de la lecture du fichier:', error);
+                alert('Erreur lors de la lecture du fichier Excel');
+            }
         }
+    };
+
+    const handleDownloadTemplate = () => {
+        generateResultatsTemplate();
     };
 
     const handlePublishPhase1 = () => {
@@ -149,111 +187,182 @@ const Resultats: React.FC = () => {
             <Grid container spacing={3}>
                 {/* Sélection de la campagne */}
                 <Grid item xs={12} md={4}>
-                    <DataCard 
-                        title="Sélectionner une campagne" 
-                        subtitle="Choisissez le parcours à traiter"
+                    <Card
+                        variant="outlined"
+                        sx={{
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                        }}
                     >
-                        <Stack spacing={2}>
-                            {mockCampagnes.map((campagne) => (
-                                <Card
-                                    key={campagne.id}
-                                    variant="outlined"
-                                    onClick={() => {
-                                        setSelectedCampagne(campagne);
-                                        // Reset les étapes selon l'état de la campagne
-                                        if (campagne.phase2Publiee) setActiveStep(3);
-                                        else if (campagne.dateConcoursEcrit) setActiveStep(2);
-                                        else if (campagne.phase1Publiee) setActiveStep(1);
-                                        else setActiveStep(0);
-                                    }}
-                                    sx={{
-                                        cursor: 'pointer',
-                                        borderRadius: BORDER_RADIUS.sm,
-                                        borderColor: selectedCampagne?.id === campagne.id ? 'primary.main' : 'grey.300',
-                                        bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.05) : 'white',
-                                        transition: 'all 0.2s',
-                                        '&:hover': {
-                                            borderColor: 'primary.main',
-                                            bgcolor: alpha(theme.palette.primary.main, 0.02),
-                                        },
-                                    }}
-                                >
-                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-                                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                                            <Box>
-                                                <Typography variant="subtitle2" fontWeight={600}>
-                                                    {campagne.parcours}
-                                                </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {campagne.candidatures} candidatures
-                                                </Typography>
-                                            </Box>
-                                            <StatusChip status={campagne.statut} />
-                                        </Stack>
-                                        <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
-                                            <Chip
-                                                size="small"
-                                                label="Phase 1"
-                                                color={campagne.phase1Publiee ? 'success' : 'default'}
-                                                variant={campagne.phase1Publiee ? 'filled' : 'outlined'}
-                                                sx={{ borderRadius: BORDER_RADIUS.xs, fontSize: '0.65rem' }}
-                                            />
-                                            <Chip
-                                                size="small"
-                                                label="Concours"
-                                                color={campagne.dateConcoursEcrit ? 'success' : 'default'}
-                                                variant={campagne.dateConcoursEcrit ? 'filled' : 'outlined'}
-                                                sx={{ borderRadius: BORDER_RADIUS.xs, fontSize: '0.65rem' }}
-                                            />
-                                            <Chip
-                                                size="small"
-                                                label="Phase 2"
-                                                color={campagne.phase2Publiee ? 'success' : 'default'}
-                                                variant={campagne.phase2Publiee ? 'filled' : 'outlined'}
-                                                sx={{ borderRadius: BORDER_RADIUS.xs, fontSize: '0.65rem' }}
-                                            />
-                                        </Stack>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </Stack>
-                    </DataCard>
+                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.success.main, 0.05), borderBottom: `2px solid ${theme.palette.success.main}` }}>
+                            <Typography variant="h6" fontWeight={700}>
+                                Sélectionner une campagne
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Choisissez le parcours à traiter
+                            </Typography>
+                        </Box>
+                        <CardContent sx={{ p: 2 }}>
+                            <Stack spacing={1.5}>
+                                {mockCampagnes.map((campagne) => (
+                                    <Card
+                                        key={campagne.id}
+                                        variant="outlined"
+                                        onClick={() => {
+                                            setSelectedCampagne(campagne);
+                                            // Reset les étapes selon l'état de la campagne
+                                            if (campagne.phase2Publiee) setActiveStep(3);
+                                            else if (campagne.dateConcoursEcrit) setActiveStep(2);
+                                            else if (campagne.phase1Publiee) setActiveStep(1);
+                                            else setActiveStep(0);
+                                        }}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            borderRadius: 1.5,
+                                            borderWidth: 2,
+                                            borderColor: selectedCampagne?.id === campagne.id ? 'success.main' : 'grey.300',
+                                            bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.success.main, 0.08) : 'white',
+                                            transition: 'all 0.2s',
+                                            '&:hover': {
+                                                borderColor: 'success.main',
+                                                bgcolor: alpha(theme.palette.success.main, 0.05),
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: 1,
+                                            },
+                                        }}
+                                    >
+                                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+                                                <Box>
+                                                    <Typography variant="subtitle1" fontWeight={700}>
+                                                        {campagne.parcours}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                        {campagne.candidatures} candidatures
+                                                    </Typography>
+                                                </Box>
+                                                <StatusChip status={campagne.statut} />
+                                            </Stack>
+                                            <Stack direction="row" spacing={0.75} flexWrap="wrap">
+                                                <Chip
+                                                    size="small"
+                                                    label="Phase 1"
+                                                    color={campagne.phase1Publiee ? 'success' : 'default'}
+                                                    variant={campagne.phase1Publiee ? 'filled' : 'outlined'}
+                                                    icon={campagne.phase1Publiee ? <CheckCircleIcon /> : undefined}
+                                                    sx={{ borderRadius: 1, fontSize: '0.7rem', fontWeight: 600 }}
+                                                />
+                                                <Chip
+                                                    size="small"
+                                                    label="Concours"
+                                                    color={campagne.dateConcoursEcrit ? 'success' : 'default'}
+                                                    variant={campagne.dateConcoursEcrit ? 'filled' : 'outlined'}
+                                                    icon={campagne.dateConcoursEcrit ? <CheckCircleIcon /> : undefined}
+                                                    sx={{ borderRadius: 1, fontSize: '0.7rem', fontWeight: 600 }}
+                                                />
+                                                <Chip
+                                                    size="small"
+                                                    label="Phase 2"
+                                                    color={campagne.phase2Publiee ? 'success' : 'default'}
+                                                    variant={campagne.phase2Publiee ? 'filled' : 'outlined'}
+                                                    icon={campagne.phase2Publiee ? <CheckCircleIcon /> : undefined}
+                                                    sx={{ borderRadius: 1, fontSize: '0.7rem', fontWeight: 600 }}
+                                                />
+                                            </Stack>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Stack>
+                        </CardContent>
+                    </Card>
 
                     {/* Info box */}
-                    <Alert 
-                        severity="info" 
+                    <Alert
+                        severity="info"
                         icon={<InfoIcon />}
-                        sx={{ mt: 2, borderRadius: BORDER_RADIUS.sm }}
+                        sx={{
+                            mt: 2,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.info.main, 0.08),
+                            border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+                        }}
                     >
-                        <Typography variant="caption">
-                            Le fichier Excel doit contenir la colonne <strong>N° Candidature</strong> pour identifier les étudiants retenus.
-                        </Typography>
+                        <Stack spacing={1}>
+                            <Typography variant="body2" fontWeight={500}>
+                                Le fichier Excel doit contenir la colonne <strong>N° Candidature</strong> pour identifier les étudiants retenus.
+                            </Typography>
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<DownloadIcon />}
+                                onClick={handleDownloadTemplate}
+                                sx={{ alignSelf: 'flex-start', borderRadius: 1.5 }}
+                            >
+                                Télécharger le modèle Excel
+                            </Button>
+                        </Stack>
                     </Alert>
                 </Grid>
 
                 {/* Processus de publication */}
                 <Grid item xs={12} md={8}>
-                    <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
+                    <Card
+                        variant="outlined"
+                        sx={{
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                        }}
+                    >
                         <CardContent sx={{ p: 3 }}>
                             {selectedCampagne ? (
                                 <>
-                                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-                                        <SchoolIcon color="primary" />
-                                        <Box>
-                                            <Typography variant="h6" fontWeight={600}>
-                                                {selectedCampagne.parcours}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Processus de publication des résultats
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
+                                    <Box
+                                        sx={{
+                                            p: 2.5,
+                                            mb: 3,
+                                            borderRadius: 2,
+                                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                                        }}
+                                    >
+                                        <Stack direction="row" alignItems="center" spacing={2}>
+                                            <Box
+                                                sx={{
+                                                    p: 1.5,
+                                                    borderRadius: 2,
+                                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                                }}
+                                            >
+                                                <SchoolIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="h6" fontWeight={700}>
+                                                    {selectedCampagne.parcours}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                                                    Processus de publication des résultats
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Box>
 
                                     <Stepper activeStep={activeStep} orientation="vertical">
                                         {/* Étape 1: Phase 1 - Sélection sur dossier */}
                                         <Step completed={getStepStatus(0)}>
-                                            <StepLabel>
-                                                <Typography fontWeight={600}>
+                                            <StepLabel
+                                                StepIconProps={{
+                                                    sx: {
+                                                        fontSize: 32,
+                                                        '&.Mui-completed': {
+                                                            color: 'success.main',
+                                                        },
+                                                        '&.Mui-active': {
+                                                            color: 'primary.main',
+                                                        },
+                                                    }
+                                                }}
+                                            >
+                                                <Typography variant="subtitle1" fontWeight={700}>
                                                     Phase 1 - Résultats de sélection sur dossier
                                                 </Typography>
                                             </StepLabel>
@@ -261,7 +370,7 @@ const Resultats: React.FC = () => {
                                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                                     Uploadez le fichier Excel contenant les numéros de candidature des étudiants retenus après étude de dossier.
                                                 </Typography>
-                                                
+
                                                 <Box
                                                     sx={{
                                                         p: 3,
@@ -336,8 +445,20 @@ const Resultats: React.FC = () => {
 
                                         {/* Étape 2: Date du concours écrit */}
                                         <Step completed={getStepStatus(1)}>
-                                            <StepLabel>
-                                                <Typography fontWeight={600}>
+                                            <StepLabel
+                                                StepIconProps={{
+                                                    sx: {
+                                                        fontSize: 32,
+                                                        '&.Mui-completed': {
+                                                            color: 'success.main',
+                                                        },
+                                                        '&.Mui-active': {
+                                                            color: 'primary.main',
+                                                        },
+                                                    }
+                                                }}
+                                            >
+                                                <Typography variant="subtitle1" fontWeight={700}>
                                                     Date du concours écrit
                                                 </Typography>
                                             </StepLabel>
@@ -387,8 +508,20 @@ const Resultats: React.FC = () => {
 
                                         {/* Étape 3: Phase 2 - Résultats définitifs */}
                                         <Step completed={getStepStatus(2)}>
-                                            <StepLabel>
-                                                <Typography fontWeight={600}>
+                                            <StepLabel
+                                                StepIconProps={{
+                                                    sx: {
+                                                        fontSize: 32,
+                                                        '&.Mui-completed': {
+                                                            color: 'success.main',
+                                                        },
+                                                        '&.Mui-active': {
+                                                            color: 'primary.main',
+                                                        },
+                                                    }
+                                                }}
+                                            >
+                                                <Typography variant="subtitle1" fontWeight={700}>
                                                     Phase 2 - Résultats définitifs
                                                 </Typography>
                                             </StepLabel>
@@ -463,8 +596,8 @@ const Resultats: React.FC = () => {
 
                                     {/* Message de fin */}
                                     {selectedCampagne.phase2Publiee && (
-                                        <Alert 
-                                            severity="success" 
+                                        <Alert
+                                            severity="success"
                                             icon={<CheckCircleIcon />}
                                             sx={{ mt: 3, borderRadius: BORDER_RADIUS.sm }}
                                         >

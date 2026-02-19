@@ -54,6 +54,7 @@ const adminEtablissementMainNavItems: NavItem[] = [
   { title: 'Offre de Formation', path: '/etablissement/offre', icon: <CategoryIcon /> },
   { title: 'Candidatures', path: '/etablissement/candidatures', icon: <AssignmentIcon /> },
   { title: 'Résultats', path: '/etablissement/resultats', icon: <PublishedWithChangesIcon /> },
+  { title: 'Notifications', path: '/etablissement/notifications', icon: <NotificationsIcon /> },
 ];
 
 const secondaryNavItems: NavItem[] = [

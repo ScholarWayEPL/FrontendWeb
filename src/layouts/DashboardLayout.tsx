@@ -412,7 +412,7 @@ const DashboardLayout: React.FC = () => {
         {/* Header Profil */}
         <Box
           sx={{
-            p: 3,
+            p: 2.5,
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
             textAlign: 'center',
             color: 'white',
@@ -420,23 +420,23 @@ const DashboardLayout: React.FC = () => {
         >
           <Avatar
             sx={{
-              width: 64,
-              height: 64,
+              width: 60,
+              height: 60,
               mx: 'auto',
               mb: 1.5,
               bgcolor: 'white',
               color: 'primary.main',
-              fontSize: '1.5rem',
+              fontSize: '1.4rem',
               fontWeight: 600,
               boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
             }}
           >
             {user?.firstName?.charAt(0) || 'A'}
           </Avatar>
-          <Typography variant="h6" fontWeight={600}>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
             {user?.firstName || 'Administrateur'} {user?.lastName || 'ScholarWay'}
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
             {user?.email || 'admin@scholarway.tg'}
           </Typography>
           <Chip
@@ -444,9 +444,9 @@ const DashboardLayout: React.FC = () => {
             label={user?.role === 'admin_etablissement' ? 'Admin Établissement' : 'Super Admin'}
             size="small"
             sx={{
-              mt: 1,
               bgcolor: 'rgba(255,255,255,0.2)',
               color: 'white',
+              fontWeight: 500,
               '& .MuiChip-icon': { color: 'white' },
             }}
           />
@@ -462,38 +462,78 @@ const DashboardLayout: React.FC = () => {
             sx={{
               cursor: 'pointer',
               py: 1.5,
+              px: 2,
               '&:hover': { bgcolor: 'grey.50' },
             }}
           >
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
+              <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: 40, height: 40 }}>
                 <Person sx={{ color: 'primary.main' }} />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Mon profil" secondary="Voir et modifier mon profil" />
+            <ListItemText 
+              primary="Mon profil" 
+              secondary="Voir et modifier mon profil"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
           </ListItem>
 
-          <ListItem
-            onClick={() => {
-              setProfileAnchor(null);
-              navigate('/logs');
-            }}
-            sx={{
-              cursor: 'pointer',
-              py: 1.5,
-              '&:hover': { bgcolor: 'grey.50' },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: alpha(theme.palette.info.main, 0.1) }}>
-                <Settings sx={{ color: 'info.main' }} />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Journal d'activité" secondary="Historique des actions" />
-          </ListItem>
+          {/* Journal d'activité - Uniquement pour SUPER_ADMIN */}
+          {user?.role === 'super_admin' && (
+            <ListItem
+              onClick={() => {
+                setProfileAnchor(null);
+                navigate('/logs');
+              }}
+              sx={{
+                cursor: 'pointer',
+                py: 1.5,
+                px: 2,
+                '&:hover': { bgcolor: 'grey.50' },
+              }}
+            >
+              <ListItemAvatar>
+                <Avatar sx={{ bgcolor: alpha(theme.palette.info.main, 0.1), width: 40, height: 40 }}>
+                  <Settings sx={{ color: 'info.main' }} />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText 
+                primary="Journal d'activité" 
+                secondary="Historique des actions"
+                primaryTypographyProps={{ fontWeight: 500 }}
+              />
+            </ListItem>
+          )}
+
+          {/* Paramètres - Uniquement pour ADMIN_ETABLISSEMENT */}
+          {user?.role === 'admin_etablissement' && (
+            <ListItem
+              onClick={() => {
+                setProfileAnchor(null);
+                navigate('/etablissement/mon-etablissement');
+              }}
+              sx={{
+                cursor: 'pointer',
+                py: 1.5,
+                px: 2,
+                '&:hover': { bgcolor: 'grey.50' },
+              }}
+            >
+              <ListItemAvatar>
+                <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), width: 40, height: 40 }}>
+                  <Settings sx={{ color: 'success.main' }} />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText 
+                primary="Mon établissement" 
+                secondary="Gérer mon établissement"
+                primaryTypographyProps={{ fontWeight: 500 }}
+              />
+            </ListItem>
+          )}
         </Box>
 
-        <Divider />
+        <Divider sx={{ my: 0.5 }} />
 
         {/* Déconnexion */}
         <Box sx={{ p: 2 }}>
@@ -509,7 +549,13 @@ const DashboardLayout: React.FC = () => {
             }}
             sx={{
               borderRadius: 2,
-              py: 1,
+              py: 1.2,
+              fontWeight: 500,
+              borderWidth: 1.5,
+              '&:hover': {
+                borderWidth: 1.5,
+                bgcolor: alpha(theme.palette.error.main, 0.08),
+              },
             }}
           >
             Déconnexion

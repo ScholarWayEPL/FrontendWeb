@@ -46,8 +46,10 @@ import {
     Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { PageHeader, SearchField, StatusChip } from '../../components/ui';
-import StatCard from '../../components/StatCard';
-import { BORDER_RADIUS, SHADOWS, AVATAR_SIZES } from '../../constants';
+import { BORDER_RADIUS, AVATAR_SIZES } from '../../constants';
+import { exportCandidaturesToExcel } from '../../utils/excelUtils';
+import { generateCandidaturesPDF } from '../../utils/pdfUtils';
+import { useAppSelector } from '../../store/hooks';
 
 interface Candidature {
     id: number;
@@ -148,6 +150,7 @@ const mockParcours = ['Tous les parcours', 'Licence Informatique', 'Master Data 
 
 const Candidatures: React.FC = () => {
     const theme = useTheme();
+    const { user } = useAppSelector((state) => state.auth);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedParcours, setSelectedParcours] = useState('Tous les parcours');
     const [selectedStatut, setSelectedStatut] = useState('Tous');
@@ -157,7 +160,7 @@ const Candidatures: React.FC = () => {
     const [detailsOpen, setDetailsOpen] = useState(false);
 
     const filteredCandidatures = mockCandidatures.filter((c) => {
-        const matchSearch = 
+        const matchSearch =
             c.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
             c.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
             c.numeroCandidature.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -193,11 +196,7 @@ const Candidatures: React.FC = () => {
         return age;
     };
 
-    const handleExport = (format: 'excel' | 'pdf') => {
-        // TODO: Implémenter l'export
-        console.log(`Export ${format} des candidatures`);
-        alert(`Téléchargement du fichier ${format.toUpperCase()} en cours...`);
-    };
+
 
     const getStatutLabel = (statut: string) => {
         switch (statut) {
@@ -206,6 +205,28 @@ const Candidatures: React.FC = () => {
             case 'REFUSEE': return 'Refusée';
             case 'EN_LISTE_ATTENTE': return 'Liste d\'attente';
             default: return statut;
+        }
+    };
+
+    const handleExport = (format: 'excel' | 'pdf') => {
+        const dataToExport = filteredCandidatures.map(c => ({
+            numeroCandidature: c.numeroCandidature,
+            nomCandidat: c.nom,
+            prenomCandidat: c.prenom,
+            emailCandidat: c.email,
+            parcours: c.parcours,
+            serieBac: c.serieBac,
+            moyenneBac: c.moyenneBac,
+            dateSoumission: c.dateSoumission,
+            statut: getStatutLabel(c.statut),
+        }));
+
+        const filename = `candidatures_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}`;
+
+        if (format === 'excel') {
+            exportCandidaturesToExcel(dataToExport, filename);
+        } else {
+            generateCandidaturesPDF(dataToExport, filename, user?.etablissementNom);
         }
     };
 
@@ -240,47 +261,146 @@ const Candidatures: React.FC = () => {
             />
 
             {/* Stats */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="Total"
-                        value={stats.total}
-                        icon={<PersonIcon />}
-                        color="primary"
-                    />
-                </Grid>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="En attente"
-                        value={stats.enAttente}
-                        icon={<HourglassIcon />}
-                        color="warning"
-                    />
-                </Grid>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="Acceptées"
-                        value={stats.acceptees}
-                        icon={<CheckCircleIcon />}
-                        color="success"
-                    />
-                </Grid>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="Refusées"
-                        value={stats.refusees}
-                        icon={<CancelIcon />}
-                        color="error"
-                    />
-                </Grid>
-            </Grid>
+            <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                <Card
+                    variant="outlined"
+                    sx={{
+                        flex: 1,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: alpha(theme.palette.primary.main, 0.05),
+                        borderColor: 'primary.main',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        }}
+                    >
+                        <PersonIcon sx={{ fontSize: 28, color: 'primary.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="primary.main">
+                            {stats.total}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            Total candidatures
+                        </Typography>
+                    </Box>
+                </Card>
+                <Card
+                    variant="outlined"
+                    sx={{
+                        flex: 1,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: alpha(theme.palette.warning.main, 0.05),
+                        borderColor: 'warning.main',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.warning.main, 0.1),
+                        }}
+                    >
+                        <HourglassIcon sx={{ fontSize: 28, color: 'warning.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="warning.main">
+                            {stats.enAttente}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            En attente
+                        </Typography>
+                    </Box>
+                </Card>
+                <Card
+                    variant="outlined"
+                    sx={{
+                        flex: 1,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: alpha(theme.palette.success.main, 0.05),
+                        borderColor: 'success.main',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.success.main, 0.1),
+                        }}
+                    >
+                        <CheckCircleIcon sx={{ fontSize: 28, color: 'success.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="success.main">
+                            {stats.acceptees}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            Acceptées
+                        </Typography>
+                    </Box>
+                </Card>
+                <Card
+                    variant="outlined"
+                    sx={{
+                        flex: 1,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: alpha(theme.palette.error.main, 0.05),
+                        borderColor: 'error.main',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.error.main, 0.1),
+                        }}
+                    >
+                        <CancelIcon sx={{ fontSize: 28, color: 'error.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="error.main">
+                            {stats.refusees}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            Refusées
+                        </Typography>
+                    </Box>
+                </Card>
+            </Stack>
 
             {/* Filtres */}
-            <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card, mb: 3 }}>
-                <CardContent>
-                    <Stack 
-                        direction={{ xs: 'column', md: 'row' }} 
-                        spacing={2} 
+            <Card
+                variant="outlined"
+                sx={{
+                    borderRadius: 2,
+                    mb: 3,
+                    bgcolor: alpha(theme.palette.grey[50], 0.5),
+                }}
+            >
+                <CardContent sx={{ p: 2.5 }}>
+                    <Stack
+                        direction={{ xs: 'column', md: 'row' }}
+                        spacing={2}
                         alignItems={{ xs: 'stretch', md: 'center' }}
                     >
                         <SearchField
@@ -289,28 +409,34 @@ const Candidatures: React.FC = () => {
                             placeholder="Rechercher par nom, N° candidature, email..."
                             fullWidth
                         />
-                        <FormControl size="small" sx={{ minWidth: 200 }}>
+                        <FormControl size="small" sx={{ minWidth: 220 }}>
                             <InputLabel>Parcours</InputLabel>
                             <Select
                                 value={selectedParcours}
                                 label="Parcours"
                                 onChange={(e) => setSelectedParcours(e.target.value)}
-                                sx={{ borderRadius: BORDER_RADIUS.sm }}
+                                sx={{
+                                    borderRadius: 1.5,
+                                    bgcolor: 'white',
+                                }}
                             >
                                 {mockParcours.map((p) => (
                                     <MenuItem key={p} value={p}>{p}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
-                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <FormControl size="small" sx={{ minWidth: 180 }}>
                             <InputLabel>Statut</InputLabel>
                             <Select
                                 value={selectedStatut}
                                 label="Statut"
                                 onChange={(e) => setSelectedStatut(e.target.value)}
-                                sx={{ borderRadius: BORDER_RADIUS.sm }}
+                                sx={{
+                                    borderRadius: 1.5,
+                                    bgcolor: 'white',
+                                }}
                             >
-                                <MenuItem value="Tous">Tous</MenuItem>
+                                <MenuItem value="Tous">Tous les statuts</MenuItem>
                                 <MenuItem value="EN_ATTENTE">En attente</MenuItem>
                                 <MenuItem value="ACCEPTEE">Acceptées</MenuItem>
                                 <MenuItem value="REFUSEE">Refusées</MenuItem>
@@ -322,26 +448,32 @@ const Candidatures: React.FC = () => {
             </Card>
 
             {/* Tableau des candidatures */}
-            <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
+            <Card
+                variant="outlined"
+                sx={{
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                }}
+            >
                 <TableContainer>
                     <Table>
                         <TableHead>
-                            <TableRow>
-                                <TableCell>N° Candidature</TableCell>
-                                <TableCell>Candidat</TableCell>
-                                <TableCell>Parcours</TableCell>
-                                <TableCell align="center">Série Bac</TableCell>
-                                <TableCell align="center">Moyenne</TableCell>
-                                <TableCell align="center">Date</TableCell>
-                                <TableCell align="center">Statut</TableCell>
-                                <TableCell align="center">Actions</TableCell>
+                            <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
+                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>N° Candidature</TableCell>
+                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Candidat</TableCell>
+                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Parcours</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Série Bac</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Moyenne</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Date</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Statut</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {filteredCandidatures
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((candidature) => (
-                                    <TableRow 
+                                    <TableRow
                                         key={candidature.id}
                                         hover
                                         sx={{ '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) } }}
@@ -353,8 +485,8 @@ const Candidatures: React.FC = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Stack direction="row" alignItems="center" spacing={1.5}>
-                                                <Avatar 
-                                                    sx={{ 
+                                                <Avatar
+                                                    sx={{
                                                         bgcolor: alpha(theme.palette.primary.main, 0.1),
                                                         width: AVATAR_SIZES.sm,
                                                         height: AVATAR_SIZES.sm,
@@ -378,15 +510,15 @@ const Candidatures: React.FC = () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
-                                            <Chip 
-                                                label={candidature.serieBac} 
-                                                size="small" 
+                                            <Chip
+                                                label={candidature.serieBac}
+                                                size="small"
                                                 sx={{ borderRadius: BORDER_RADIUS.xs }}
                                             />
                                         </TableCell>
                                         <TableCell align="center">
-                                            <Typography 
-                                                variant="body2" 
+                                            <Typography
+                                                variant="body2"
                                                 fontWeight={600}
                                                 color={candidature.moyenneBac >= 14 ? 'success.main' : candidature.moyenneBac >= 12 ? 'warning.main' : 'error.main'}
                                             >
@@ -399,14 +531,14 @@ const Candidatures: React.FC = () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
-                                            <StatusChip 
-                                                status={candidature.statut} 
+                                            <StatusChip
+                                                status={candidature.statut}
                                                 label={getStatutLabel(candidature.statut)}
                                             />
                                         </TableCell>
                                         <TableCell align="center">
                                             <Tooltip title="Voir détails">
-                                                <IconButton 
+                                                <IconButton
                                                     size="small"
                                                     onClick={() => {
                                                         setSelectedCandidat(candidature);
@@ -437,10 +569,10 @@ const Candidatures: React.FC = () => {
             </Card>
 
             {/* Dialog Détails */}
-            <Dialog 
-                open={detailsOpen} 
-                onClose={() => setDetailsOpen(false)} 
-                maxWidth="sm" 
+            <Dialog
+                open={detailsOpen}
+                onClose={() => setDetailsOpen(false)}
+                maxWidth="sm"
                 fullWidth
                 PaperProps={{ sx: { borderRadius: BORDER_RADIUS.md } }}
             >
@@ -504,8 +636,8 @@ const Candidatures: React.FC = () => {
                                     <Grid item xs={6}>
                                         <Typography variant="caption" color="text.secondary">Statut</Typography>
                                         <Box sx={{ mt: 0.5 }}>
-                                            <StatusChip 
-                                                status={selectedCandidat.statut} 
+                                            <StatusChip
+                                                status={selectedCandidat.statut}
                                                 label={getStatutLabel(selectedCandidat.statut)}
                                             />
                                         </Box>
@@ -534,8 +666,8 @@ const Candidatures: React.FC = () => {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => setDetailsOpen(false)}>Fermer</Button>
-                            <Button 
-                                variant="contained" 
+                            <Button
+                                variant="contained"
                                 startIcon={<DownloadIcon />}
                                 onClick={() => alert('Téléchargement du dossier complet...')}
                             >

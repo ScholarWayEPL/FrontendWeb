@@ -26,7 +26,6 @@ import {
     Description as DescriptionIcon,
     CheckCircle as CheckCircleIcon,
     AccountBalance as AccountBalanceIcon,
-    Assignment as AssignmentIcon,
 } from '@mui/icons-material';
 import { useAppSelector } from '../../store/hooks';
 import { PageHeader, DataCard } from '../../components/ui';
@@ -37,18 +36,16 @@ const MonEtablissement: React.FC = () => {
     const { user } = useAppSelector((state) => state.auth);
     const [isEditing, setIsEditing] = useState(false);
 
-    // Données mockées de l'établissement
+    // Données mockées de l'établissement (basées sur EtablissementBackend)
     const [etablissement, setEtablissement] = useState({
         nom: user?.etablissementNom || 'Mon Établissement',
         description: 'Établissement d\'enseignement supérieur reconnu par l\'État, offrant des formations de qualité dans divers domaines. Notre mission est de former les leaders de demain en leur fournissant les compétences nécessaires pour exceller dans un monde en constante évolution.',
         localisation: 'Lomé, Togo',
-        telephone: '+228 22 XX XX XX',
+        telephonePro: '+228 22 XX XX XX',
         siteWeb: 'https://www.etablissement.tg',
         logoUrl: '',
         scolariteGlobale: '500 000 - 2 000 000 FCFA/an',
-        conditionsAdmission: 'Baccalauréat requis. Étude de dossier et/ou concours d\'entrée selon les filières.',
-        infrastructures: 'Bibliothèque moderne, Laboratoires informatiques, Salles climatisées, WiFi campus, Cafétéria',
-        documentAccreditation: 'Accréditation CAMES',
+        documentAccreditationUrl: 'https://example.com/accreditation.pdf',
         valide: true,
     });
 
@@ -127,15 +124,15 @@ const MonEtablissement: React.FC = () => {
 
             <Grid container spacing={3}>
                 {/* Informations principales */}
-                <Grid item xs={12} lg={8}>
+                <Grid item xs={12} lg={7}>
                     <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
                         <CardContent sx={{ p: 3 }}>
                             {/* Header de la carte */}
                             <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ mb: 3 }}>
                                 <Box
                                     sx={{
-                                        width: 100,
-                                        height: 100,
+                                        width: 120,
+                                        height: 120,
                                         borderRadius: BORDER_RADIUS.md,
                                         bgcolor: alpha(theme.palette.primary.main, 0.1),
                                         display: 'flex',
@@ -155,10 +152,10 @@ const MonEtablissement: React.FC = () => {
                                         <img src={etablissement.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: BORDER_RADIUS.md }} />
                                     ) : (
                                         <Stack alignItems="center" spacing={0.5}>
-                                            <CloudUploadIcon sx={{ color: 'primary.main', fontSize: 32 }} />
+                                            <CloudUploadIcon sx={{ color: 'primary.main', fontSize: 40 }} />
                                             {isEditing && (
-                                                <Typography variant="caption" color="primary.main">
-                                                    Logo
+                                                <Typography variant="caption" color="primary.main" fontWeight={500}>
+                                                    Ajouter logo
                                                 </Typography>
                                             )}
                                         </Stack>
@@ -178,21 +175,34 @@ const MonEtablissement: React.FC = () => {
                                             {etablissement.nom}
                                         </Typography>
                                     )}
-                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
                                         <Chip
                                             icon={<CheckCircleIcon />}
-                                            label={etablissement.documentAccreditation}
-                                            color="success"
+                                            label={etablissement.valide ? "Établissement validé" : "En attente de validation"}
+                                            color={etablissement.valide ? "success" : "warning"}
                                             size="small"
-                                            sx={{ borderRadius: BORDER_RADIUS.xs }}
+                                            sx={{ borderRadius: BORDER_RADIUS.xs, fontWeight: 500 }}
                                         />
                                         <Chip
                                             icon={<LocationIcon />}
                                             label={etablissement.localisation}
                                             size="small"
+                                            variant="outlined"
                                             sx={{ borderRadius: BORDER_RADIUS.xs }}
                                         />
                                     </Stack>
+                                    {etablissement.documentAccreditationUrl && !isEditing && (
+                                        <Button
+                                            size="small"
+                                            variant="text"
+                                            startIcon={<DescriptionIcon />}
+                                            href={etablissement.documentAccreditationUrl}
+                                            target="_blank"
+                                            sx={{ mt: 1 }}
+                                        >
+                                            Voir document d'accréditation
+                                        </Button>
+                                    )}
                                 </Box>
                             </Stack>
 
@@ -200,19 +210,20 @@ const MonEtablissement: React.FC = () => {
 
                             {/* Description */}
                             <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Description
+                                <Typography variant="subtitle2" fontWeight={600} color="text.secondary" gutterBottom>
+                                    Description de l'établissement
                                 </Typography>
                                 {isEditing ? (
                                     <TextField
                                         fullWidth
                                         multiline
-                                        rows={4}
+                                        rows={5}
                                         value={etablissement.description}
                                         onChange={(e) => setEtablissement({ ...etablissement, description: e.target.value })}
+                                        placeholder="Décrivez votre établissement, sa mission, ses valeurs..."
                                     />
                                 ) : (
-                                    <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.7 }}>
+                                    <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.8 }}>
                                         {etablissement.description}
                                     </Typography>
                                 )}
@@ -221,23 +232,23 @@ const MonEtablissement: React.FC = () => {
                             <Divider sx={{ my: 3 }} />
 
                             {/* Coordonnées */}
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
-                                Coordonnées
+                            <Typography variant="subtitle2" fontWeight={600} color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                                Coordonnées de contact
                             </Typography>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} md={6}>
                                     {isEditing ? (
                                         <TextField
                                             fullWidth
-                                            label="Téléphone"
-                                            value={etablissement.telephone}
-                                            onChange={(e) => setEtablissement({ ...etablissement, telephone: e.target.value })}
+                                            label="Téléphone professionnel"
+                                            value={etablissement.telephonePro}
+                                            onChange={(e) => setEtablissement({ ...etablissement, telephonePro: e.target.value })}
                                         />
                                     ) : (
                                         <InfoItem
                                             icon={<PhoneIcon />}
-                                            label="Téléphone"
-                                            value={etablissement.telephone}
+                                            label="Téléphone professionnel"
+                                            value={etablissement.telephonePro}
                                             color={theme.palette.info.main}
                                         />
                                     )}
@@ -247,25 +258,27 @@ const MonEtablissement: React.FC = () => {
                                         <TextField
                                             fullWidth
                                             label="Site web"
-                                            value={etablissement.siteWeb}
+                                            value={etablissement.siteWeb || ''}
                                             onChange={(e) => setEtablissement({ ...etablissement, siteWeb: e.target.value })}
+                                            placeholder="https://..."
                                         />
                                     ) : (
                                         <InfoItem
                                             icon={<LanguageIcon />}
                                             label="Site web"
-                                            value={etablissement.siteWeb}
+                                            value={etablissement.siteWeb || 'Non renseigné'}
                                             color={theme.palette.success.main}
                                         />
                                     )}
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid item xs={12}>
                                     {isEditing ? (
                                         <TextField
                                             fullWidth
                                             label="Localisation"
                                             value={etablissement.localisation}
                                             onChange={(e) => setEtablissement({ ...etablissement, localisation: e.target.value })}
+                                            placeholder="Ville, Pays"
                                         />
                                     ) : (
                                         <InfoItem
@@ -276,89 +289,122 @@ const MonEtablissement: React.FC = () => {
                                         />
                                     )}
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <InfoItem
-                                        icon={<DescriptionIcon />}
-                                        label="Accréditation"
-                                        value={etablissement.documentAccreditation}
-                                        color={theme.palette.primary.main}
-                                    />
-                                </Grid>
                             </Grid>
                         </CardContent>
                     </Card>
                 </Grid>
 
                 {/* Sidebar */}
-                <Grid item xs={12} lg={4}>
+                <Grid item xs={12} lg={5}>
                     <Stack spacing={3}>
-                        {/* Scolarité */}
-                        <DataCard title="Scolarité globale" subtitle="Frais de scolarité annuels">
-                            {isEditing ? (
-                                <TextField
-                                    fullWidth
-                                    value={etablissement.scolariteGlobale}
-                                    onChange={(e) => setEtablissement({ ...etablissement, scolariteGlobale: e.target.value })}
-                                    placeholder="Ex: 500 000 - 2 000 000 FCFA/an"
-                                />
-                            ) : (
-                                <Stack direction="row" alignItems="center" spacing={1.5}>
+                        {/* Scolarité globale */}
+                        <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
+                            <CardContent sx={{ p: 3 }}>
+                                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
                                     <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), width: AVATAR_SIZES.md, height: AVATAR_SIZES.md }}>
                                         <AccountBalanceIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
                                     </Avatar>
-                                    <Typography variant="h6" fontWeight={600} color="success.main">
-                                        {etablissement.scolariteGlobale}
-                                    </Typography>
+                                    <Box>
+                                        <Typography variant="subtitle1" fontWeight={600}>
+                                            Scolarité globale
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Fourchette des frais annuels
+                                        </Typography>
+                                    </Box>
                                 </Stack>
-                            )}
-                        </DataCard>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        value={etablissement.scolariteGlobale || ''}
+                                        onChange={(e) => setEtablissement({ ...etablissement, scolariteGlobale: e.target.value })}
+                                        placeholder="Ex: 500 000 - 2 000 000 FCFA/an"
+                                        helperText="Indiquez la fourchette de prix des programmes"
+                                    />
+                                ) : (
+                                    <Box sx={{ 
+                                        bgcolor: alpha(theme.palette.success.main, 0.08), 
+                                        p: 2.5, 
+                                        borderRadius: BORDER_RADIUS.sm,
+                                        border: '1px solid',
+                                        borderColor: alpha(theme.palette.success.main, 0.2),
+                                    }}>
+                                        <Typography variant="h5" fontWeight={700} color="success.main" textAlign="center">
+                                            {etablissement.scolariteGlobale || 'Non renseigné'}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                        {/* Conditions d'admission */}
-                        <DataCard title="Conditions d'admission" subtitle="Prérequis généraux">
-                            {isEditing ? (
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    value={etablissement.conditionsAdmission}
-                                    onChange={(e) => setEtablissement({ ...etablissement, conditionsAdmission: e.target.value })}
-                                />
-                            ) : (
-                                <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-                                    <Avatar sx={{ bgcolor: alpha(theme.palette.info.main, 0.1), width: AVATAR_SIZES.md, height: AVATAR_SIZES.md }}>
-                                        <AssignmentIcon sx={{ color: theme.palette.info.main, fontSize: 20 }} />
-                                    </Avatar>
-                                    <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
-                                        {etablissement.conditionsAdmission}
-                                    </Typography>
-                                </Stack>
-                            )}
-                        </DataCard>
+                        {/* Document d'accréditation */}
+                        {isEditing && (
+                            <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
+                                <CardContent sx={{ p: 3 }}>
+                                    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+                                        <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: AVATAR_SIZES.md, height: AVATAR_SIZES.md }}>
+                                            <DescriptionIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="subtitle1" fontWeight={600}>
+                                                Document d'accréditation
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Attestation officielle
+                                            </Typography>
+                                        </Box>
+                                    </Stack>
+                                    <TextField
+                                        fullWidth
+                                        value={etablissement.documentAccreditationUrl || ''}
+                                        onChange={(e) => setEtablissement({ ...etablissement, documentAccreditationUrl: e.target.value })}
+                                        placeholder="URL du document PDF"
+                                        helperText="Lien vers votre document d'accréditation (PDF)"
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
 
-                        {/* Infrastructures */}
-                        <DataCard title="Infrastructures" subtitle="Équipements disponibles">
-                            {isEditing ? (
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    value={etablissement.infrastructures}
-                                    onChange={(e) => setEtablissement({ ...etablissement, infrastructures: e.target.value })}
-                                    placeholder="Séparez par des virgules"
-                                />
-                            ) : (
-                                <Stack direction="row" flexWrap="wrap" gap={1}>
-                                    {etablissement.infrastructures.split(',').map((infra, index) => (
-                                        <Chip
-                                            key={index}
-                                            label={infra.trim()}
-                                            size="small"
-                                            sx={{ borderRadius: BORDER_RADIUS.xs }}
-                                        />
-                                    ))}
+                        {/* Informations complémentaires */}
+                        <Card sx={{ 
+                            borderRadius: BORDER_RADIUS.md, 
+                            boxShadow: SHADOWS.card,
+                            bgcolor: alpha(theme.palette.info.main, 0.02),
+                            border: '1px solid',
+                            borderColor: alpha(theme.palette.info.main, 0.1),
+                        }}>
+                            <CardContent sx={{ p: 3 }}>
+                                <Stack direction="row" alignItems="flex-start" spacing={1.5} sx={{ mb: 2 }}>
+                                    <DescriptionIcon sx={{ color: 'info.main', fontSize: 20, mt: 0.3 }} />
+                                    <Box>
+                                        <Typography variant="subtitle2" fontWeight={600} color="info.main" gutterBottom>
+                                            Besoin d'aide ?
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                                            Les informations de votre établissement sont visibles par les bacheliers. 
+                                            Assurez-vous qu'elles sont complètes et à jour.
+                                        </Typography>
+                                    </Box>
                                 </Stack>
-                            )}
-                        </DataCard>
+                                <Divider sx={{ my: 2 }} />
+                                <Stack spacing={1}>
+                                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                                        INFORMATIONS IMPORTANTES :
+                                    </Typography>
+                                    <Stack spacing={0.5}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            • Le logo améliore la visibilité de votre établissement
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            • La description aide les étudiants à vous découvrir
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            • Les coordonnées doivent être exactes pour être contacté
+                                        </Typography>
+                                    </Stack>
+                                </Stack>
+                            </CardContent>
+                        </Card>
                     </Stack>
                 </Grid>
             </Grid>

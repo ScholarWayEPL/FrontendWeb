@@ -9,6 +9,7 @@ import {
     Button,
     Divider,
     useTheme,
+    alpha,
 } from '@mui/material';
 import {
     School as SchoolIcon,
@@ -22,7 +23,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store/hooks';
 import { PageHeader, DataCard, StatusChip } from '../../components/ui';
-import StatCard from '../../components/StatCard';
 
 // Données mockées pour le dashboard établissement
 const mockStats = {
@@ -99,200 +99,365 @@ const EtablissementDashboard: React.FC = () => {
             />
 
             {/* Stats Cards */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                        title="Parcours actifs"
-                        value={mockStats.totalParcours}
-                        icon={<MenuBookIcon />}
-                        color="primary"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                        title="Total candidatures"
-                        value={mockStats.totalCandidatures}
-                        icon={<GroupsIcon />}
-                        color="info"
-                        growth={12}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                        title="En attente"
-                        value={mockStats.candidaturesEnAttente}
-                        icon={<DescriptionIcon />}
-                        color="warning"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                        title="Taux d'acceptation"
-                        value={`${mockStats.tauxAcceptation}%`}
-                        icon={<AssessmentIcon />}
-                        color="success"
-                        growth={5}
-                    />
-                </Grid>
-            </Grid>
+            <Stack direction="row" spacing={2} sx={{ mb: 4, flexWrap: 'wrap' }}>
+                <Card 
+                    variant="outlined"
+                    sx={{ 
+                        flex: 1,
+                        minWidth: 240,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: `${theme.palette.primary.main}08`,
+                        borderColor: 'primary.main',
+                    }}
+                >
+                    <Box 
+                        sx={{ 
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: `${theme.palette.primary.main}15`,
+                        }}
+                    >
+                        <MenuBookIcon sx={{ fontSize: 28, color: 'primary.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="primary.main">
+                            {mockStats.totalParcours}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            Parcours actifs
+                        </Typography>
+                    </Box>
+                </Card>
+                <Card 
+                    variant="outlined"
+                    sx={{ 
+                        flex: 1,
+                        minWidth: 240,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: `${theme.palette.info.main}08`,
+                        borderColor: 'info.main',
+                    }}
+                >
+                    <Box 
+                        sx={{ 
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: `${theme.palette.info.main}15`,
+                        }}
+                    >
+                        <GroupsIcon sx={{ fontSize: 28, color: 'info.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="info.main">
+                            {mockStats.totalCandidatures}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            Total candidatures
+                        </Typography>
+                    </Box>
+                </Card>
+                <Card 
+                    variant="outlined"
+                    sx={{ 
+                        flex: 1,
+                        minWidth: 240,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: `${theme.palette.warning.main}08`,
+                        borderColor: 'warning.main',
+                    }}
+                >
+                    <Box 
+                        sx={{ 
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: `${theme.palette.warning.main}15`,
+                        }}
+                    >
+                        <DescriptionIcon sx={{ fontSize: 28, color: 'warning.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="warning.main">
+                            {mockStats.candidaturesEnAttente}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            En attente
+                        </Typography>
+                    </Box>
+                </Card>
+                <Card 
+                    variant="outlined"
+                    sx={{ 
+                        flex: 1,
+                        minWidth: 240,
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        borderRadius: 2,
+                        bgcolor: `${theme.palette.success.main}08`,
+                        borderColor: 'success.main',
+                    }}
+                >
+                    <Box 
+                        sx={{ 
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: `${theme.palette.success.main}15`,
+                        }}
+                    >
+                        <AssessmentIcon sx={{ fontSize: 28, color: 'success.main' }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} color="success.main">
+                            {mockStats.tauxAcceptation}%
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                            Taux d'acceptation
+                        </Typography>
+                    </Box>
+                </Card>
+            </Stack>
 
             <Grid container spacing={3}>
                 {/* Campagnes d'admission */}
                 <Grid item xs={12} lg={8}>
-                    <DataCard
-                        title="Campagnes d'admission"
-                        subtitle="Gérez vos périodes de candidatures"
-                        action={
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                onClick={() => navigate('/etablissement/offre')}
-                            >
-                                Gérer les campagnes
-                            </Button>
-                        }
+                    <Card 
+                        variant="outlined"
+                        sx={{ 
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                        }}
                     >
-                        <Stack spacing={1.5}>
-                            {mockCampagnes.map((campagne) => (
-                                <Box
-                                    key={campagne.id}
-                                    sx={{
-                                        border: '1px solid',
-                                        borderColor: 'grey.200',
-                                        borderRadius: 1,
-                                        bgcolor: 'white',
-                                        '&:hover': {
-                                            borderColor: 'grey.300',
-                                            bgcolor: 'grey.50',
-                                        },
-                                    }}
+                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.primary.main, 0.05), borderBottom: `2px solid ${theme.palette.primary.main}` }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                <Box>
+                                    <Typography variant="h6" fontWeight={700}>
+                                        Campagnes d'admission
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Gérez vos périodes de candidatures
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    onClick={() => navigate('/etablissement/offre')}
+                                    sx={{ borderRadius: 1.5 }}
                                 >
-                                        <Box sx={{ px: 2, py: 1.5 }}>
-                                        <Stack
-                                            direction={{ xs: 'column', sm: 'row' }}
-                                            justifyContent="space-between"
-                                            alignItems={{ xs: 'flex-start', sm: 'center' }}
-                                            spacing={1.5}
-                                        >
-                                            <Box sx={{ flex: 1 }}>
-                                                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.5 }}>
-                                                    <Typography variant="body1" fontWeight={600}>
-                                                        {campagne.parcours}
-                                                    </Typography>
-                                                    <StatusChip status={campagne.statut} />
-                                                </Stack>
-                                                <Stack direction="row" alignItems="center" spacing={1.5}>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {formatDate(campagne.dateOuverture)} → {formatDate(campagne.dateCloture)}
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.disabled">•</Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {campagne.candidatures} candidatures
-                                                    </Typography>
-                                                </Stack>
-                                            </Box>
-                                            <Stack direction="row" spacing={1}>
-                                                {campagne.statut === 'OUVERTE' && (
-                                                    <>
+                                    Gérer les campagnes
+                                </Button>
+                            </Stack>
+                        </Box>
+                        <CardContent sx={{ p: 2 }}>
+                            <Stack spacing={1.5}>
+                                {mockCampagnes.map((campagne) => (
+                                    <Card
+                                        key={campagne.id}
+                                        variant="outlined"
+                                        sx={{
+                                            borderRadius: 1.5,
+                                            borderWidth: 1.5,
+                                            transition: 'all 0.2s',
+                                            '&:hover': {
+                                                borderColor: 'primary.main',
+                                                bgcolor: alpha(theme.palette.primary.main, 0.02),
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: 1,
+                                            },
+                                        }}
+                                    >
+                                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                            <Stack
+                                                direction={{ xs: 'column', sm: 'row' }}
+                                                justifyContent="space-between"
+                                                alignItems={{ xs: 'flex-start', sm: 'center' }}
+                                                spacing={2}
+                                            >
+                                                <Box sx={{ flex: 1 }}>
+                                                    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
+                                                        <Typography variant="subtitle1" fontWeight={700}>
+                                                            {campagne.parcours}
+                                                        </Typography>
+                                                        <StatusChip status={campagne.statut} />
+                                                    </Stack>
+                                                    <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap">
+                                                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                                                            {formatDate(campagne.dateOuverture)} → {formatDate(campagne.dateCloture)}
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.disabled">•</Typography>
+                                                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                                                            {campagne.candidatures} candidatures
+                                                        </Typography>
+                                                    </Stack>
+                                                </Box>
+                                                <Stack direction="row" spacing={1}>
+                                                    {campagne.statut === 'OUVERTE' && (
+                                                        <>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                onClick={() => navigate('/etablissement/candidatures')}
+                                                                sx={{ borderRadius: 1.5 }}
+                                                            >
+                                                                Voir
+                                                            </Button>
+                                                            <Button
+                                                                size="small"
+                                                                variant="contained"
+                                                                onClick={() => navigate('/etablissement/resultats')}
+                                                                sx={{ borderRadius: 1.5 }}
+                                                            >
+                                                                Publier
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                    {campagne.statut === 'A_VENIR' && (
                                                         <Button
                                                             size="small"
                                                             variant="outlined"
-                                                            onClick={() => navigate('/etablissement/candidatures')}
+                                                            onClick={() => navigate('/etablissement/offre')}
+                                                            sx={{ borderRadius: 1.5 }}
                                                         >
-                                                            Voir
+                                                            Configurer
                                                         </Button>
+                                                    )}
+                                                    {campagne.statut === 'CLOTUREE' && (
                                                         <Button
                                                             size="small"
-                                                            variant="contained"
+                                                            variant="text"
                                                             onClick={() => navigate('/etablissement/resultats')}
+                                                            sx={{ borderRadius: 1.5 }}
                                                         >
-                                                            Publier
+                                                            Résultats
                                                         </Button>
-                                                    </>
-                                                )}
-                                                {campagne.statut === 'A_VENIR' && (
-                                                    <Button
-                                                        size="small"
-                                                        variant="outlined"
-                                                        onClick={() => navigate('/etablissement/offre')}
-                                                    >
-                                                        Configurer
-                                                    </Button>
-                                                )}
-                                                {campagne.statut === 'CLOTUREE' && (
-                                                    <Button
-                                                        size="small"
-                                                        variant="text"
-                                                        onClick={() => navigate('/etablissement/resultats')}
-                                                    >
-                                                        Résultats
-                                                    </Button>
-                                                )}
+                                                    )}
+                                                </Stack>
                                             </Stack>
-                                        </Stack>
-                                    </Box>
-                                </Box>
-                            ))}
-                        </Stack>
-                    </DataCard>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Stack>
+                        </CardContent>
+                    </Card>
                 </Grid>
 
                 {/* Activité récente */}
                 <Grid item xs={12} lg={4}>
-                    <DataCard
-                        title="Activité récente"
-                        subtitle="Dernières actions sur vos campagnes"
+                    <Card 
+                        variant="outlined"
+                        sx={{ 
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                        }}
                     >
-                        <Stack spacing={0} divider={<Divider />}>
-                            {mockActivites.map((activite) => (
-                                <Box key={activite.id} sx={{ py: 1.5 }}>
-                                    <Typography variant="body2" fontWeight={500}>
-                                        {activite.action}
-                                    </Typography>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 0.5 }}>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {activite.parcours}
+                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.info.main, 0.05), borderBottom: `2px solid ${theme.palette.info.main}` }}>
+                            <Typography variant="h6" fontWeight={700}>
+                                Activité récente
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Dernières actions sur vos campagnes
+                            </Typography>
+                        </Box>
+                        <CardContent sx={{ p: 2 }}>
+                            <Stack spacing={0} divider={<Divider />}>
+                                {mockActivites.map((activite) => (
+                                    <Box key={activite.id} sx={{ py: 2 }}>
+                                        <Typography variant="body2" fontWeight={600}>
+                                            {activite.action}
                                         </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {activite.date}
-                                        </Typography>
-                                    </Stack>
-                                </Box>
-                            ))}
-                        </Stack>
-                    </DataCard>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 0.5 }}>
+                                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                {activite.parcours}
+                                            </Typography>
+                                            <Typography variant="caption" color="primary.main" fontWeight={600}>
+                                                {activite.date}
+                                            </Typography>
+                                        </Stack>
+                                    </Box>
+                                ))}
+                            </Stack>
+                        </CardContent>
+                    </Card>
 
                     {/* Actions rapides */}
-                    <Card variant="outlined" sx={{ mt: 3 }}>
-                        <CardContent>
-                            <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                    <Card 
+                        variant="outlined" 
+                        sx={{ 
+                            mt: 3,
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.success.main, 0.05), borderBottom: `2px solid ${theme.palette.success.main}` }}>
+                            <Typography variant="h6" fontWeight={700}>
                                 Actions rapides
                             </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Raccourcis vers vos actions fréquentes
+                            </Typography>
+                        </Box>
+                        <CardContent sx={{ p: 2 }}>
                             <Stack spacing={1}>
                                 <Button
                                     fullWidth
-                                    variant="text"
+                                    variant="outlined"
                                     startIcon={<MenuBookIcon />}
                                     onClick={() => navigate('/etablissement/offre')}
-                                    sx={{ justifyContent: 'flex-start', py: 1 }}
+                                    sx={{ 
+                                        justifyContent: 'flex-start', 
+                                        py: 1.5,
+                                        borderRadius: 1.5,
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                        },
+                                    }}
                                 >
                                     Ajouter un parcours
                                 </Button>
                                 <Button
                                     fullWidth
-                                    variant="text"
+                                    variant="outlined"
                                     startIcon={<DownloadIcon />}
                                     onClick={() => navigate('/etablissement/candidatures')}
-                                    sx={{ justifyContent: 'flex-start', py: 1 }}
+                                    sx={{ 
+                                        justifyContent: 'flex-start', 
+                                        py: 1.5,
+                                        borderRadius: 1.5,
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                        },
+                                    }}
                                 >
                                     Télécharger candidatures
                                 </Button>
                                 <Button
                                     fullWidth
-                                    variant="text"
+                                    variant="outlined"
                                     startIcon={<PublishIcon />}
                                     onClick={() => navigate('/etablissement/resultats')}
-                                    sx={{ justifyContent: 'flex-start', py: 1 }}
+                                    sx={{ 
+                                        justifyContent: 'flex-start', 
+                                        py: 1.5,
+                                        borderRadius: 1.5,
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                        },
+                                    }}
                                 >
                                     Publier des résultats
                                 </Button>

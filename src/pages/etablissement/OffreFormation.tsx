@@ -17,12 +17,6 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     Collapse,
     Paper,
     Divider,
@@ -348,20 +342,29 @@ const OffreFormation: React.FC = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                p: 2,
-                                bgcolor: alpha(theme.palette.primary.main, 0.03),
+                                p: 2.5,
+                                bgcolor: alpha(theme.palette.primary.main, 0.04),
                                 cursor: 'pointer',
-                                '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.06) },
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                                '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.08) },
                             }}
                             onClick={() => toggleDomaine(domaine.id)}
                         >
                             <Stack direction="row" spacing={2} alignItems="center">
-                                <IconButton size="small">
+                                <IconButton 
+                                    size="small"
+                                    sx={{
+                                        bgcolor: 'white',
+                                        boxShadow: 1,
+                                        '&:hover': { bgcolor: 'white', boxShadow: 2 },
+                                    }}
+                                >
                                     {expandedDomaines.includes(domaine.id) ? 
                                         <ExpandLessIcon /> : <ExpandMoreIcon />}
                                 </IconButton>
                                 <Box>
-                                    <Typography variant="subtitle1" fontWeight={600}>
+                                    <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
                                         {domaine.nom}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
@@ -372,18 +375,29 @@ const OffreFormation: React.FC = () => {
                             <Stack direction="row" spacing={1}>
                                 <Button
                                     size="small"
+                                    variant="contained"
                                     startIcon={<AddIcon />}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedDomaineId(domaine.id);
                                         setOpenDialog('parcours');
                                     }}
+                                    sx={{ borderRadius: 1.5 }}
                                 >
-                                    Parcours
+                                    Ajouter un parcours
                                 </Button>
-                                <IconButton size="small" onClick={(e) => e.stopPropagation()}>
-                                    <EditIcon fontSize="small" />
-                                </IconButton>
+                                <Tooltip title="Modifier le domaine">
+                                    <IconButton 
+                                        size="small" 
+                                        onClick={(e) => e.stopPropagation()}
+                                        sx={{ 
+                                            bgcolor: 'white',
+                                            '&:hover': { bgcolor: 'white', color: 'primary.main' },
+                                        }}
+                                    >
+                                        <EditIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
                             </Stack>
                         </Box>
 
@@ -411,126 +425,181 @@ const OffreFormation: React.FC = () => {
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'space-between',
-                                                        p: 1.5,
-                                                        bgcolor: 'grey.50',
+                                                        p: 2,
+                                                        bgcolor: alpha(theme.palette.grey[50], 0.8),
                                                         cursor: 'pointer',
-                                                        '&:hover': { bgcolor: 'grey.100' },
+                                                        transition: 'all 0.2s',
+                                                        '&:hover': { bgcolor: alpha(theme.palette.grey[100], 0.9) },
                                                     }}
                                                     onClick={() => toggleParcours(parcours.id)}
                                                 >
-                                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                                    <Stack direction="row" spacing={2} alignItems="center">
                                                         <ArrowIcon 
                                                             sx={{ 
                                                                 transform: expandedParcours.includes(parcours.id) 
                                                                     ? 'rotate(90deg)' : 'none',
                                                                 transition: 'transform 0.2s',
-                                                                color: 'text.secondary',
+                                                                color: 'primary.main',
+                                                                fontSize: 20,
                                                             }} 
                                                         />
-                                                        <Typography fontWeight={500}>
+                                                        <Typography variant="subtitle1" fontWeight={600}>
                                                             {parcours.nom}
                                                         </Typography>
                                                         {getNiveauChip(parcours.niveau)}
                                                         {getStatusChip(parcours.statut)}
                                                     </Stack>
-                                                    <Stack direction="row" spacing={1} alignItems="center">
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            {parcours.filieres.length} filières
-                                                        </Typography>
+                                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                                        <Chip 
+                                                            label={`${parcours.filieres.length} filières`}
+                                                            size="small"
+                                                            sx={{ 
+                                                                bgcolor: 'white',
+                                                                fontWeight: 500,
+                                                            }}
+                                                        />
                                                         <Tooltip title="Ajouter une filière">
                                                             <IconButton
                                                                 size="small"
-                                                                color="primary"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setSelectedDomaineId(domaine.id);
                                                                     setSelectedParcoursId(parcours.id);
                                                                     setOpenDialog('filiere');
                                                                 }}
+                                                                sx={{
+                                                                    bgcolor: theme.palette.primary.main,
+                                                                    color: 'white',
+                                                                    '&:hover': { 
+                                                                        bgcolor: theme.palette.primary.dark,
+                                                                    },
+                                                                }}
                                                             >
                                                                 <AddIcon fontSize="small" />
                                                             </IconButton>
                                                         </Tooltip>
-                                                        <IconButton 
-                                                            size="small"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <EditIcon fontSize="small" />
-                                                        </IconButton>
+                                                        <Tooltip title="Modifier le parcours">
+                                                            <IconButton 
+                                                                size="small"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                sx={{
+                                                                    bgcolor: 'white',
+                                                                    '&:hover': { 
+                                                                        bgcolor: 'white',
+                                                                        color: 'primary.main',
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <EditIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </Stack>
                                                 </Box>
 
-                                                {/* Table des filières */}
+                                                {/* Cards des filières */}
                                                 <Collapse in={expandedParcours.includes(parcours.id)}>
                                                     {parcours.filieres.length === 0 ? (
-                                                        <Box sx={{ p: 2, textAlign: 'center' }}>
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                Aucune filière - 
-                                                                <Button
-                                                                    size="small"
-                                                                    onClick={() => {
-                                                                        setSelectedDomaineId(domaine.id);
-                                                                        setSelectedParcoursId(parcours.id);
-                                                                        setOpenDialog('filiere');
-                                                                    }}
-                                                                >
-                                                                    Ajouter une filière
-                                                                </Button>
+                                                        <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
+                                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                                                Aucune filière dans ce parcours
                                                             </Typography>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                startIcon={<AddIcon />}
+                                                                onClick={() => {
+                                                                    setSelectedDomaineId(domaine.id);
+                                                                    setSelectedParcoursId(parcours.id);
+                                                                    setOpenDialog('filiere');
+                                                                }}
+                                                            >
+                                                                Ajouter une filière
+                                                            </Button>
                                                         </Box>
                                                     ) : (
-                                                        <TableContainer>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow sx={{ bgcolor: 'grey.50' }}>
-                                                                        <TableCell>Filière</TableCell>
-                                                                        <TableCell align="right">Frais de scolarité</TableCell>
-                                                                        <TableCell align="right">Places</TableCell>
-                                                                        <TableCell align="right" width={80}>Actions</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableBody>
-                                                                    {parcours.filieres.map((filiere) => (
-                                                                        <TableRow 
-                                                                            key={filiere.id}
-                                                                            sx={{ '&:hover': { bgcolor: 'grey.50' } }}
-                                                                        >
-                                                                            <TableCell>
-                                                                                <Typography variant="body2" fontWeight={500}>
-                                                                                    {filiere.nom}
-                                                                                </Typography>
-                                                                            </TableCell>
-                                                                            <TableCell align="right">
-                                                                                <Typography variant="body2" color="primary.main" fontWeight={500}>
-                                                                                    {formatCFA(filiere.fraisScolarite)}
-                                                                                </Typography>
-                                                                            </TableCell>
-                                                                            <TableCell align="right">
-                                                                                <Chip 
-                                                                                    label={`${filiere.places} places`} 
-                                                                                    size="small" 
-                                                                                    variant="outlined"
-                                                                                />
-                                                                            </TableCell>
-                                                                            <TableCell align="right">
-                                                                                <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                                                                    <IconButton size="small">
-                                                                                        <EditIcon fontSize="small" />
-                                                                                    </IconButton>
-                                                                                    <IconButton 
-                                                                                        size="small" 
-                                                                                        color="error"
-                                                                                        onClick={() => handleDeleteFiliere(domaine.id, parcours.id, filiere.id)}
-                                                                                    >
-                                                                                        <DeleteIcon fontSize="small" />
-                                                                                    </IconButton>
+                                                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.grey[100], 0.3) }}>
+                                                            <Stack spacing={1.5}>
+                                                                {parcours.filieres.map((filiere) => (
+                                                                    <Card 
+                                                                        key={filiere.id}
+                                                                        variant="outlined"
+                                                                        sx={{ 
+                                                                            transition: 'all 0.2s',
+                                                                            '&:hover': { 
+                                                                                boxShadow: 1,
+                                                                                borderColor: 'primary.main',
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                                                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                                                <Box sx={{ flex: 1 }}>
+                                                                                    <Typography variant="body1" fontWeight={600} sx={{ mb: 1 }}>
+                                                                                        {filiere.nom}
+                                                                                    </Typography>
+                                                                                    <Stack direction="row" spacing={2} alignItems="center">
+                                                                                        <Box sx={{ 
+                                                                                            display: 'flex', 
+                                                                                            alignItems: 'center',
+                                                                                            px: 1.5,
+                                                                                            py: 0.5,
+                                                                                            bgcolor: alpha(theme.palette.primary.main, 0.08),
+                                                                                            borderRadius: 1,
+                                                                                        }}>
+                                                                                            <Typography 
+                                                                                                variant="body2" 
+                                                                                                color="primary.main" 
+                                                                                                fontWeight={600}
+                                                                                            >
+                                                                                                {formatCFA(filiere.fraisScolarite)}
+                                                                                            </Typography>
+                                                                                        </Box>
+                                                                                        <Chip 
+                                                                                            label={`${filiere.places} places`} 
+                                                                                            size="small" 
+                                                                                            color="default"
+                                                                                            sx={{ 
+                                                                                                fontWeight: 500,
+                                                                                                borderRadius: 1.5,
+                                                                                            }}
+                                                                                        />
+                                                                                    </Stack>
+                                                                                </Box>
+                                                                                <Stack direction="row" spacing={0.5}>
+                                                                                    <Tooltip title="Modifier">
+                                                                                        <IconButton 
+                                                                                            size="small"
+                                                                                            sx={{ 
+                                                                                                '&:hover': { 
+                                                                                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                                                                                    color: 'primary.main',
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            <EditIcon fontSize="small" />
+                                                                                        </IconButton>
+                                                                                    </Tooltip>
+                                                                                    <Tooltip title="Supprimer">
+                                                                                        <IconButton 
+                                                                                            size="small" 
+                                                                                            onClick={() => handleDeleteFiliere(domaine.id, parcours.id, filiere.id)}
+                                                                                            sx={{ 
+                                                                                                '&:hover': { 
+                                                                                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                                                                                    color: 'error.main',
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            <DeleteIcon fontSize="small" />
+                                                                                        </IconButton>
+                                                                                    </Tooltip>
                                                                                 </Stack>
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </TableContainer>
+                                                                            </Stack>
+                                                                        </CardContent>
+                                                                    </Card>
+                                                                ))}
+                                                            </Stack>
+                                                        </Box>
                                                     )}
                                                 </Collapse>
                                             </Paper>

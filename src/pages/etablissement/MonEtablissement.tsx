@@ -28,7 +28,7 @@ import {
     AccountBalance as AccountBalanceIcon,
 } from '@mui/icons-material';
 import { useAppSelector } from '../../store/hooks';
-import { PageHeader, DataCard } from '../../components/ui';
+import { PageHeader } from '../../components/ui';
 import { BORDER_RADIUS, SHADOWS, AVATAR_SIZES } from '../../constants';
 
 const MonEtablissement: React.FC = () => {

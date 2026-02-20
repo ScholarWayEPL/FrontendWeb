@@ -22,7 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store/hooks';
-import { PageHeader, DataCard, StatusChip } from '../../components/ui';
+import { PageHeader, StatusChip } from '../../components/ui';
 
 // Données mockées pour le dashboard établissement
 const mockStats = {

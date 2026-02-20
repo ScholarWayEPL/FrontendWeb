@@ -30,8 +30,7 @@ import {
 import { PageHeader, StatusChip } from '../../components/ui';
 import { BORDER_RADIUS } from '../../constants';
 import { readExcel, generateResultatsTemplate } from '../../utils/excelUtils';
-import { generateResultatsPDF } from '../../utils/pdfUtils';
-import { useAppSelector } from '../../store/hooks';
+ 
 
 interface Campagne {
     id: number;
@@ -75,7 +74,6 @@ const mockCampagnes: Campagne[] = [
 
 const Resultats: React.FC = () => {
     const theme = useTheme();
-    const { user } = useAppSelector((state) => state.auth);
     const [selectedCampagne, setSelectedCampagne] = useState<Campagne | null>(mockCampagnes[0]);
     const [phase1File, setPhase1File] = useState<File | null>(null);
     const [phase2File, setPhase2File] = useState<File | null>(null);

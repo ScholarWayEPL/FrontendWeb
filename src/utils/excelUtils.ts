@@ -43,7 +43,7 @@ export const generateExcel = (sheets: ExcelSheetData[], filename: string): void 
     // Générer le fichier Excel
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: MIME_TYPES.EXCEL });
-    
+
     // Télécharger le fichier
     downloadFile(blob, `${filename}${FILE_EXTENSIONS.EXCEL}`);
 };
@@ -61,7 +61,7 @@ export const readExcel = async (file: File): Promise<Record<string, any[]>> => {
             try {
                 const data = e.target?.result;
                 const workbook = XLSX.read(data, { type: 'array' });
-                
+
                 const result: Record<string, any[]> = {};
 
                 // Lire chaque feuille
@@ -92,7 +92,9 @@ export const exportCandidaturesToExcel = (candidatures: any[], filename: string 
         'Nom': c.nomCandidat,
         'Prénom': c.prenomCandidat,
         'Email': c.emailCandidat,
+        'Domaine': c.domaine || '',
         'Parcours': c.parcours,
+        'Filière': c.filiere || '',
         'Série Bac': c.serieBac,
         'Moyenne': c.moyenneBac,
         'Date': new Date(c.dateSoumission).toLocaleDateString('fr-FR'),
@@ -100,6 +102,55 @@ export const exportCandidaturesToExcel = (candidatures: any[], filename: string 
     }));
 
     generateExcel([{ sheetName: 'Candidatures', data }], filename);
+};
+
+/**
+ * Exporte les candidatures groupées par filière dans un fichier Excel avec un onglet par filière
+ * @param candidatures - Liste des candidatures avec domaine, parcours et filiere
+ * @param filename - Nom du fichier
+ */
+export const exportCandidaturesGroupedExcel = (candidatures: any[], filename: string = 'candidatures_groupees'): void => {
+    // Grouper par filière
+    const grouped: Record<string, any[]> = {};
+
+    candidatures.forEach(c => {
+        const key = c.filiere || c.parcours || 'Sans filière';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(c);
+    });
+
+    // Créer une feuille par filière
+    const sheets: ExcelSheetData[] = Object.entries(grouped).map(([filiere, items]) => ({
+        sheetName: filiere.substring(0, 31), // Max 31 caractères pour le nom de feuille Excel
+        data: items.map(c => ({
+            'N° Candidature': c.numeroCandidature,
+            'Nom': c.nomCandidat,
+            'Prénom': c.prenomCandidat,
+            'Email': c.emailCandidat,
+            'Domaine': c.domaine || '',
+            'Parcours': c.parcours,
+            'Série Bac': c.serieBac,
+            'Moyenne': c.moyenneBac,
+            'Date': new Date(c.dateSoumission).toLocaleDateString('fr-FR'),
+            'Statut': c.statut,
+        })),
+    }));
+
+    // Ajouter un onglet récapitulatif en premier
+    const recap = Object.entries(grouped).map(([filiere, items]) => ({
+        'Filière': filiere,
+        'Nombre de candidatures': items.length,
+        'Moyenne générale': items.length > 0
+            ? (items.reduce((sum: number, c: any) => sum + (c.moyenneBac || 0), 0) / items.length).toFixed(2)
+            : '-',
+    }));
+
+    sheets.unshift({
+        sheetName: 'Récapitulatif',
+        data: recap,
+    });
+
+    generateExcel(sheets, filename);
 };
 
 /**
@@ -138,8 +189,8 @@ export const generateResultatsTemplate = (filename: string = 'template_resultats
         },
     ];
 
-    generateExcel([{ 
-        sheetName: 'Résultats', 
+    generateExcel([{
+        sheetName: 'Résultats',
         data,
         columns: ['N° Candidature', 'Résultat', 'Remarques']
     }], filename);

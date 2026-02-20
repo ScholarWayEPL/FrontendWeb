@@ -29,6 +29,9 @@ import {
     DialogContent,
     DialogActions,
     Divider,
+    Menu,
+    ListItemIcon,
+    ListItemText,
 } from '@mui/material';
 import {
     Download as DownloadIcon,
@@ -44,12 +47,16 @@ import {
     HourglassEmpty as HourglassIcon,
     CheckCircle as CheckCircleIcon,
     Cancel as CancelIcon,
+    KeyboardArrowDown as ArrowDownIcon,
+    Folder as FolderIcon,
+    ViewList as ViewListIcon,
 } from '@mui/icons-material';
 import { PageHeader, SearchField, StatusChip } from '../../components/ui';
 import { BORDER_RADIUS, AVATAR_SIZES } from '../../constants';
-import { exportCandidaturesToExcel } from '../../utils/excelUtils';
-import { generateCandidaturesPDF } from '../../utils/pdfUtils';
+import { exportCandidaturesToExcel, exportCandidaturesGroupedExcel } from '../../utils/excelUtils';
+import { generateCandidaturesPDF, generateCandidaturesGroupedPDF } from '../../utils/pdfUtils';
 import { useAppSelector } from '../../store/hooks';
+import type { StatutCandidature } from '../../types';
 
 interface Candidature {
     id: number;
@@ -62,12 +69,14 @@ interface Candidature {
     sexe: 'M' | 'F';
     serieBac: string;
     moyenneBac: number;
+    domaine: string;
     parcours: string;
+    filiere: string;
     dateSoumission: string;
-    statut: 'EN_ATTENTE' | 'ACCEPTEE' | 'REFUSEE' | 'EN_LISTE_ATTENTE';
+    statut: StatutCandidature;
 }
 
-// Données mockées
+// Données mockées alignées sur les models backend
 const mockCandidatures: Candidature[] = [
     {
         id: 1,
@@ -80,9 +89,11 @@ const mockCandidatures: Candidature[] = [
         sexe: 'M',
         serieBac: 'C',
         moyenneBac: 14.5,
-        parcours: 'Licence Informatique',
+        domaine: 'Sciences et Technologies',
+        parcours: 'Informatique',
+        filiere: 'Génie Logiciel',
         dateSoumission: '2026-02-01',
-        statut: 'EN_ATTENTE',
+        statut: 'SOUMISE',
     },
     {
         id: 2,
@@ -95,9 +106,11 @@ const mockCandidatures: Candidature[] = [
         sexe: 'F',
         serieBac: 'D',
         moyenneBac: 15.2,
-        parcours: 'Licence Informatique',
+        domaine: 'Sciences et Technologies',
+        parcours: 'Informatique',
+        filiere: 'Réseaux & Systèmes',
         dateSoumission: '2026-02-02',
-        statut: 'EN_ATTENTE',
+        statut: 'EN_COURS',
     },
     {
         id: 3,
@@ -110,7 +123,9 @@ const mockCandidatures: Candidature[] = [
         sexe: 'M',
         serieBac: 'C',
         moyenneBac: 16.8,
-        parcours: 'Master Data Science',
+        domaine: 'Sciences et Technologies',
+        parcours: 'Informatique',
+        filiere: 'Intelligence Artificielle',
         dateSoumission: '2026-02-03',
         statut: 'ACCEPTEE',
     },
@@ -125,9 +140,11 @@ const mockCandidatures: Candidature[] = [
         sexe: 'F',
         serieBac: 'D',
         moyenneBac: 13.9,
-        parcours: 'Master Data Science',
+        domaine: 'Sciences et Technologies',
+        parcours: 'Mathématiques Appliquées',
+        filiere: 'Data Science',
         dateSoumission: '2026-02-04',
-        statut: 'EN_LISTE_ATTENTE',
+        statut: 'EN_ATTENTE_CONCOURS',
     },
     {
         id: 5,
@@ -140,24 +157,66 @@ const mockCandidatures: Candidature[] = [
         sexe: 'M',
         serieBac: 'C',
         moyenneBac: 12.5,
-        parcours: 'Licence Informatique',
+        domaine: 'Sciences Économiques et Gestion',
+        parcours: 'Gestion des Entreprises',
+        filiere: 'Finance',
         dateSoumission: '2026-02-05',
         statut: 'REFUSEE',
     },
+    {
+        id: 6,
+        numeroCandidature: 'CAND-2026-006',
+        nom: 'AYIVI',
+        prenom: 'Essi',
+        email: 'essi.ayivi@email.com',
+        telephone: '+228 95 67 89 01',
+        dateNaissance: '2005-09-20',
+        sexe: 'F',
+        serieBac: 'D',
+        moyenneBac: 14.1,
+        domaine: 'Sciences Économiques et Gestion',
+        parcours: 'Gestion des Entreprises',
+        filiere: 'Comptabilité',
+        dateSoumission: '2026-02-06',
+        statut: 'SOUMISE',
+    },
+    {
+        id: 7,
+        numeroCandidature: 'CAND-2026-007',
+        nom: 'DZIFA',
+        prenom: 'Ablam',
+        email: 'ablam.dzifa@email.com',
+        telephone: '+228 96 78 90 12',
+        dateNaissance: '2004-12-05',
+        sexe: 'M',
+        serieBac: 'C',
+        moyenneBac: 17.2,
+        domaine: 'Sciences et Technologies',
+        parcours: 'Informatique',
+        filiere: 'Génie Logiciel',
+        dateSoumission: '2026-02-07',
+        statut: 'ACCEPTEE',
+    },
 ];
 
-const mockParcours = ['Tous les parcours', 'Licence Informatique', 'Master Data Science', 'Licence Gestion', 'Master Finance'];
+const mockParcours = ['Tous les parcours', 'Informatique', 'Mathématiques Appliquées', 'Gestion des Entreprises'];
+const mockFilieres = ['Toutes les filières', 'Génie Logiciel', 'Réseaux & Systèmes', 'Intelligence Artificielle', 'Data Science', 'Finance', 'Comptabilité'];
 
 const Candidatures: React.FC = () => {
     const theme = useTheme();
     const { user } = useAppSelector((state) => state.auth);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedParcours, setSelectedParcours] = useState('Tous les parcours');
+    const [selectedFiliere, setSelectedFiliere] = useState('Toutes les filières');
     const [selectedStatut, setSelectedStatut] = useState('Tous');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [selectedCandidat, setSelectedCandidat] = useState<Candidature | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+
+    // Export menu state
+    const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+    const exportMenuOpen = Boolean(exportMenuAnchor);
 
     const filteredCandidatures = mockCandidatures.filter((c) => {
         const matchSearch =
@@ -166,13 +225,14 @@ const Candidatures: React.FC = () => {
             c.numeroCandidature.toLowerCase().includes(searchTerm.toLowerCase()) ||
             c.email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchParcours = selectedParcours === 'Tous les parcours' || c.parcours === selectedParcours;
+        const matchFiliere = selectedFiliere === 'Toutes les filières' || c.filiere === selectedFiliere;
         const matchStatut = selectedStatut === 'Tous' || c.statut === selectedStatut;
-        return matchSearch && matchParcours && matchStatut;
+        return matchSearch && matchParcours && matchFiliere && matchStatut;
     });
 
     const stats = {
         total: mockCandidatures.length,
-        enAttente: mockCandidatures.filter(c => c.statut === 'EN_ATTENTE').length,
+        enAttente: mockCandidatures.filter(c => c.statut === 'SOUMISE' || c.statut === 'EN_COURS').length,
         acceptees: mockCandidatures.filter(c => c.statut === 'ACCEPTEE').length,
         refusees: mockCandidatures.filter(c => c.statut === 'REFUSEE').length,
     };
@@ -197,37 +257,52 @@ const Candidatures: React.FC = () => {
     };
 
 
-
     const getStatutLabel = (statut: string) => {
         switch (statut) {
-            case 'EN_ATTENTE': return 'En attente';
+            case 'SOUMISE': return 'Soumise';
+            case 'EN_COURS': return 'En cours';
             case 'ACCEPTEE': return 'Acceptée';
             case 'REFUSEE': return 'Refusée';
-            case 'EN_LISTE_ATTENTE': return 'Liste d\'attente';
+            case 'EN_ATTENTE_CONCOURS': return 'Attente concours';
             default: return statut;
         }
     };
 
-    const handleExport = (format: 'excel' | 'pdf') => {
-        const dataToExport = filteredCandidatures.map(c => ({
+    // Prepare export data
+    const prepareExportData = (candidatures: Candidature[]) => {
+        return candidatures.map(c => ({
             numeroCandidature: c.numeroCandidature,
             nomCandidat: c.nom,
             prenomCandidat: c.prenom,
             emailCandidat: c.email,
+            domaine: c.domaine,
             parcours: c.parcours,
+            filiere: c.filiere,
             serieBac: c.serieBac,
             moyenneBac: c.moyenneBac,
             dateSoumission: c.dateSoumission,
             statut: getStatutLabel(c.statut),
         }));
+    };
 
-        const filename = `candidatures_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}`;
+    const handleExport = (type: 'excel' | 'pdf', grouped: boolean = false) => {
+        const dataToExport = prepareExportData(filteredCandidatures);
+        const dateSuffix = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
 
-        if (format === 'excel') {
-            exportCandidaturesToExcel(dataToExport, filename);
+        if (type === 'excel') {
+            if (grouped) {
+                exportCandidaturesGroupedExcel(dataToExport, `candidatures_par_filiere_${dateSuffix}`);
+            } else {
+                exportCandidaturesToExcel(dataToExport, `candidatures_${dateSuffix}`);
+            }
         } else {
-            generateCandidaturesPDF(dataToExport, filename, user?.etablissementNom);
+            if (grouped) {
+                generateCandidaturesGroupedPDF(dataToExport, `candidatures_par_filiere_${dateSuffix}`, user?.etablissementNom);
+            } else {
+                generateCandidaturesPDF(dataToExport, `candidatures_${dateSuffix}`, user?.etablissementNom);
+            }
         }
+        setExportMenuAnchor(null);
     };
 
     return (
@@ -239,24 +314,90 @@ const Candidatures: React.FC = () => {
                 icon={<DescriptionIcon />}
                 iconColor={theme.palette.info.main}
                 action={
-                    <Stack direction="row" spacing={1}>
-                        <Button
-                            variant="outlined"
-                            startIcon={<ExcelIcon />}
-                            onClick={() => handleExport('excel')}
-                            sx={{ borderRadius: BORDER_RADIUS.sm }}
-                        >
-                            Excel
-                        </Button>
+                    <Box>
                         <Button
                             variant="contained"
-                            startIcon={<PdfIcon />}
-                            onClick={() => handleExport('pdf')}
+                            startIcon={<DownloadIcon />}
+                            endIcon={<ArrowDownIcon />}
+                            onClick={(e) => setExportMenuAnchor(e.currentTarget)}
                             sx={{ borderRadius: BORDER_RADIUS.sm }}
                         >
-                            PDF
+                            Exporter
                         </Button>
-                    </Stack>
+                        <Menu
+                            anchorEl={exportMenuAnchor}
+                            open={exportMenuOpen}
+                            onClose={() => setExportMenuAnchor(null)}
+                            PaperProps={{
+                                sx: {
+                                    mt: 1,
+                                    minWidth: 260,
+                                    borderRadius: 2,
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                                },
+                            }}
+                            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                        >
+                            {/* Section Excel */}
+                            <Box sx={{ px: 2, py: 1 }}>
+                                <Typography variant="overline" color="text.secondary" fontWeight={600}>
+                                    Excel
+                                </Typography>
+                            </Box>
+                            <MenuItem onClick={() => handleExport('excel', false)}>
+                                <ListItemIcon>
+                                    <ExcelIcon fontSize="small" sx={{ color: 'success.main' }} />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Liste complète"
+                                    secondary="Toutes les candidatures filtrées"
+                                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                                    secondaryTypographyProps={{ variant: 'caption' }}
+                                />
+                            </MenuItem>
+                            <MenuItem onClick={() => handleExport('excel', true)}>
+                                <ListItemIcon>
+                                    <FolderIcon fontSize="small" sx={{ color: 'success.main' }} />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Groupé par filière"
+                                    secondary="Un onglet par filière + récapitulatif"
+                                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                                    secondaryTypographyProps={{ variant: 'caption' }}
+                                />
+                            </MenuItem>
+                            <Divider sx={{ my: 0.5 }} />
+                            {/* Section PDF */}
+                            <Box sx={{ px: 2, py: 1 }}>
+                                <Typography variant="overline" color="text.secondary" fontWeight={600}>
+                                    PDF
+                                </Typography>
+                            </Box>
+                            <MenuItem onClick={() => handleExport('pdf', false)}>
+                                <ListItemIcon>
+                                    <PdfIcon fontSize="small" sx={{ color: 'error.main' }} />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Liste complète"
+                                    secondary="Toutes les candidatures filtrées"
+                                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                                    secondaryTypographyProps={{ variant: 'caption' }}
+                                />
+                            </MenuItem>
+                            <MenuItem onClick={() => handleExport('pdf', true)}>
+                                <ListItemIcon>
+                                    <ViewListIcon fontSize="small" sx={{ color: 'error.main' }} />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Groupé par filière"
+                                    secondary="Une page par filière avec en-tête"
+                                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                                    secondaryTypographyProps={{ variant: 'caption' }}
+                                />
+                            </MenuItem>
+                        </Menu>
+                    </Box>
                 }
             />
 
@@ -409,7 +550,7 @@ const Candidatures: React.FC = () => {
                             placeholder="Rechercher par nom, N° candidature, email..."
                             fullWidth
                         />
-                        <FormControl size="small" sx={{ minWidth: 220 }}>
+                        <FormControl size="small" sx={{ minWidth: 200 }}>
                             <InputLabel>Parcours</InputLabel>
                             <Select
                                 value={selectedParcours}
@@ -425,7 +566,23 @@ const Candidatures: React.FC = () => {
                                 ))}
                             </Select>
                         </FormControl>
-                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                        <FormControl size="small" sx={{ minWidth: 200 }}>
+                            <InputLabel>Filière</InputLabel>
+                            <Select
+                                value={selectedFiliere}
+                                label="Filière"
+                                onChange={(e) => setSelectedFiliere(e.target.value)}
+                                sx={{
+                                    borderRadius: 1.5,
+                                    bgcolor: 'white',
+                                }}
+                            >
+                                {mockFilieres.map((f) => (
+                                    <MenuItem key={f} value={f}>{f}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl size="small" sx={{ minWidth: 170 }}>
                             <InputLabel>Statut</InputLabel>
                             <Select
                                 value={selectedStatut}
@@ -437,10 +594,11 @@ const Candidatures: React.FC = () => {
                                 }}
                             >
                                 <MenuItem value="Tous">Tous les statuts</MenuItem>
-                                <MenuItem value="EN_ATTENTE">En attente</MenuItem>
+                                <MenuItem value="SOUMISE">Soumise</MenuItem>
+                                <MenuItem value="EN_COURS">En cours</MenuItem>
                                 <MenuItem value="ACCEPTEE">Acceptées</MenuItem>
                                 <MenuItem value="REFUSEE">Refusées</MenuItem>
-                                <MenuItem value="EN_LISTE_ATTENTE">Liste d'attente</MenuItem>
+                                <MenuItem value="EN_ATTENTE_CONCOURS">Attente concours</MenuItem>
                             </Select>
                         </FormControl>
                     </Stack>
@@ -461,7 +619,7 @@ const Candidatures: React.FC = () => {
                             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
                                 <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>N° Candidature</TableCell>
                                 <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Candidat</TableCell>
-                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Parcours</TableCell>
+                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Parcours / Filière</TableCell>
                                 <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Série Bac</TableCell>
                                 <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Moyenne</TableCell>
                                 <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Date</TableCell>
@@ -505,8 +663,11 @@ const Candidatures: React.FC = () => {
                                             </Stack>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body2">
+                                            <Typography variant="body2" fontWeight={500}>
                                                 {candidature.parcours}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {candidature.filiere}
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
@@ -611,7 +772,10 @@ const Candidatures: React.FC = () => {
                                 </Stack>
                                 <Stack direction="row" alignItems="center" spacing={1.5}>
                                     <SchoolIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-                                    <Typography variant="body2">{selectedCandidat.parcours}</Typography>
+                                    <Box>
+                                        <Typography variant="body2">{selectedCandidat.parcours} — {selectedCandidat.filiere}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{selectedCandidat.domaine}</Typography>
+                                    </Box>
                                 </Stack>
 
                                 <Divider sx={{ my: 1 }} />

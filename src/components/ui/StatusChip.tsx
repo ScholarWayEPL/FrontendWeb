@@ -6,7 +6,8 @@ import { BORDER_RADIUS } from '../../constants';
 type StatusType =
     | 'active' | 'inactive' | 'pending' | 'draft'
     | 'published' | 'closed' | 'open' | 'approved' | 'rejected'
-    | 'ouverte' | 'a_venir' | 'cloturee' | 'en_attente';
+    | 'ouverte' | 'a_venir' | 'cloturee' | 'en_attente'
+    | 'soumise' | 'en_cours' | 'en_attente_concours';
 
 interface StatusChipProps {
     status: StatusType | string;
@@ -45,7 +46,13 @@ const getStatusConfig = (status: string): { color: ChipProps['color']; label: st
         case 'a_venir':
         case 'à venir':
         case 'en_liste_attente':
+        case 'en_attente_concours':
             return { color: 'warning', label: status };
+
+        case 'soumise':
+        case 'en_cours':
+        case 'en cours':
+            return { color: 'info', label: status };
 
         case 'draft':
         case 'brouillon':

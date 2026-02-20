@@ -5,11 +5,13 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { downloadFile, MIME_TYPES, FILE_EXTENSIONS } from './fileUtils';
+import { downloadFile, FILE_EXTENSIONS } from './fileUtils';
 
 /**
  * Configuration par défaut pour les PDF
  */
+type RGB = [number, number, number];
+
 const PDF_CONFIG = {
     orientation: 'portrait' as const,
     unit: 'mm' as const,
@@ -21,13 +23,13 @@ const PDF_CONFIG = {
         bottom: 20,
     },
     colors: {
-        primary: [25, 118, 210], // Bleu
-        secondary: [156, 39, 176], // Violet
-        success: [46, 125, 50], // Vert
-        error: [211, 47, 47], // Rouge
-        warning: [237, 108, 2], // Orange
-        text: [33, 33, 33], // Noir
-        lightGray: [240, 240, 240],
+        primary: [25, 118, 210] as RGB,
+        secondary: [156, 39, 176] as RGB,
+        success: [46, 125, 50] as RGB,
+        error: [211, 47, 47] as RGB,
+        warning: [237, 108, 2] as RGB,
+        text: [33, 33, 33] as RGB,
+        lightGray: [240, 240, 240] as RGB,
     },
 };
 
@@ -92,7 +94,7 @@ const addFooter = (doc: jsPDF): void => {
 
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        
+
         // Ligne de séparation
         doc.setDrawColor(...PDF_CONFIG.colors.lightGray);
         doc.setLineWidth(0.5);
@@ -149,6 +151,7 @@ export const generateCandidaturesPDF = (
         c.numeroCandidature,
         `${c.nomCandidat} ${c.prenomCandidat}`,
         c.parcours,
+        c.filiere || '',
         c.serieBac,
         c.moyenneBac?.toFixed(2) || '-',
         new Date(c.dateSoumission).toLocaleDateString('fr-FR'),
@@ -158,16 +161,16 @@ export const generateCandidaturesPDF = (
     // Générer le tableau
     autoTable(doc, {
         startY: currentY,
-        head: [['N° Candidature', 'Candidat', 'Parcours', 'Série', 'Moyenne', 'Date', 'Statut']],
+        head: [['N° Candidature', 'Candidat', 'Parcours', 'Filière', 'Série', 'Moyenne', 'Date', 'Statut']],
         body: tableData,
         headStyles: {
             fillColor: PDF_CONFIG.colors.primary,
             textColor: [255, 255, 255],
             fontStyle: 'bold',
-            fontSize: 9,
+            fontSize: 8,
         },
         bodyStyles: {
-            fontSize: 8,
+            fontSize: 7,
             textColor: PDF_CONFIG.colors.text,
         },
         alternateRowStyles: {
@@ -175,6 +178,131 @@ export const generateCandidaturesPDF = (
         },
         margin: { left: PDF_CONFIG.margins.left, right: PDF_CONFIG.margins.right },
         theme: 'grid',
+    });
+
+    // Pied de page
+    addFooter(doc);
+
+    // Télécharger le PDF
+    const blob = doc.output('blob');
+    downloadFile(blob, `${filename}${FILE_EXTENSIONS.PDF}`);
+};
+
+/**
+ * Génère un PDF de candidatures groupées par filière avec sauts de page
+ * @param candidatures - Liste des candidatures avec domaine, parcours et filiere
+ * @param filename - Nom du fichier
+ * @param etablissementNom - Nom de l'établissement
+ */
+export const generateCandidaturesGroupedPDF = (
+    candidatures: any[],
+    filename: string = 'candidatures_groupees',
+    etablissementNom?: string
+): void => {
+    const doc = new jsPDF(PDF_CONFIG);
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Grouper par domaine, puis parcours, puis filière
+    const grouped: Record<string, Record<string, Record<string, any[]>>> = {};
+
+    candidatures.forEach(c => {
+        const domaine = c.domaine || 'Sans domaine';
+        const parcours = c.parcours || 'Sans parcours';
+        const filiere = c.filiere || 'Sans filière';
+        if (!grouped[domaine]) grouped[domaine] = {};
+        if (!grouped[domaine][parcours]) grouped[domaine][parcours] = {};
+        if (!grouped[domaine][parcours][filiere]) grouped[domaine][parcours][filiere] = [];
+        grouped[domaine][parcours][filiere].push(c);
+    });
+
+    let isFirstSection = true;
+
+    Object.entries(grouped).forEach(([domaine, parcoursMap]) => {
+        Object.entries(parcoursMap).forEach(([parcours, filiereMap]) => {
+            Object.entries(filiereMap).forEach(([filiere, items]) => {
+                // Saut de page sauf pour la première section
+                if (!isFirstSection) {
+                    doc.addPage();
+                }
+                isFirstSection = false;
+
+                // En-tête de section
+                let currentY = PDF_CONFIG.margins.top;
+
+                if (etablissementNom) {
+                    doc.setFontSize(11);
+                    doc.setTextColor(...PDF_CONFIG.colors.primary);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(etablissementNom, PDF_CONFIG.margins.left, currentY);
+                    currentY += 8;
+                }
+
+                // Breadcrumb : Domaine > Parcours > Filière
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${domaine}  ›  ${parcours}`, PDF_CONFIG.margins.left, currentY);
+                currentY += 7;
+
+                // Nom de la filière
+                doc.setFontSize(16);
+                doc.setTextColor(...PDF_CONFIG.colors.text);
+                doc.setFont('helvetica', 'bold');
+                doc.text(filiere, PDF_CONFIG.margins.left, currentY);
+                currentY += 6;
+
+                // Sous-titre avec stats
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont('helvetica', 'normal');
+                const moyenne = items.length > 0
+                    ? (items.reduce((sum: number, c: any) => sum + (c.moyenneBac || 0), 0) / items.length).toFixed(2)
+                    : '-';
+                doc.text(
+                    `${items.length} candidature(s)  •  Moyenne générale : ${moyenne}`,
+                    PDF_CONFIG.margins.left,
+                    currentY
+                );
+                currentY += 4;
+
+                // Ligne de séparation
+                doc.setDrawColor(...PDF_CONFIG.colors.lightGray);
+                doc.setLineWidth(0.5);
+                doc.line(PDF_CONFIG.margins.left, currentY, pageWidth - PDF_CONFIG.margins.right, currentY);
+                currentY += 5;
+
+                // Tableau des candidatures
+                const tableData = items.map((c: any) => [
+                    c.numeroCandidature,
+                    `${c.nomCandidat} ${c.prenomCandidat}`,
+                    c.serieBac,
+                    c.moyenneBac?.toFixed(2) || '-',
+                    new Date(c.dateSoumission).toLocaleDateString('fr-FR'),
+                    c.statut,
+                ]);
+
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['N° Candidature', 'Candidat', 'Série Bac', 'Moyenne', 'Date', 'Statut']],
+                    body: tableData,
+                    headStyles: {
+                        fillColor: PDF_CONFIG.colors.primary,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 9,
+                    },
+                    bodyStyles: {
+                        fontSize: 8,
+                        textColor: PDF_CONFIG.colors.text,
+                    },
+                    alternateRowStyles: {
+                        fillColor: PDF_CONFIG.colors.lightGray,
+                    },
+                    margin: { left: PDF_CONFIG.margins.left, right: PDF_CONFIG.margins.right },
+                    theme: 'grid',
+                });
+            });
+        });
     });
 
     // Pied de page
@@ -289,11 +417,11 @@ export const generateStatsPDF = (
     Object.entries(stats).forEach(([key, value]) => {
         doc.setTextColor(...PDF_CONFIG.colors.text);
         doc.text(`${key}:`, PDF_CONFIG.margins.left, currentY);
-        
+
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...PDF_CONFIG.colors.primary);
         doc.text(String(value), PDF_CONFIG.margins.left + 80, currentY);
-        
+
         doc.setFont('helvetica', 'normal');
         currentY += 8;
     });
@@ -333,7 +461,7 @@ export const generateCustomPDF = (
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const maxWidth = pageWidth - PDF_CONFIG.margins.left - PDF_CONFIG.margins.right;
-    
+
     const lines = doc.splitTextToSize(content, maxWidth);
     doc.text(lines, PDF_CONFIG.margins.left, currentY);
 

@@ -53,257 +53,45 @@ import {
 } from '@mui/icons-material';
 import { PageHeader, SearchField, StatusChip } from '../../components/ui';
 import { BORDER_RADIUS, AVATAR_SIZES } from '../../constants';
-import { exportCandidaturesToExcel, exportCandidaturesGroupedExcel } from '../../utils/excelUtils';
-import { generateCandidaturesPDF, generateCandidaturesGroupedPDF } from '../../utils/pdfUtils';
-import { useAppSelector } from '../../store/hooks';
-import type { StatutCandidature } from '../../types';
+import useCandidatures from '../../hooks/useCandidatures';
 
-interface Candidature {
-    id: number;
-    numeroCandidature: string;
-    nom: string;
-    prenom: string;
-    email: string;
-    telephone: string;
-    dateNaissance: string;
-    sexe: 'M' | 'F';
-    serieBac: string;
-    moyenneBac: number;
-    domaine: string;
-    parcours: string;
-    filiere: string;
-    dateSoumission: string;
-    statut: StatutCandidature;
-}
 
-// Données mockées alignées sur les models backend
-const mockCandidatures: Candidature[] = [
-    {
-        id: 1,
-        numeroCandidature: 'CAND-2026-001',
-        nom: 'AGBEKO',
-        prenom: 'Kofi',
-        email: 'kofi.agbeko@email.com',
-        telephone: '+228 90 12 34 56',
-        dateNaissance: '2005-03-15',
-        sexe: 'M',
-        serieBac: 'C',
-        moyenneBac: 14.5,
-        domaine: 'Sciences et Technologies',
-        parcours: 'Informatique',
-        filiere: 'Génie Logiciel',
-        dateSoumission: '2026-02-01',
-        statut: 'SOUMISE',
-    },
-    {
-        id: 2,
-        numeroCandidature: 'CAND-2026-002',
-        nom: 'MENSAH',
-        prenom: 'Ama',
-        email: 'ama.mensah@email.com',
-        telephone: '+228 91 23 45 67',
-        dateNaissance: '2004-07-22',
-        sexe: 'F',
-        serieBac: 'D',
-        moyenneBac: 15.2,
-        domaine: 'Sciences et Technologies',
-        parcours: 'Informatique',
-        filiere: 'Réseaux & Systèmes',
-        dateSoumission: '2026-02-02',
-        statut: 'EN_COURS',
-    },
-    {
-        id: 3,
-        numeroCandidature: 'CAND-2026-003',
-        nom: 'KODJO',
-        prenom: 'Yao',
-        email: 'yao.kodjo@email.com',
-        telephone: '+228 92 34 56 78',
-        dateNaissance: '2005-11-08',
-        sexe: 'M',
-        serieBac: 'C',
-        moyenneBac: 16.8,
-        domaine: 'Sciences et Technologies',
-        parcours: 'Informatique',
-        filiere: 'Intelligence Artificielle',
-        dateSoumission: '2026-02-03',
-        statut: 'ACCEPTEE',
-    },
-    {
-        id: 4,
-        numeroCandidature: 'CAND-2026-004',
-        nom: 'ADOM',
-        prenom: 'Akossiwa',
-        email: 'akossiwa.adom@email.com',
-        telephone: '+228 93 45 67 89',
-        dateNaissance: '2004-01-30',
-        sexe: 'F',
-        serieBac: 'D',
-        moyenneBac: 13.9,
-        domaine: 'Sciences et Technologies',
-        parcours: 'Mathématiques Appliquées',
-        filiere: 'Data Science',
-        dateSoumission: '2026-02-04',
-        statut: 'EN_ATTENTE_CONCOURS',
-    },
-    {
-        id: 5,
-        numeroCandidature: 'CAND-2026-005',
-        nom: 'AMEGAH',
-        prenom: 'Kossi',
-        email: 'kossi.amegah@email.com',
-        telephone: '+228 94 56 78 90',
-        dateNaissance: '2005-06-12',
-        sexe: 'M',
-        serieBac: 'C',
-        moyenneBac: 12.5,
-        domaine: 'Sciences Économiques et Gestion',
-        parcours: 'Gestion des Entreprises',
-        filiere: 'Finance',
-        dateSoumission: '2026-02-05',
-        statut: 'REFUSEE',
-    },
-    {
-        id: 6,
-        numeroCandidature: 'CAND-2026-006',
-        nom: 'AYIVI',
-        prenom: 'Essi',
-        email: 'essi.ayivi@email.com',
-        telephone: '+228 95 67 89 01',
-        dateNaissance: '2005-09-20',
-        sexe: 'F',
-        serieBac: 'D',
-        moyenneBac: 14.1,
-        domaine: 'Sciences Économiques et Gestion',
-        parcours: 'Gestion des Entreprises',
-        filiere: 'Comptabilité',
-        dateSoumission: '2026-02-06',
-        statut: 'SOUMISE',
-    },
-    {
-        id: 7,
-        numeroCandidature: 'CAND-2026-007',
-        nom: 'DZIFA',
-        prenom: 'Ablam',
-        email: 'ablam.dzifa@email.com',
-        telephone: '+228 96 78 90 12',
-        dateNaissance: '2004-12-05',
-        sexe: 'M',
-        serieBac: 'C',
-        moyenneBac: 17.2,
-        domaine: 'Sciences et Technologies',
-        parcours: 'Informatique',
-        filiere: 'Génie Logiciel',
-        dateSoumission: '2026-02-07',
-        statut: 'ACCEPTEE',
-    },
-];
-
-const mockParcours = ['Tous les parcours', 'Informatique', 'Mathématiques Appliquées', 'Gestion des Entreprises'];
-const mockFilieres = ['Toutes les filières', 'Génie Logiciel', 'Réseaux & Systèmes', 'Intelligence Artificielle', 'Data Science', 'Finance', 'Comptabilité'];
 
 const Candidatures: React.FC = () => {
     const theme = useTheme();
-    const { user } = useAppSelector((state) => state.auth);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedParcours, setSelectedParcours] = useState('Tous les parcours');
-    const [selectedFiliere, setSelectedFiliere] = useState('Toutes les filières');
-    const [selectedStatut, setSelectedStatut] = useState('Tous');
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [selectedCandidat, setSelectedCandidat] = useState<Candidature | null>(null);
-    const [detailsOpen, setDetailsOpen] = useState(false);
+    const {
+        searchTerm,
+        setSearchTerm,
+        selectedParcours,
+        setSelectedParcours,
+        selectedStatut,
+        setSelectedStatut,
+        page,
+        setPage,
+        rowsPerPage,
+        setRowsPerPage,
+        selectedCandidat,
+        setSelectedCandidat,
+        selectedFiliere,
+        setSelectedFiliere,
+        detailsOpen,
+        setDetailsOpen,
+        filteredCandidatures,
+        stats,
+        formatDate,
+        calculateAge,
+        handleExport,
+        getStatutLabel,
+        mockParcours,
+        mockFilieres,
+    } = useCandidatures();
 
-    // Export menu state
+    // Export menu state (UI only)
     const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
     const exportMenuOpen = Boolean(exportMenuAnchor);
 
-    const filteredCandidatures = mockCandidatures.filter((c) => {
-        const matchSearch =
-            c.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.numeroCandidature.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchParcours = selectedParcours === 'Tous les parcours' || c.parcours === selectedParcours;
-        const matchFiliere = selectedFiliere === 'Toutes les filières' || c.filiere === selectedFiliere;
-        const matchStatut = selectedStatut === 'Tous' || c.statut === selectedStatut;
-        return matchSearch && matchParcours && matchFiliere && matchStatut;
-    });
 
-    const stats = {
-        total: mockCandidatures.length,
-        enAttente: mockCandidatures.filter(c => c.statut === 'SOUMISE' || c.statut === 'EN_COURS').length,
-        acceptees: mockCandidatures.filter(c => c.statut === 'ACCEPTEE').length,
-        refusees: mockCandidatures.filter(c => c.statut === 'REFUSEE').length,
-    };
-
-    const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-        });
-    };
-
-    const calculateAge = (dateNaissance: string) => {
-        const today = new Date();
-        const birthDate = new Date(dateNaissance);
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    };
-
-
-    const getStatutLabel = (statut: string) => {
-        switch (statut) {
-            case 'SOUMISE': return 'Soumise';
-            case 'EN_COURS': return 'En cours';
-            case 'ACCEPTEE': return 'Acceptée';
-            case 'REFUSEE': return 'Refusée';
-            case 'EN_ATTENTE_CONCOURS': return 'Attente concours';
-            default: return statut;
-        }
-    };
-
-    // Prepare export data
-    const prepareExportData = (candidatures: Candidature[]) => {
-        return candidatures.map(c => ({
-            numeroCandidature: c.numeroCandidature,
-            nomCandidat: c.nom,
-            prenomCandidat: c.prenom,
-            emailCandidat: c.email,
-            domaine: c.domaine,
-            parcours: c.parcours,
-            filiere: c.filiere,
-            serieBac: c.serieBac,
-            moyenneBac: c.moyenneBac,
-            dateSoumission: c.dateSoumission,
-            statut: getStatutLabel(c.statut),
-        }));
-    };
-
-    const handleExport = (type: 'excel' | 'pdf', grouped: boolean = false) => {
-        const dataToExport = prepareExportData(filteredCandidatures);
-        const dateSuffix = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
-
-        if (type === 'excel') {
-            if (grouped) {
-                exportCandidaturesGroupedExcel(dataToExport, `candidatures_par_filiere_${dateSuffix}`);
-            } else {
-                exportCandidaturesToExcel(dataToExport, `candidatures_${dateSuffix}`);
-            }
-        } else {
-            if (grouped) {
-                generateCandidaturesGroupedPDF(dataToExport, `candidatures_par_filiere_${dateSuffix}`, user?.etablissementNom);
-            } else {
-                generateCandidaturesPDF(dataToExport, `candidatures_${dateSuffix}`, user?.etablissementNom);
-            }
-        }
-        setExportMenuAnchor(null);
-    };
+    
 
     return (
         <Box>

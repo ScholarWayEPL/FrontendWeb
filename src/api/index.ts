@@ -1,3 +1,5 @@
+export * from './candidatures';
+export { default as apiClient } from './client';
 // API index - Export centralisé de toutes les APIs
 export { dashboardApi } from './dashboard';
 export { etablissementsApi } from './etablissements';

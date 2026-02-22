@@ -174,10 +174,10 @@ const DashboardLayout: React.FC = () => {
             aria-label="ouvrir menu"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ 
+            sx={{
               mr: 2,
               color: 'grey.600',
-              '&:hover': { 
+              '&:hover': {
                 bgcolor: 'grey.100',
                 color: 'primary.main',
               },
@@ -188,20 +188,20 @@ const DashboardLayout: React.FC = () => {
 
           {/* Titre et date */}
           <Box sx={{ flexGrow: 1 }}>
-            <Typography 
-              variant="h6" 
-              noWrap 
+            <Typography
+              variant="h6"
+              noWrap
               fontWeight={700}
-              sx={{ 
+              sx={{
                 color: 'grey.800',
                 letterSpacing: '-0.02em',
               }}
             >
               ScholarWay
-              <Typography 
-                component="span" 
-                sx={{ 
-                  color: 'primary.main', 
+              <Typography
+                component="span"
+                sx={{
+                  color: 'primary.main',
                   fontWeight: 700,
                   ml: 0.5,
                 }}
@@ -209,9 +209,9 @@ const DashboardLayout: React.FC = () => {
                 Admin
               </Typography>
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              sx={{
                 color: 'grey.500',
                 display: 'block',
                 mt: -0.3,
@@ -229,16 +229,16 @@ const DashboardLayout: React.FC = () => {
           {/* Notifications */}
           <IconButton
             onClick={(e) => setNotifAnchor(e.currentTarget)}
-            sx={{ 
+            sx={{
               color: 'grey.600',
-              '&:hover': { 
+              '&:hover': {
                 bgcolor: 'grey.100',
                 color: 'primary.main',
               },
             }}
           >
-            <Badge 
-              badgeContent={unreadCount} 
+            <Badge
+              badgeContent={unreadCount}
               color="error"
               sx={{
                 '& .MuiBadge-badge': {
@@ -258,9 +258,9 @@ const DashboardLayout: React.FC = () => {
           {/* Profil */}
           <IconButton
             onClick={(e) => setProfileAnchor(e.currentTarget)}
-            sx={{ 
+            sx={{
               p: 0.5,
-              '&:hover': { 
+              '&:hover': {
                 bgcolor: 'transparent',
               },
             }}
@@ -383,7 +383,7 @@ const DashboardLayout: React.FC = () => {
             onClick={() => {
               setNotifAnchor(null);
               // Redirige vers la page de notifications adaptée au rôle
-              if (user?.role === 'admin_etablissement') {
+              if (user?.role === 'ADMIN_ETABLISSEMENT') {
                 navigate('/etablissement/notifications');
               } else {
                 navigate('/notifications');
@@ -446,7 +446,7 @@ const DashboardLayout: React.FC = () => {
           </Typography>
           <Chip
             icon={<AdminPanelSettings sx={{ fontSize: 16 }} />}
-            label={user?.role === 'admin_etablissement' ? 'Admin Établissement' : 'Super Admin'}
+            label={user?.role === 'ADMIN_ETABLISSEMENT' ? 'Admin Établissement' : 'Super Admin'}
             size="small"
             sx={{
               bgcolor: 'rgba(255,255,255,0.2)',
@@ -476,15 +476,15 @@ const DashboardLayout: React.FC = () => {
                 <Person sx={{ color: 'primary.main' }} />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText 
-              primary="Mon profil" 
+            <ListItemText
+              primary="Mon profil"
               secondary="Voir et modifier mon profil"
               primaryTypographyProps={{ fontWeight: 500 }}
             />
           </ListItem>
 
           {/* Journal d'activité - Uniquement pour SUPER_ADMIN */}
-          {user?.role === 'super_admin' && (
+          {user?.role === 'SUPER_ADMIN' && (
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);
@@ -502,8 +502,8 @@ const DashboardLayout: React.FC = () => {
                   <Settings sx={{ color: 'info.main' }} />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText 
-                primary="Journal d'activité" 
+              <ListItemText
+                primary="Journal d'activité"
                 secondary="Historique des actions"
                 primaryTypographyProps={{ fontWeight: 500 }}
               />
@@ -511,7 +511,7 @@ const DashboardLayout: React.FC = () => {
           )}
 
           {/* Paramètres - Uniquement pour ADMIN_ETABLISSEMENT */}
-          {user?.role === 'admin_etablissement' && (
+          {user?.role === 'ADMIN_ETABLISSEMENT' && (
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);
@@ -529,8 +529,8 @@ const DashboardLayout: React.FC = () => {
                   <Settings sx={{ color: 'success.main' }} />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText 
-                primary="Mon établissement" 
+              <ListItemText
+                primary="Mon établissement"
                 secondary="Gérer mon établissement"
                 primaryTypographyProps={{ fontWeight: 500 }}
               />

@@ -346,7 +346,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'super_admin' | 'admin_etablissement' | 'bachelier';
+  role: RoleUtilisateur;
   status: 'active' | 'inactive' | 'pending' | 'suspended';
   avatar?: string;
   createdAt: string;

@@ -43,6 +43,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setUser, setLoading, setError } from '../store/slices/authSlice';
+import { authApi } from '../api';
 import loginBg from '../assets/login_bg.jpg';
 
 // Composant pour les features de la landing
@@ -103,7 +104,7 @@ const Login: React.FC = () => {
     const [inscriptionLoading, setInscriptionLoading] = useState(false);
 
     const [credentials, setCredentials] = useState({
-        username: '',
+        email: '',
         password: '',
     });
     const [showPassword, setShowPassword] = useState(false);
@@ -194,102 +195,51 @@ const Login: React.FC = () => {
         setInscriptionError(null);
     };
 
-    // Définition des comptes de démo
-    const demoAccounts = [
-        {
-            username: 'admin',
-            password: 'admin',
-            user: {
-                id: '1',
-                firstName: 'KOUMONDJI',
-                lastName: 'H. Timothée Klaus',
-                email: 'admin@scholarway.tg',
-                role: 'super_admin' as const,
-                status: 'active' as const,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            },
-            redirect: '/',
-        },
-        {
-            username: 'etab_ul',
-            password: 'etab123',
-            user: {
-                id: '2',
-                firstName: 'Université',
-                lastName: 'de Lomé',
-                email: 'admin@ul.tg',
-                role: 'admin_etablissement' as const,
-                status: 'active' as const,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                etablissementId: 1,
-                etablissementNom: 'Université de Lomé',
-            },
-            redirect: '/etablissement/dashboard',
-        },
-        {
-            username: 'etab_esgis',
-            password: 'etab123',
-            user: {
-                id: '3',
-                firstName: 'ESGIS',
-                lastName: 'Togo',
-                email: 'admin@esgis.tg',
-                role: 'admin_etablissement' as const,
-                status: 'active' as const,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                etablissementId: 2,
-                etablissementNom: 'ESGIS Togo',
-            },
-            redirect: '/etablissement/dashboard',
-        },
-        {
-            username: 'etab_ucao',
-            password: 'etab123',
-            user: {
-                id: '4',
-                firstName: 'UCAO',
-                lastName: 'UUT',
-                email: 'admin@ucao-uut.tg',
-                role: 'admin_etablissement' as const,
-                status: 'active' as const,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                etablissementId: 3,
-                etablissementNom: 'UCAO-UUT',
-            },
-            redirect: '/etablissement/dashboard',
-        },
-    ];
+    // On conserve les comptes de démo en commentaire pour référence si besoin
+    /*
+    const demoAccounts = [ ... ];
+    */
 
     const handleLogin = async () => {
         // Validation
-        if (!credentials.username || !credentials.password) {
+        if (!credentials.email || !credentials.password) {
             dispatch(setError('Veuillez remplir tous les champs'));
             return;
         }
 
-        // Recherche du compte correspondant
-        const account = demoAccounts.find(
-            (acc) => acc.username === credentials.username && acc.password === credentials.password
-        );
-
-        if (!account) {
-            dispatch(setError('Identifiants invalides'));
-            return;
-        }
-
-        // Simulation de connexion
         dispatch(setLoading(true));
         dispatch(setError(null));
 
-        setTimeout(() => {
-            dispatch(setUser(account.user));
+        try {
+            const response = await authApi.login(credentials.email, credentials.password);
+
+            if (response.success && response.data) {
+                const { user, token } = response.data;
+
+                // Stockage du token
+                localStorage.setItem('authToken', token);
+
+                // Update Redux state
+                dispatch(setUser(user));
+
+                // Redirection selon le rôle
+                if (user.role === 'SUPER_ADMIN') {
+                    navigate('/');
+                } else if (user.role === 'ADMIN_ETABLISSEMENT') {
+                    navigate('/etablissement/dashboard');
+                } else if (user.role === 'BACHELIER') {
+                    navigate('/bachelier/dashboard');
+                }
+            } else {
+                dispatch(setError(response.message || 'Identifiants invalides'));
+            }
+        } catch (err: any) {
+            console.error('Login error:', err);
+            const errorMessage = err.response?.data?.message || 'Une erreur est survenue lors de la connexion';
+            dispatch(setError(errorMessage));
+        } finally {
             dispatch(setLoading(false));
-            navigate(account.redirect);
-        }, 1200);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -443,255 +393,232 @@ const Login: React.FC = () => {
                     {/* ===== FORMULAIRE DE CONNEXION ===== */}
                     <Slide direction="right" in={!showInscription} mountOnEnter unmountOnExit>
                         <Box>
-                    {/* Titre du formulaire */}
-                    <Box sx={{ mb: 4 }}>
-                        <Typography variant="h4" fontWeight={700} gutterBottom>
-                            Connexion
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Entrez vos identifiants pour accéder au tableau de bord
-                        </Typography>
-                    </Box>
+                            {/* Titre du formulaire */}
+                            <Box sx={{ mb: 4 }}>
+                                <Typography variant="h4" fontWeight={700} gutterBottom>
+                                    Connexion
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary">
+                                    Entrez vos identifiants pour accéder au tableau de bord
+                                </Typography>
+                            </Box>
 
-                    {/* Message d'erreur */}
-                    <Fade in={!!error}>
-                        <Box sx={{ mb: 3 }}>
-                            {error && (
-                                <Alert
-                                    severity="error"
+                            {/* Message d'erreur */}
+                            <Fade in={!!error}>
+                                <Box sx={{ mb: 3 }}>
+                                    {error && (
+                                        <Alert
+                                            severity="error"
+                                            sx={{
+                                                borderRadius: 2,
+                                                '& .MuiAlert-icon': { alignItems: 'center' }
+                                            }}
+                                        >
+                                            {error}
+                                        </Alert>
+                                    )}
+                                </Box>
+                            </Fade>
+
+                            {/* Formulaire */}
+                            <Stack spacing={3}>
+                                <TextField
+                                    fullWidth
+                                    label="Email"
+                                    name="email"
+                                    type="email"
+                                    value={credentials.email}
+                                    onChange={handleInputChange}
+                                    onKeyPress={handleKeyPress}
+                                    disabled={loading}
+                                    placeholder="Entrez votre identifiant"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <PersonIcon sx={{ color: 'text.secondary' }} />
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                     sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 2,
+                                            bgcolor: theme.palette.grey[50],
+                                            '&:hover': { bgcolor: theme.palette.grey[100] },
+                                            '&.Mui-focused': { bgcolor: 'white' },
+                                        },
+                                    }}
+                                />
+
+                                <TextField
+                                    fullWidth
+                                    label="Mot de passe"
+                                    name="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={credentials.password}
+                                    onChange={handleInputChange}
+                                    onKeyPress={handleKeyPress}
+                                    disabled={loading}
+                                    placeholder="Entrez votre mot de passe"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LockIcon sx={{ color: 'text.secondary' }} />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={handleTogglePasswordVisibility}
+                                                    edge="end"
+                                                    disabled={loading}
+                                                    size="small"
+                                                >
+                                                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 2,
+                                            bgcolor: theme.palette.grey[50],
+                                            '&:hover': { bgcolor: theme.palette.grey[100] },
+                                            '&.Mui-focused': { bgcolor: 'white' },
+                                        },
+                                    }}
+                                />
+
+                                {/* Remember me & Forgot password */}
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={rememberMe}
+                                                onChange={(e) => setRememberMe(e.target.checked)}
+                                                size="small"
+                                                disabled={loading}
+                                            />
+                                        }
+                                        label={
+                                            <Typography variant="body2" color="text.secondary">
+                                                Se souvenir de moi
+                                            </Typography>
+                                        }
+                                    />
+                                    <Link
+                                        href="#"
+                                        underline="hover"
+                                        sx={{ fontSize: '0.875rem', fontWeight: 500 }}
+                                    >
+                                        Mot de passe oublié ?
+                                    </Link>
+                                </Stack>
+
+                                {/* Bouton de connexion */}
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    onClick={handleLogin}
+                                    disabled={loading}
+                                    startIcon={!loading && <LoginIcon />}
+                                    sx={{
+                                        py: 1.5,
                                         borderRadius: 2,
-                                        '& .MuiAlert-icon': { alignItems: 'center' }
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        textTransform: 'none',
+                                        boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
+                                        '&:hover': {
+                                            boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+                                        },
                                     }}
                                 >
-                                    {error}
-                                </Alert>
-                            )}
-                        </Box>
-                    </Fade>
+                                    {loading ? (
+                                        <CircularProgress size={24} sx={{ color: 'white' }} />
+                                    ) : (
+                                        'Se connecter'
+                                    )}
+                                </Button>
+                            </Stack>
 
-                    {/* Formulaire */}
-                    <Stack spacing={3}>
-                        <TextField
-                            fullWidth
-                            label="Nom d'utilisateur"
-                            name="username"
-                            value={credentials.username}
-                            onChange={handleInputChange}
-                            onKeyPress={handleKeyPress}
-                            disabled={loading}
-                            placeholder="Entrez votre identifiant"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon sx={{ color: 'text.secondary' }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
+                            {/* Info de démo */}
+                            <Box
+                                sx={{
+                                    mt: 4,
+                                    p: 2.5,
                                     borderRadius: 2,
-                                    bgcolor: theme.palette.grey[50],
-                                    '&:hover': { bgcolor: theme.palette.grey[100] },
-                                    '&.Mui-focused': { bgcolor: 'white' },
-                                },
-                            }}
-                        />
-
-                        <TextField
-                            fullWidth
-                            label="Mot de passe"
-                            name="password"
-                            type={showPassword ? 'text' : 'password'}
-                            value={credentials.password}
-                            onChange={handleInputChange}
-                            onKeyPress={handleKeyPress}
-                            disabled={loading}
-                            placeholder="Entrez votre mot de passe"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon sx={{ color: 'text.secondary' }} />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={handleTogglePasswordVisibility}
-                                            edge="end"
-                                            disabled={loading}
-                                            size="small"
-                                        >
-                                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 2,
-                                    bgcolor: theme.palette.grey[50],
-                                    '&:hover': { bgcolor: theme.palette.grey[100] },
-                                    '&.Mui-focused': { bgcolor: 'white' },
-                                },
-                            }}
-                        />
-
-                        {/* Remember me & Forgot password */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                        size="small"
-                                        disabled={loading}
-                                    />
-                                }
-                                label={
-                                    <Typography variant="body2" color="text.secondary">
-                                        Se souvenir de moi
-                                    </Typography>
-                                }
-                            />
-                            <Link
-                                href="#"
-                                underline="hover"
-                                sx={{ fontSize: '0.875rem', fontWeight: 500 }}
+                                    bgcolor: alpha(theme.palette.info.main, 0.08),
+                                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                                }}
                             >
-                                Mot de passe oublié ?
-                            </Link>
-                        </Stack>
+                                <Typography variant="subtitle2" color="info.dark" fontWeight={600} gutterBottom>
+                                    🔐 Identifiants de test (Backend)
+                                </Typography>
 
-                        {/* Bouton de connexion */}
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            size="large"
-                            onClick={handleLogin}
-                            disabled={loading}
-                            startIcon={!loading && <LoginIcon />}
-                            sx={{
-                                py: 1.5,
-                                borderRadius: 2,
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                textTransform: 'none',
-                                boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
-                                '&:hover': {
-                                    boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
-                                },
-                            }}
-                        >
-                            {loading ? (
-                                <CircularProgress size={24} sx={{ color: 'white' }} />
-                            ) : (
-                                'Se connecter'
-                            )}
-                        </Button>
-                    </Stack>
+                                {/* Admin ScholarWay */}
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography variant="caption" color="primary.main" fontWeight={600}>
+                                        Administrateur ScholarWay
+                                    </Typography>
+                                    <Stack direction="row" spacing={4}>
+                                        <Box>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Utilisateur
+                                            </Typography>
+                                            <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
+                                                admin@scholarway.com
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Mot de passe
+                                            </Typography>
+                                            <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
+                                                Admin@2026
+                                            </Typography>
+                                        </Box>
+                                    </Stack>
+                                </Box>
 
-                    {/* Info de démo */}
-                    <Box
-                        sx={{
-                            mt: 4,
-                            p: 2.5,
-                            borderRadius: 2,
-                            bgcolor: alpha(theme.palette.info.main, 0.08),
-                            border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-                        }}
-                    >
-                        <Typography variant="subtitle2" color="info.dark" fontWeight={600} gutterBottom>
-                            🔐 Identifiants de démo
-                        </Typography>
-                        
-                        {/* Super Admin */}
-                        <Box sx={{ mb: 2 }}>
-                            <Typography variant="caption" color="primary.main" fontWeight={600}>
-                                Super Admin
+                            </Box>
+
+                            {/* Séparateur */}
+                            <Divider sx={{ my: 3 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    ou
+                                </Typography>
+                            </Divider>
+
+                            {/* Bouton inscription établissement */}
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                size="large"
+                                onClick={() => setShowInscription(true)}
+                                startIcon={<BusinessIcon />}
+                                sx={{
+                                    py: 1.5,
+                                    borderRadius: 2,
+                                    fontSize: '0.95rem',
+                                    fontWeight: 600,
+                                    textTransform: 'none',
+                                    borderWidth: 2,
+                                    '&:hover': {
+                                        borderWidth: 2,
+                                    },
+                                }}
+                            >
+                                Inscrire mon établissement
+                            </Button>
+
+                            {/* Footer */}
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
+                                Besoin d'aide ?{' '}
+                                <Link href="#" underline="hover" fontWeight={600}>
+                                    Contactez le support
+                                </Link>
                             </Typography>
-                            <Stack direction="row" spacing={4}>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Utilisateur
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
-                                        admin
-                                    </Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Mot de passe
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
-                                        admin
-                                    </Typography>
-                                </Box>
-                            </Stack>
-                        </Box>
-
-                        {/* Admin Établissement */}
-                        <Box>
-                            <Typography variant="caption" color="secondary.main" fontWeight={600}>
-                                Admin Établissement
-                            </Typography>
-                            <Stack direction="row" spacing={4}>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Utilisateur
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
-                                        etab_ul / etab_esgis / etab_ucao
-                                    </Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Mot de passe
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>
-                                        etab123
-                                    </Typography>
-                                </Box>
-                            </Stack>
-                        </Box>
-                    </Box>
-
-                    {/* Séparateur */}
-                    <Divider sx={{ my: 3 }}>
-                        <Typography variant="body2" color="text.secondary">
-                            ou
-                        </Typography>
-                    </Divider>
-
-                    {/* Bouton inscription établissement */}
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        size="large"
-                        onClick={() => setShowInscription(true)}
-                        startIcon={<BusinessIcon />}
-                        sx={{
-                            py: 1.5,
-                            borderRadius: 2,
-                            fontSize: '0.95rem',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            borderWidth: 2,
-                            '&:hover': {
-                                borderWidth: 2,
-                            },
-                        }}
-                    >
-                        Inscrire mon établissement
-                    </Button>
-
-                    {/* Footer */}
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
-                        Besoin d'aide ?{' '}
-                        <Link href="#" underline="hover" fontWeight={600}>
-                            Contactez le support
-                        </Link>
-                    </Typography>
                         </Box>
                     </Slide>
 
@@ -721,7 +648,7 @@ const Login: React.FC = () => {
                                             Demande envoyée !
                                         </Typography>
                                         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                                            Votre demande d'inscription a été soumise avec succès. 
+                                            Votre demande d'inscription a été soumise avec succès.
                                             Vous recevrez un email de confirmation une fois votre dossier validé par notre équipe.
                                         </Typography>
                                         <Button
@@ -961,7 +888,7 @@ const Login: React.FC = () => {
 
                                             <Alert severity="info" sx={{ borderRadius: 2 }}>
                                                 <Typography variant="body2">
-                                                    Le document d'accréditation sera examiné par notre équipe. 
+                                                    Le document d'accréditation sera examiné par notre équipe.
                                                     Assurez-vous qu'il soit lisible et à jour.
                                                 </Typography>
                                             </Alert>

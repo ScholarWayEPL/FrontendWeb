@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+const baseURL = 'https://scholarway.pepit.cloud/api';
 
 const client = axios.create({
   baseURL,

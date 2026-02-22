@@ -130,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             ScholarWay
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {user?.role === 'ADMIN_ETABLISSEMENT' ? 'Espace Établissement' : 'Administration'}
+            {user?.role === 'ROLE_ADMIN_ETABLISSEMENT' ? 'Espace Établissement' : 'Administration'}
           </Typography>
         </Box>
       </Box>

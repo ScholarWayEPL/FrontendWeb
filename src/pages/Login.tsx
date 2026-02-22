@@ -45,6 +45,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setUser, setLoading, setError } from '../store/slices/authSlice';
 import { authApi } from '../api';
 import loginBg from '../assets/login_bg.jpg';
+import type { User } from '../types';
 
 // Composant pour les features de la landing
 interface FeatureItemProps {
@@ -214,20 +215,32 @@ const Login: React.FC = () => {
             const response = await authApi.login(credentials.email, credentials.password);
 
             if (response.success && response.data) {
-                const { user, token } = response.data;
+                const { token, email, role, userId } = response.data;
 
                 // Stockage du token
                 localStorage.setItem('authToken', token);
 
+                // Construct user object for Redux from response
+                const userObj: User = {
+                    id: String(userId),
+                    email: email,
+                    role: role,
+                    firstName: email.split('@')[0], // Fallback as backend returns limited info on login
+                    lastName: '',
+                    status: 'active',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                };
+
                 // Update Redux state
-                dispatch(setUser(user));
+                dispatch(setUser(userObj));
 
                 // Redirection selon le rôle
-                if (user.role === 'SUPER_ADMIN') {
+                if (userObj.role === 'ROLE_ADMINISTRATEUR') {
                     navigate('/');
-                } else if (user.role === 'ADMIN_ETABLISSEMENT') {
+                } else if (userObj.role === 'ROLE_ADMIN_ETABLISSEMENT') {
                     navigate('/etablissement/dashboard');
-                } else if (user.role === 'BACHELIER') {
+                } else if (userObj.role === 'ROLE_BACHELIER') {
                     navigate('/bachelier/dashboard');
                 }
             } else {

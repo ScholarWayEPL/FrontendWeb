@@ -1,9 +1,13 @@
 import client from './client';
-import type { ApiResponse, User } from '../types';
+import type { ApiResponse, User, RoleUtilisateur } from '../types';
 
 export interface LoginResponse {
-    user: User;
     token: string;
+    tokenType: string;
+    userId: number;
+    email: string;
+    role: RoleUtilisateur;
+    expiresAt: string;
 }
 
 export const authApi = {

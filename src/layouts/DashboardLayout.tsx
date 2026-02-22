@@ -383,7 +383,7 @@ const DashboardLayout: React.FC = () => {
             onClick={() => {
               setNotifAnchor(null);
               // Redirige vers la page de notifications adaptée au rôle
-              if (user?.role === 'ADMIN_ETABLISSEMENT') {
+              if (user?.role === 'ROLE_ADMIN_ETABLISSEMENT') {
                 navigate('/etablissement/notifications');
               } else {
                 navigate('/notifications');
@@ -446,7 +446,7 @@ const DashboardLayout: React.FC = () => {
           </Typography>
           <Chip
             icon={<AdminPanelSettings sx={{ fontSize: 16 }} />}
-            label={user?.role === 'ADMIN_ETABLISSEMENT' ? 'Admin Établissement' : 'Super Admin'}
+            label={user?.role === 'ROLE_ADMIN_ETABLISSEMENT' ? 'Admin Établissement' : 'Super Admin'}
             size="small"
             sx={{
               bgcolor: 'rgba(255,255,255,0.2)',
@@ -484,7 +484,7 @@ const DashboardLayout: React.FC = () => {
           </ListItem>
 
           {/* Journal d'activité - Uniquement pour SUPER_ADMIN */}
-          {user?.role === 'SUPER_ADMIN' && (
+          {user?.role === 'ROLE_ADMINISTRATEUR' && (
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);
@@ -511,7 +511,7 @@ const DashboardLayout: React.FC = () => {
           )}
 
           {/* Paramètres - Uniquement pour ADMIN_ETABLISSEMENT */}
-          {user?.role === 'ADMIN_ETABLISSEMENT' && (
+          {user?.role === 'ROLE_ADMIN_ETABLISSEMENT' && (
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);

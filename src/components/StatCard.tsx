@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Card, CardContent, Typography, type SvgIconProps } from '@mui/material';
+import { Box, Card, CardContent, Typography, type SvgIconProps, useTheme } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
 import { BORDER_RADIUS, SHADOWS } from '../constants';
 
@@ -14,14 +14,16 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }) => {
   const isPositiveGrowth = growth !== undefined && growth >= 0;
 
+  const theme = useTheme();
+
   const colorMap = {
-    primary: { main: '#1565C0', light: '#E3F2FD' },
-    secondary: { main: '#2E7D32', light: '#E8F5E9' },
-    success: { main: '#2E7D32', light: '#E8F5E9' },
-    warning: { main: '#ED6C02', light: '#FFF3E0' },
-    error: { main: '#D32F2F', light: '#FFEBEE' },
-    info: { main: '#0288D1', light: '#E1F5FE' },
-  };
+    primary: { main: theme.palette.primary.main, light: 'rgba(21,101,192,0.08)' },
+    secondary: { main: theme.palette.secondary.main, light: 'rgba(46,125,50,0.08)' },
+    success: { main: theme.palette.success.main, light: 'rgba(46,125,50,0.08)' },
+    warning: { main: theme.palette.warning.main, light: 'rgba(237,108,2,0.06)' },
+    error: { main: theme.palette.error.main, light: 'rgba(211,47,47,0.06)' },
+    info: { main: theme.palette.info.main, light: 'rgba(2,136,209,0.06)' },
+  } as const;
 
   return (
     <Card
@@ -37,7 +39,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }
       }}
     >
       <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {title}
@@ -71,15 +73,16 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }
             sx={{
               width: 56,
               height: 56,
-              borderRadius: BORDER_RADIUS.sm,
+              borderRadius: BORDER_RADIUS.full,
               bgcolor: colorMap[color].light,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
             {React.cloneElement(icon, {
-              sx: { fontSize: 28, color: colorMap[color].main },
+              sx: { fontSize: 26, color: colorMap[color].main },
             })}
           </Box>
         </Box>

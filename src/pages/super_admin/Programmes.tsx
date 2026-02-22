@@ -34,20 +34,20 @@ import {
   Business as BusinessIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import { formatCFA } from '../constants';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { BORDER_RADIUS, SHADOWS } from '../constants';
+import { formatCFA } from '../../constants';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   fetchProgrammes,
   fetchDomaines,
   setFilters,
   resetFilters,
   deleteProgramme,
-} from '../store/slices/programmesSlice';
-import { showSnackbar } from '../store/slices/uiSlice';
-import type { Programme, NiveauProgramme, ProgrammeFilters } from '../types';
-import ProgrammeModal from '../components/ProgrammeModal';
-import ConfirmDialog from '../components/ConfirmDialog';
+} from '../../store/slices/programmesSlice';
+import { showSnackbar } from '../../store/slices/uiSlice';
+import type { Programme, NiveauProgramme, ProgrammeFilters } from '../../types';
+import ProgrammeModal from '../../components/ProgrammeModal';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const niveauOptions: { value: string; label: string }[] = [
   { value: '', label: 'Tous les niveaux' },

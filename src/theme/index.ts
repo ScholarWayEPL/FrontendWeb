@@ -102,7 +102,7 @@ const scholarwayTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: 4, // Uniforme avec les constantes
+    borderRadius: 8, // Plus arrondi pour un rendu moderne
   },
   shadows: [
     'none',
@@ -135,7 +135,7 @@ const scholarwayTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
+          borderRadius: '12px',
           padding: '10px 24px',
           fontSize: '0.875rem',
         },
@@ -144,6 +144,13 @@ const scholarwayTheme = createTheme({
           '&:hover': {
             boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.15)',
           },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '10px',
         },
       },
     },

@@ -26,7 +26,7 @@ import {
   Tabs,
   LinearProgress,
 } from '@mui/material';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../../constants';
 import {
   Person as PersonIcon,
   Lock as LockIcon,
@@ -49,9 +49,9 @@ import {
   PhotoCamera,
   Verified,
 } from '@mui/icons-material';
-import { useAppDispatch } from '../store/hooks';
-import { showSnackbar } from '../store/slices/uiSlice';
-import { INDICATIF_TOGO } from '../constants';
+import { useAppDispatch } from '../../store/hooks';
+import { showSnackbar } from '../../store/slices/uiSlice';
+import { INDICATIF_TOGO } from '../../constants';
 
 interface AdminProfile {
   nom: string;

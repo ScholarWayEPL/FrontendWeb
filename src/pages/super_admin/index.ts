@@ -1,5 +1,5 @@
 // Pages index - Export centralisé de toutes les pages
-export { default as Login } from './Login';
+export { default as Login } from '../Login';
 export { default as Dashboard } from './Dashboard';
 export { default as Utilisateurs } from './Utilisateurs';
 export { default as Etablissements } from './Etablissements';

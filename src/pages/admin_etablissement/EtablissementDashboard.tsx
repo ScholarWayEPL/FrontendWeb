@@ -12,6 +12,19 @@ import {
     alpha,
 } from '@mui/material';
 import {
+    Tooltip as RechartsTooltip,
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Legend,
+    PieChart,
+    Pie,
+    Cell,
+} from 'recharts';
+import {
     School as SchoolIcon,
     Description as DescriptionIcon,
     Assessment as AssessmentIcon,
@@ -39,6 +52,7 @@ const mockCampagnes = [
         parcours: 'Licence Informatique',
         statut: 'OUVERTE',
         candidatures: 145,
+        acceptees: 62,
         dateOuverture: '2026-01-15',
         dateCloture: '2026-03-15',
     },
@@ -47,6 +61,7 @@ const mockCampagnes = [
         parcours: 'Master Data Science',
         statut: 'OUVERTE',
         candidatures: 78,
+        acceptees: 34,
         dateOuverture: '2026-01-20',
         dateCloture: '2026-03-20',
     },
@@ -55,6 +70,7 @@ const mockCampagnes = [
         parcours: 'Licence Gestion',
         statut: 'A_VENIR',
         candidatures: 0,
+        acceptees: 0,
         dateOuverture: '2026-04-01',
         dateCloture: '2026-06-01',
     },
@@ -63,6 +79,7 @@ const mockCampagnes = [
         parcours: 'Master Finance',
         statut: 'CLOTUREE',
         candidatures: 112,
+        acceptees: 45,
         dateOuverture: '2025-09-01',
         dateCloture: '2025-11-30',
     },
@@ -88,6 +105,24 @@ const EtablissementDashboard: React.FC = () => {
         });
     };
 
+    // Données pour la répartition par statut
+    const statusData = [
+        { name: 'En attente', value: mockStats.candidaturesEnAttente, color: theme.palette.warning.main },
+        { name: 'En cours', value: 33, color: theme.palette.info.main },
+        { name: 'Acceptés', value: mockStats.candidaturesAcceptees, color: theme.palette.success.main },
+        { name: 'Refusés', value: 100, color: theme.palette.error.main },
+    ];
+
+    // Données pour le Top 5 des parcours (Popularité)
+    const popularityData = [...mockCampagnes]
+        .sort((a, b) => b.candidatures - a.candidatures)
+        .slice(0, 5)
+        .map(c => ({
+            name: c.parcours.length > 20 ? c.parcours.substring(0, 18) + '...' : c.parcours,
+            fullName: c.parcours,
+            volume: c.candidatures,
+        }));
+
     return (
         <Box>
             {/* Header */}
@@ -100,9 +135,9 @@ const EtablissementDashboard: React.FC = () => {
 
             {/* Stats Cards */}
             <Stack direction="row" spacing={2} sx={{ mb: 4, flexWrap: 'wrap' }}>
-                <Card 
+                <Card
                     variant="outlined"
-                    sx={{ 
+                    sx={{
                         flex: 1,
                         minWidth: 240,
                         p: 2.5,
@@ -114,8 +149,8 @@ const EtablissementDashboard: React.FC = () => {
                         borderColor: 'primary.main',
                     }}
                 >
-                    <Box 
-                        sx={{ 
+                    <Box
+                        sx={{
                             p: 1.5,
                             borderRadius: 2,
                             bgcolor: `${theme.palette.primary.main}15`,
@@ -132,9 +167,9 @@ const EtablissementDashboard: React.FC = () => {
                         </Typography>
                     </Box>
                 </Card>
-                <Card 
+                <Card
                     variant="outlined"
-                    sx={{ 
+                    sx={{
                         flex: 1,
                         minWidth: 240,
                         p: 2.5,
@@ -146,8 +181,8 @@ const EtablissementDashboard: React.FC = () => {
                         borderColor: 'info.main',
                     }}
                 >
-                    <Box 
-                        sx={{ 
+                    <Box
+                        sx={{
                             p: 1.5,
                             borderRadius: 2,
                             bgcolor: `${theme.palette.info.main}15`,
@@ -164,9 +199,9 @@ const EtablissementDashboard: React.FC = () => {
                         </Typography>
                     </Box>
                 </Card>
-                <Card 
+                <Card
                     variant="outlined"
-                    sx={{ 
+                    sx={{
                         flex: 1,
                         minWidth: 240,
                         p: 2.5,
@@ -178,8 +213,8 @@ const EtablissementDashboard: React.FC = () => {
                         borderColor: 'warning.main',
                     }}
                 >
-                    <Box 
-                        sx={{ 
+                    <Box
+                        sx={{
                             p: 1.5,
                             borderRadius: 2,
                             bgcolor: `${theme.palette.warning.main}15`,
@@ -196,9 +231,9 @@ const EtablissementDashboard: React.FC = () => {
                         </Typography>
                     </Box>
                 </Card>
-                <Card 
+                <Card
                     variant="outlined"
-                    sx={{ 
+                    sx={{
                         flex: 1,
                         minWidth: 240,
                         p: 2.5,
@@ -210,8 +245,8 @@ const EtablissementDashboard: React.FC = () => {
                         borderColor: 'success.main',
                     }}
                 >
-                    <Box 
-                        sx={{ 
+                    <Box
+                        sx={{
                             p: 1.5,
                             borderRadius: 2,
                             bgcolor: `${theme.palette.success.main}15`,
@@ -231,11 +266,104 @@ const EtablissementDashboard: React.FC = () => {
             </Stack>
 
             <Grid container spacing={3}>
+                {/* Graphique 1: État global des candidatures */}
+                <Grid item xs={12} md={6} lg={4}>
+                    <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, overflow: 'hidden' }}>
+                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.primary.main, 0.03), borderBottom: `1px solid ${theme.palette.divider}` }}>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                                Statut des candidatures
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Répartition globale de l'avancement
+                            </Typography>
+                        </Box>
+                        <CardContent sx={{ height: 320, p: 0 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={statusData}
+                                        cx="50%"
+                                        cy="45%"
+                                        innerRadius={60}
+                                        outerRadius={85}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        stroke="none"
+                                    >
+                                        {statusData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        align="center"
+                                        iconType="circle"
+                                        wrapperStyle={{ paddingBottom: '10px', fontSize: '11px' }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </Grid>
+
+                {/* Graphique 2: Top Parcours */}
+                <Grid item xs={12} md={6} lg={8}>
+                    <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, overflow: 'hidden' }}>
+                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.secondary.main, 0.03), borderBottom: `1px solid ${theme.palette.divider}` }}>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                                Top 5 Parcours les plus demandés
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Nombre de candidatures déposées
+                            </Typography>
+                        </Box>
+                        <CardContent sx={{ height: 320, pt: 3 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                    layout="vertical"
+                                    data={popularityData}
+                                    margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                                >
+                                    <defs>
+                                        <linearGradient id="barPop" x1="0" y1="0" x2="1" y2="0">
+                                            <stop offset="0%" stopColor={theme.palette.secondary.main} stopOpacity={0.4} />
+                                            <stop offset="100%" stopColor={theme.palette.secondary.main} stopOpacity={1} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={theme.palette.divider} />
+                                    <XAxis type="number" hide />
+                                    <YAxis
+                                        dataKey="name"
+                                        type="category"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        width={120}
+                                        tick={{ fill: theme.palette.text.secondary, fontSize: 11, fontWeight: 500 }}
+                                    />
+                                    <RechartsTooltip
+                                        cursor={{ fill: 'transparent' }}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                        labelFormatter={(label, payload) => payload[0]?.payload?.fullName || label}
+                                    />
+                                    <Bar
+                                        dataKey="volume"
+                                        fill="url(#barPop)"
+                                        radius={[0, 4, 4, 0]}
+                                        barSize={20}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </Grid>
                 {/* Campagnes d'admission */}
                 <Grid item xs={12} lg={8}>
-                    <Card 
+                    <Card
                         variant="outlined"
-                        sx={{ 
+                        sx={{
                             borderRadius: 2,
                             overflow: 'hidden',
                         }}
@@ -355,9 +483,9 @@ const EtablissementDashboard: React.FC = () => {
 
                 {/* Activité récente */}
                 <Grid item xs={12} lg={4}>
-                    <Card 
+                    <Card
                         variant="outlined"
-                        sx={{ 
+                        sx={{
                             borderRadius: 2,
                             overflow: 'hidden',
                         }}
@@ -392,9 +520,9 @@ const EtablissementDashboard: React.FC = () => {
                     </Card>
 
                     {/* Actions rapides */}
-                    <Card 
-                        variant="outlined" 
-                        sx={{ 
+                    <Card
+                        variant="outlined"
+                        sx={{
                             mt: 3,
                             borderRadius: 2,
                             overflow: 'hidden',
@@ -415,8 +543,8 @@ const EtablissementDashboard: React.FC = () => {
                                     variant="outlined"
                                     startIcon={<MenuBookIcon />}
                                     onClick={() => navigate('/etablissement/offre')}
-                                    sx={{ 
-                                        justifyContent: 'flex-start', 
+                                    sx={{
+                                        justifyContent: 'flex-start',
                                         py: 1.5,
                                         borderRadius: 1.5,
                                         fontWeight: 600,
@@ -432,8 +560,8 @@ const EtablissementDashboard: React.FC = () => {
                                     variant="outlined"
                                     startIcon={<DownloadIcon />}
                                     onClick={() => navigate('/etablissement/candidatures')}
-                                    sx={{ 
-                                        justifyContent: 'flex-start', 
+                                    sx={{
+                                        justifyContent: 'flex-start',
                                         py: 1.5,
                                         borderRadius: 1.5,
                                         fontWeight: 600,
@@ -449,8 +577,8 @@ const EtablissementDashboard: React.FC = () => {
                                     variant="outlined"
                                     startIcon={<PublishIcon />}
                                     onClick={() => navigate('/etablissement/resultats')}
-                                    sx={{ 
-                                        justifyContent: 'flex-start', 
+                                    sx={{
+                                        justifyContent: 'flex-start',
                                         py: 1.5,
                                         borderRadius: 1.5,
                                         fontWeight: 600,

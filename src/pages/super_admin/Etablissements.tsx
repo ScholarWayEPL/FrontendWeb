@@ -36,20 +36,20 @@ import {
   Visibility as VisibilityIcon,
   Business as BusinessIcon,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { BORDER_RADIUS, SHADOWS } from '../constants';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   fetchEtablissements,
   setFilters,
   resetFilters,
   deleteEtablissement,
-} from '../store/slices/etablissementsSlice';
-import { showSnackbar } from '../store/slices/uiSlice';
-import type { Etablissement, EtablissementFilters, TypeEtablissement } from '../types';
-import EtablissementModal from '../components/EtablissementModal';
-import ConfirmDialog from '../components/ConfirmDialog';
-import { REGION_OPTIONS } from '../constants';
-import EtablissementDetails from '../components/EtablissementDetails';
+} from '../../store/slices/etablissementsSlice';
+import { showSnackbar } from '../../store/slices/uiSlice';
+import type { Etablissement, EtablissementFilters, TypeEtablissement } from '../../types';
+import EtablissementModal from '../../components/EtablissementModal';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import { REGION_OPTIONS } from '../../constants';
+import EtablissementDetails from '../../components/EtablissementDetails';
 
 const typeOptions: { value: string; label: string }[] = [
   { value: '', label: 'Tous les types' },

@@ -16,7 +16,7 @@ import {
   Parametres,
   Logs,
   ValidationInscriptions,
-} from './pages';
+} from './pages/super_admin';
 
 // Pages Admin Établissement
 import {
@@ -25,7 +25,8 @@ import {
   OffreFormation,
   Candidatures,
   Resultats,
-} from './pages/etablissement';
+  Notifications as EtablissementNotifications,
+} from './pages/admin_etablissement';
 
 // Components
 import { GlobalSnackbar, ProtectedRoute } from './components';
@@ -68,6 +69,7 @@ const App: React.FC = () => {
                 <Route path="offre" element={<OffreFormation />} />
                 <Route path="candidatures" element={<Candidatures />} />
                 <Route path="resultats" element={<Resultats />} />
+                <Route path="notifications" element={<EtablissementNotifications />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

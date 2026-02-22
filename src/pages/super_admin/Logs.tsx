@@ -34,7 +34,7 @@ import {
     useTheme,
     LinearProgress,
 } from '@mui/material';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../../constants';
 import {
     Search,
     FilterList,
@@ -59,8 +59,8 @@ import {
     Computer,
     Person,
 } from '@mui/icons-material';
-import { logsApi, type Log } from '../api/logs';
-import { formatRelativeTime } from '../utils/helpers';
+import { logsApi, type Log } from '../../api/logs';
+import { formatRelativeTime } from '../../utils/helpers';
 
 const LOG_TYPES = [
     { value: 'connexion', label: 'Connexion', color: '#4caf50', icon: Login, bgColor: '#e8f5e9' },

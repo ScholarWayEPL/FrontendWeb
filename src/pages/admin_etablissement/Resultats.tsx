@@ -188,11 +188,12 @@ const Resultats: React.FC = () => {
                     <Card
                         variant="outlined"
                         sx={{
-                            borderRadius: 2,
+                            borderRadius: BORDER_RADIUS.md,
                             overflow: 'hidden',
+                            borderColor: 'transparent',
                         }}
                     >
-                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.success.main, 0.05), borderBottom: `2px solid ${theme.palette.success.main}` }}>
+                        <Box sx={{ px: 3, py: 2.5, bgcolor: 'transparent', borderBottom: `1px solid ${theme.palette.divider}` }}>
                             <Typography variant="h6" fontWeight={700}>
                                 Sélectionner une campagne
                             </Typography>
@@ -216,14 +217,14 @@ const Resultats: React.FC = () => {
                                         }}
                                         sx={{
                                             cursor: 'pointer',
-                                            borderRadius: 1.5,
-                                            borderWidth: 2,
-                                            borderColor: selectedCampagne?.id === campagne.id ? 'success.main' : 'grey.300',
-                                            bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.success.main, 0.08) : 'white',
-                                            transition: 'all 0.2s',
+                                            borderRadius: BORDER_RADIUS.md,
+                                            borderWidth: 1,
+                                            borderColor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.18) : 'grey.200',
+                                            bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.03) : 'background.paper',
+                                            transition: 'all 0.12s ease-in-out',
                                             '&:hover': {
-                                                borderColor: 'success.main',
-                                                bgcolor: alpha(theme.palette.success.main, 0.05),
+                                                borderColor: alpha(theme.palette.primary.main, 0.28),
+                                                bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.04) : alpha(theme.palette.action.hover, 0.04),
                                                 transform: 'translateY(-2px)',
                                                 boxShadow: 1,
                                             },
@@ -248,7 +249,7 @@ const Resultats: React.FC = () => {
                                                     color={campagne.phase1Publiee ? 'success' : 'default'}
                                                     variant={campagne.phase1Publiee ? 'filled' : 'outlined'}
                                                     icon={campagne.phase1Publiee ? <CheckCircleIcon /> : undefined}
-                                                    sx={{ borderRadius: 1, fontSize: '0.7rem', fontWeight: 600 }}
+                                                    sx={{ borderRadius: BORDER_RADIUS.sm, fontSize: '0.75rem', fontWeight: 600 }}
                                                 />
                                                 <Chip
                                                     size="small"
@@ -256,7 +257,7 @@ const Resultats: React.FC = () => {
                                                     color={campagne.dateConcoursEcrit ? 'success' : 'default'}
                                                     variant={campagne.dateConcoursEcrit ? 'filled' : 'outlined'}
                                                     icon={campagne.dateConcoursEcrit ? <CheckCircleIcon /> : undefined}
-                                                    sx={{ borderRadius: 1, fontSize: '0.7rem', fontWeight: 600 }}
+                                                    sx={{ borderRadius: BORDER_RADIUS.sm, fontSize: '0.75rem', fontWeight: 600 }}
                                                 />
                                                 <Chip
                                                     size="small"
@@ -264,7 +265,7 @@ const Resultats: React.FC = () => {
                                                     color={campagne.phase2Publiee ? 'success' : 'default'}
                                                     variant={campagne.phase2Publiee ? 'filled' : 'outlined'}
                                                     icon={campagne.phase2Publiee ? <CheckCircleIcon /> : undefined}
-                                                    sx={{ borderRadius: 1, fontSize: '0.7rem', fontWeight: 600 }}
+                                                    sx={{ borderRadius: BORDER_RADIUS.sm, fontSize: '0.75rem', fontWeight: 600 }}
                                                 />
                                             </Stack>
                                         </CardContent>

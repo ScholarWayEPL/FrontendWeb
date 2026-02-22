@@ -382,7 +382,12 @@ const DashboardLayout: React.FC = () => {
             variant="text"
             onClick={() => {
               setNotifAnchor(null);
-              navigate('/notifications');
+              // Redirige vers la page de notifications adaptée au rôle
+              if (user?.role === 'admin_etablissement') {
+                navigate('/etablissement/notifications');
+              } else {
+                navigate('/notifications');
+              }
             }}
           >
             Voir toutes les notifications

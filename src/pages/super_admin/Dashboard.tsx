@@ -50,11 +50,11 @@ import {
   Bar,
   Legend,
 } from 'recharts';
-import { BORDER_RADIUS } from '../constants';
-import StatCard from '../components/StatCard';
-import { type ActivityItem } from '../types';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { fetchDashboardStats } from '../store/slices/dashboardSlice';
+import { BORDER_RADIUS } from '../../constants';
+import StatCard from '../../components/StatCard';
+import { type ActivityItem } from '../../types';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { fetchDashboardStats } from '../../store/slices/dashboardSlice';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();

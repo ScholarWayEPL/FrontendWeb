@@ -19,7 +19,7 @@ import {
   Tabs,
   Badge,
 } from '@mui/material';
-import { BORDER_RADIUS, SHADOWS } from '../constants';
+import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
@@ -37,10 +37,10 @@ import {
   MarkEmailRead,
   NotificationsActive,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { showSnackbar } from '../store/slices/uiSlice';
-import ConfirmDialog from '../components/ConfirmDialog';
-import { formatRelativeTime } from '../utils/helpers';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { showSnackbar } from '../../store/slices/uiSlice';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import { formatRelativeTime } from '../../utils/helpers';
 
 // Types de notifications admin
 type AdminNotifType = 'info' | 'success' | 'warning' | 'error';

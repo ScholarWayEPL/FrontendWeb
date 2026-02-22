@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, Typography, Box, Divider } from '@mui/material';
+import { Card, CardContent, Typography, Box, Divider } from '@mui/material';
 import { BORDER_RADIUS, SHADOWS, TRANSITIONS } from '../../constants';
 
 interface DataCardProps {
@@ -35,25 +35,26 @@ const DataCard: React.FC<DataCardProps> = ({
                 },
             }}
         >
-            <CardHeader
-                title={
-                    <Typography variant="h6" fontWeight={600}>
-                        {title}
-                    </Typography>
-                }
-                subheader={subtitle && (
-                    <Typography variant="body2" color="text.secondary">
-                        {subtitle}
-                    </Typography>
-                )}
-                action={action}
-                sx={{ pb: headerDivider ? 2 : 0 }}
-            />
-            {headerDivider && <Divider />}
+            <Box sx={{ px: 3, pt: 3, pb: headerDivider ? 2 : 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+                    <Box>
+                        <Typography variant="h6" fontWeight={600} sx={{ letterSpacing: '0.2px' }}>
+                            {title}
+                        </Typography>
+                        {subtitle && (
+                            <Typography variant="body2" color="text.secondary">
+                                {subtitle}
+                            </Typography>
+                        )}
+                    </Box>
+                    {action}
+                </Box>
+            </Box>
+            {headerDivider && <Divider sx={{ borderColor: 'divider', opacity: 0.6 }} />}
             {noPadding ? (
                 <Box>{children}</Box>
             ) : (
-                <CardContent sx={{ pt: headerDivider ? 2 : 0 }}>
+                <CardContent sx={{ pt: headerDivider ? 2 : 0, px: 3, pb: 3 }}>
                     {children}
                 </CardContent>
             )}

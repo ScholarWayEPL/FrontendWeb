@@ -40,8 +40,8 @@ import {
   Close as CloseIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { BORDER_RADIUS, SHADOWS } from '../constants';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   fetchBacheliers,
   fetchSeries,
@@ -50,13 +50,13 @@ import {
   deleteBachelier,
   createBachelier,
   updateBachelier,
-} from '../store/slices/usersSlice';
-import { showSnackbar } from '../store/slices/uiSlice';
-import type { Bachelier } from '../types';
-import UtilisateurModal from '../components/UtilisateurModal';
-import ConfirmDialog from '../components/ConfirmDialog';
-import { formatCFA } from '../constants';
-import UtilisateurDetails from '../components/UtilisateurDetails';
+} from '../../store/slices/usersSlice';
+import { showSnackbar } from '../../store/slices/uiSlice';
+import type { Bachelier } from '../../types';
+import UtilisateurModal from '../../components/UtilisateurModal';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import { formatCFA } from '../../constants';
+import UtilisateurDetails from '../../components/UtilisateurDetails';
 
 const Utilisateurs: React.FC = () => {
   const dispatch = useAppDispatch();

@@ -39,9 +39,9 @@ import {
     LocationOn as LocationOnIcon,
     VerifiedUser as VerifiedUserIcon,
 } from '@mui/icons-material';
-import { PageHeader, SearchField, StatusChip } from '../components/ui';
-import StatCard from '../components/StatCard';
-import { BORDER_RADIUS, SHADOWS } from '../constants';
+import { PageHeader, SearchField, StatusChip } from '../../components/ui';
+import StatCard from '../../components/StatCard';
+import { BORDER_RADIUS, SHADOWS } from '../../constants';
 
 // Types
 interface DemandeInscription {

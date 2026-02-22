@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user } = useAppSelector((state) => state.auth);
 
   // Sélection du menu selon le rôle
-  const mainNavItems = user?.role === 'ADMIN_ETABLISSEMENT'
+  const mainNavItems = user?.role === 'ROLE_ADMIN_ETABLISSEMENT'
     ? adminEtablissementMainNavItems
     : superAdminMainNavItems;
 

@@ -216,32 +216,41 @@ const Login: React.FC = () => {
 
             if (response.success && response.data) {
                 const { token, email, role, userId } = response.data;
+                console.log('Login successful, response data:', response.data);
+
+                if (!token || !role) {
+                    throw new Error('Données de réponse incomplètes (token ou role manquant)');
+                }
 
                 // Stockage du token
                 localStorage.setItem('authToken', token);
 
                 // Construct user object for Redux from response
                 const userObj: User = {
-                    id: String(userId),
-                    email: email,
+                    id: String(userId || ''),
+                    email: email || '',
                     role: role,
-                    firstName: email.split('@')[0], // Fallback as backend returns limited info on login
+                    firstName: email?.split('@')[0] || 'Utilisateur',
                     lastName: '',
                     status: 'active',
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                 };
 
+                console.log('Dispatching user object:', userObj);
                 // Update Redux state
                 dispatch(setUser(userObj));
 
                 // Redirection selon le rôle
-                if (userObj.role === 'ROLE_ADMINISTRATEUR') {
+                if (role === 'ROLE_ADMINISTRATEUR') {
                     navigate('/');
-                } else if (userObj.role === 'ROLE_ADMIN_ETABLISSEMENT') {
+                } else if (role === 'ROLE_ADMIN_ETABLISSEMENT') {
                     navigate('/etablissement/dashboard');
-                } else if (userObj.role === 'ROLE_BACHELIER') {
+                } else if (role === 'ROLE_BACHELIER') {
                     navigate('/bachelier/dashboard');
+                } else {
+                    console.warn('Unknown role:', role);
+                    navigate('/');
                 }
             } else {
                 dispatch(setError(response.message || 'Identifiants invalides'));

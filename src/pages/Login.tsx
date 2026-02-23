@@ -20,6 +20,7 @@ import {
     Stepper,
     Step,
     StepLabel,
+    MenuItem,
 } from '@mui/material';
 import {
     Person as PersonIcon,
@@ -43,7 +44,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setUser, setLoading, setError } from '../store/slices/authSlice';
-import { authApi } from '../api';
+import { authApi, type RegisterEtablissementRequest } from '../api';
 import loginBg from '../assets/login_bg.jpg';
 import type { User } from '../types';
 
@@ -83,6 +84,8 @@ const FeatureItem: React.FC<FeatureItemProps> = ({ icon, title, description }) =
 interface InscriptionForm {
     nomEtablissement: string;
     emailPro: string;
+    motDePasse: string;
+    typeEtablissement: string;
     telephonePro: string;
     localisation: string;
     siteWeb: string;
@@ -115,6 +118,8 @@ const Login: React.FC = () => {
     const [inscriptionForm, setInscriptionForm] = useState<InscriptionForm>({
         nomEtablissement: '',
         emailPro: '',
+        motDePasse: '',
+        typeEtablissement: '',
         telephonePro: '',
         localisation: '',
         siteWeb: '',
@@ -149,12 +154,12 @@ const Login: React.FC = () => {
     const handleNextStep = () => {
         // Validation par étape
         if (inscriptionStep === 0) {
-            if (!inscriptionForm.nomEtablissement || !inscriptionForm.description) {
-                setInscriptionError('Veuillez remplir le nom et la description de l\'établissement');
+            if (!inscriptionForm.nomEtablissement || !inscriptionForm.description || !inscriptionForm.typeEtablissement) {
+                setInscriptionError('Veuillez remplir tous les champs obligatoires');
                 return;
             }
         } else if (inscriptionStep === 1) {
-            if (!inscriptionForm.emailPro || !inscriptionForm.telephonePro || !inscriptionForm.localisation) {
+            if (!inscriptionForm.emailPro || !inscriptionForm.motDePasse || !inscriptionForm.telephonePro || !inscriptionForm.localisation) {
                 setInscriptionError('Veuillez remplir tous les champs obligatoires');
                 return;
             }
@@ -166,18 +171,41 @@ const Login: React.FC = () => {
         setInscriptionStep((prev) => prev - 1);
     };
 
-    const handleSubmitInscription = () => {
+    const handleSubmitInscription = async () => {
         if (!inscriptionForm.documentAccreditation) {
             setInscriptionError('Veuillez téléverser le document d\'accréditation');
             return;
         }
 
         setInscriptionLoading(true);
-        // Simulation d'envoi
-        setTimeout(() => {
+        setInscriptionError(null);
+
+        try {
+            const data: RegisterEtablissementRequest = {
+                nomEtablissement: inscriptionForm.nomEtablissement,
+                email: inscriptionForm.emailPro,
+                motDePasse: inscriptionForm.motDePasse,
+                description: inscriptionForm.description,
+                localisation: inscriptionForm.localisation,
+                siteWeb: inscriptionForm.siteWeb,
+                telephonePro: inscriptionForm.telephonePro,
+                typeEtablissement: inscriptionForm.typeEtablissement,
+            };
+
+            const response = await authApi.registerEtablissement(data);
+
+            if (response.success) {
+                setInscriptionSuccess(true);
+            } else {
+                setInscriptionError(response.message || 'Une erreur est survenue lors de l\'inscription');
+            }
+        } catch (err: any) {
+            console.error('Registration error:', err);
+            const errorMessage = err.response?.data?.message || 'Une erreur est survenue lors de l\'inscription';
+            setInscriptionError(errorMessage);
+        } finally {
             setInscriptionLoading(false);
-            setInscriptionSuccess(true);
-        }, 2000);
+        }
     };
 
     const handleBackToLogin = () => {
@@ -187,6 +215,8 @@ const Login: React.FC = () => {
         setInscriptionForm({
             nomEtablissement: '',
             emailPro: '',
+            motDePasse: '',
+            typeEtablissement: '',
             telephonePro: '',
             localisation: '',
             siteWeb: '',
@@ -752,6 +782,27 @@ const Login: React.FC = () => {
                                             />
                                             <TextField
                                                 fullWidth
+                                                select
+                                                label="Type d'établissement *"
+                                                name="typeEtablissement"
+                                                value={inscriptionForm.typeEtablissement}
+                                                onChange={handleInscriptionInputChange}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            >
+                                                <MenuItem value="UNIVERSITE_PUBLIQUE">Université Publique</MenuItem>
+                                                <MenuItem value="UNIVERSITE_PRIVEE">Université Privée</MenuItem>
+                                                <MenuItem value="ECOLE_PUBLIQUE">École Publique</MenuItem>
+                                                <MenuItem value="ECOLE_PRIVEE">École Privée</MenuItem>
+                                                <MenuItem value="INSTITUT_PUBLIC">Institut Public</MenuItem>
+                                                <MenuItem value="INSTITUT_PRIVE">Institut Privé</MenuItem>
+                                            </TextField>
+                                            <TextField
+                                                fullWidth
                                                 label="Description de l'établissement *"
                                                 name="description"
                                                 value={inscriptionForm.description}
@@ -784,6 +835,28 @@ const Login: React.FC = () => {
                                                     startAdornment: (
                                                         <InputAdornment position="start">
                                                             <EmailIcon sx={{ color: 'text.secondary' }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: theme.palette.grey[50],
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Mot de passe *"
+                                                name="motDePasse"
+                                                type="password"
+                                                value={inscriptionForm.motDePasse}
+                                                onChange={handleInscriptionInputChange}
+                                                placeholder="••••••••"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <LockIcon sx={{ color: 'text.secondary' }} />
                                                         </InputAdornment>
                                                     ),
                                                 }}

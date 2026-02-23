@@ -10,6 +10,17 @@ export interface LoginResponse {
     expiresAt: string;
 }
 
+export interface RegisterEtablissementRequest {
+    nomEtablissement: string;
+    email: string;
+    motDePasse: string;
+    description: string;
+    localisation: string;
+    siteWeb: string;
+    telephonePro: string;
+    typeEtablissement: string;
+}
+
 export const authApi = {
     /**
      * Authentifie un utilisateur et renvoie un token JWT
@@ -21,6 +32,15 @@ export const authApi = {
             email,
             motDePasse,
         });
+        return response.data;
+    },
+
+    /**
+     * Enregistre un nouvel établissement
+     * @param data Données de l'établissement
+     */
+    registerEtablissement: async (data: RegisterEtablissementRequest): Promise<ApiResponse<any>> => {
+        const response = await client.post<ApiResponse<any>>('/auth/register/etablissement', data);
         return response.data;
     },
 

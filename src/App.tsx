@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -18,6 +18,9 @@ import {
   Logs,
   ValidationInscriptions,
 } from './pages/super_admin';
+
+// Page 404
+import NotFound from './pages/NotFound';
 
 // Pages Admin Établissement
 import {
@@ -79,7 +82,7 @@ const AppContent: React.FC = () => {
               <Route path="notifications" element={<EtablissementNotifications />} />
             </Route>
           </Route>
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
       <GlobalSnackbar />

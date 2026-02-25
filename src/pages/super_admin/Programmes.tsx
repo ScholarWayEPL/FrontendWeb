@@ -19,6 +19,7 @@ import {
   Skeleton,
   Pagination,
   Divider,
+  Avatar,
   useTheme,
   alpha,
   Stack,

@@ -37,9 +37,6 @@ import {
   FilterList as FilterIcon,
   Refresh as RefreshIcon,
   People as PeopleIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  School as SchoolIcon,
   Close as CloseIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';

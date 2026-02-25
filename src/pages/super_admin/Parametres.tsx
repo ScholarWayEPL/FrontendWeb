@@ -7,7 +7,6 @@ import {
   TextField,
   Button,
   Switch,
-  Divider,
   Grid,
   Avatar,
   Stack,
@@ -45,7 +44,6 @@ import {
   CloudDone,
   Storage,
   Speed,
-  TrendingUp,
   PhotoCamera,
   Verified,
 } from '@mui/icons-material';
@@ -291,7 +289,7 @@ const Parametres: React.FC = () => {
             <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
               <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={800} gutterBottom>Journal d'accès</Typography>
-                <List divider>
+                <List>
                   <ListItem sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: '12px', mb: 2 }}>
                     <ListItemIcon><CheckCircleIcon color="success" /></ListItemIcon>
                     <ListItemText primary="Session active" secondary="Lomé, Togo • 192.168.1.XX" primaryTypographyProps={{ fontWeight: 700 }} />

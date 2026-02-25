@@ -54,8 +54,6 @@ import {
     Info,
     Timeline,
     ViewList,
-    CalendarToday,
-    AccessTime,
     Computer,
     Person,
 } from '@mui/icons-material';

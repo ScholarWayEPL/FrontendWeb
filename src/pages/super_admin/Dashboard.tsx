@@ -15,7 +15,7 @@ import {
   LinearProgress,
   IconButton,
   Tooltip,
-  Divider,
+  Button,
   useTheme,
   alpha,
   Stack,
@@ -29,10 +29,7 @@ import {
   Add,
   Edit,
   Send,
-  TrendingUp,
-  TrendingDown,
   Refresh,
-  MoreVert,
   EmojiEvents,
   Dashboard as DashboardIcon,
 } from '@mui/icons-material';
@@ -47,8 +44,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
   Legend,
 } from 'recharts';
 import StatCard from '../../components/StatCard';

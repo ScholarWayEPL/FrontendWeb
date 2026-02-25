@@ -166,6 +166,11 @@ const Etablissements: React.FC = () => {
     handleModalClose();
   };
 
+  const handleViewDetails = (etablissement: Etablissement) => {
+    setViewingEtablissement(etablissement);
+    setDetailsOpen(true);
+  };
+
   const getTypeChip = (type: TypeEtablissement) => {
     const typeConfig = {
       'Université': { color: 'primary' as const },

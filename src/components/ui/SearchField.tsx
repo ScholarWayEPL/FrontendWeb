@@ -1,4 +1,4 @@
-import React from 'react';
+import type { SxProps, Theme } from '@mui/material';
 import { TextField, InputAdornment } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { BORDER_RADIUS } from '../../constants';
@@ -9,6 +9,7 @@ interface SearchFieldProps {
     placeholder?: string;
     fullWidth?: boolean;
     size?: 'small' | 'medium';
+    sx?: SxProps<Theme>;
 }
 
 const SearchField: React.FC<SearchFieldProps> = ({
@@ -17,6 +18,7 @@ const SearchField: React.FC<SearchFieldProps> = ({
     placeholder = 'Rechercher...',
     fullWidth = false,
     size = 'small',
+    sx,
 }) => {
     return (
         <TextField
@@ -44,6 +46,7 @@ const SearchField: React.FC<SearchFieldProps> = ({
                         bgcolor: 'white',
                     },
                 },
+                ...sx,
             }}
         />
     );

@@ -18,6 +18,7 @@ import {
   Tab,
   Tabs,
   Badge,
+  Divider,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -34,9 +35,8 @@ import {
   Storage,
   Sync,
   MarkEmailRead,
-  NotificationsActive,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { formatRelativeTime } from '../../utils/helpers';

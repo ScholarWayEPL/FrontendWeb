@@ -25,7 +25,6 @@ import {
     useTheme,
     alpha,
     Alert,
-    Fade,
 } from '@mui/material';
 import {
     Visibility as VisibilityIcon,
@@ -35,13 +34,13 @@ import {
     Business as BusinessIcon,
     Email as EmailIcon,
     Phone as PhoneIcon,
-    Language as LanguageIcon,
     Description as DescriptionIcon,
     LocationOn as LocationOnIcon,
     VerifiedUser as VerifiedUserIcon,
 } from '@mui/icons-material';
-import { PageHeader, SearchField, StatusChip } from '../../components/ui';
+import { SearchField, StatusChip } from '../../components/ui';
 import StatCard from '../../components/StatCard';
+import { ConfirmDialog } from '../../components';
 
 // Types
 interface DemandeInscription {
@@ -359,15 +358,15 @@ const ValidationInscriptions: React.FC = () => {
                                     <Typography variant="overline" sx={{ color: 'text.disabled', fontWeight: 800 }}>Informations de contact</Typography>
                                     <Stack spacing={2} sx={{ mt: 2 }}>
                                         <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar size="small" sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05), color: 'primary.main', width: 32, height: 32 }}><EmailIcon sx={{ fontSize: 18 }} /></Avatar>
+                                            <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05), color: 'primary.main', width: 32, height: 32 }}><EmailIcon sx={{ fontSize: 18 }} /></Avatar>
                                             <Typography variant="body2" fontWeight={600}>{selectedDemande.emailPro}</Typography>
                                         </Stack>
                                         <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar size="small" sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), color: 'success.main', width: 32, height: 32 }}><PhoneIcon sx={{ fontSize: 18 }} /></Avatar>
+                                            <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), color: 'success.main', width: 32, height: 32 }}><PhoneIcon sx={{ fontSize: 18 }} /></Avatar>
                                             <Typography variant="body2" fontWeight={600}>{selectedDemande.telephonePro}</Typography>
                                         </Stack>
                                         <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar size="small" sx={{ bgcolor: alpha(theme.palette.warning.main, 0.05), color: 'warning.main', width: 32, height: 32 }}><LocationOnIcon sx={{ fontSize: 18 }} /></Avatar>
+                                            <Avatar sx={{ bgcolor: alpha(theme.palette.warning.main, 0.05), color: 'warning.main', width: 32, height: 32 }}><LocationOnIcon sx={{ fontSize: 18 }} /></Avatar>
                                             <Typography variant="body2" fontWeight={600}>{selectedDemande.localisation}</Typography>
                                         </Stack>
                                     </Stack>

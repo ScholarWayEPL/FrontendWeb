@@ -25,6 +25,7 @@ import {
     useTheme,
     alpha,
     Alert,
+    Fade,
 } from '@mui/material';
 import {
     Visibility as VisibilityIcon,
@@ -41,7 +42,6 @@ import {
 } from '@mui/icons-material';
 import { PageHeader, SearchField, StatusChip } from '../../components/ui';
 import StatCard from '../../components/StatCard';
-import { BORDER_RADIUS, SHADOWS } from '../../constants';
 
 // Types
 interface DemandeInscription {
@@ -198,153 +198,122 @@ const ValidationInscriptions: React.FC = () => {
     };
 
     return (
-        <Box>
+        <Box sx={{ p: { xs: 1, md: 3 } }}>
             {/* En-tête */}
-            <PageHeader
-                title="Validation des Inscriptions"
-                subtitle="Examinez et validez les demandes d'inscription des établissements"
-                icon={<VerifiedUserIcon />}
-                iconColor={theme.palette.primary.main}
-            />
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h4" fontWeight={800} sx={{ color: 'text.primary', mb: 1, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <VerifiedUserIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                    Validation des Inscriptions
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                    Examinez et validez les demandes d'accès des nouveaux établissements ScholarWay.
+                </Typography>
+            </Box>
 
             {/* Stats rapides */}
-            <Grid container spacing={2} sx={{ mb: 4 }}>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="Total demandes"
-                        value={stats.total}
-                        icon={<BusinessIcon />}
-                        color="info"
-                    />
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Total Demandes" value={stats.total} icon={<BusinessIcon />} color="info" />
                 </Grid>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="En attente"
-                        value={stats.enAttente}
-                        icon={<DescriptionIcon />}
-                        color="warning"
-                    />
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="En attente" value={stats.enAttente} icon={<DescriptionIcon />} color="warning" />
                 </Grid>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="Approuvées"
-                        value={stats.approuvees}
-                        icon={<CheckCircleIcon />}
-                        color="success"
-                    />
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Approuvées" value={stats.approuvees} icon={<CheckCircleIcon />} color="success" />
                 </Grid>
-                <Grid item xs={6} sm={3}>
-                    <StatCard
-                        title="Rejetées"
-                        value={stats.rejetees}
-                        icon={<CancelIcon />}
-                        color="error"
-                    />
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Rejetées" value={stats.rejetees} icon={<CancelIcon />} color="error" />
                 </Grid>
             </Grid>
 
-            {/* Barre de recherche */}
-            <Card sx={{ mb: 3, borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
-                <CardContent>
+            {/* Filtres */}
+            <Card sx={{ mb: 4, borderRadius: '16px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', boxShadow: 'none' }}>
+                <CardContent sx={{ p: 2.5 }}>
                     <SearchField
                         value={searchTerm}
                         onChange={setSearchTerm}
-                        placeholder="Rechercher par nom, email ou localisation..."
+                        placeholder="Rechercher un établissement, une ville ou un email..."
                         fullWidth
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
                     />
                 </CardContent>
             </Card>
 
-            {/* Tableau des demandes */}
-            <Card sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}>
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Établissement</TableCell>
-                                <TableCell>Contact</TableCell>
-                                <TableCell>Localisation</TableCell>
-                                <TableCell>Date demande</TableCell>
-                                <TableCell>Statut</TableCell>
-                                <TableCell align="center">Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {filteredDemandes
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((demande) => (
-                                    <TableRow key={demande.id} hover>
-                                        <TableCell>
-                                            <Stack direction="row" spacing={2} alignItems="center">
-                                                <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                                                    <BusinessIcon color="primary" />
-                                                </Avatar>
-                                                <Box>
-                                                    <Typography variant="subtitle2" fontWeight={600}>
-                                                        {demande.nomEtablissement}
+            {/* Liste des demandes */}
+            <TableContainer component={Card} sx={{ borderRadius: '16px', border: '1px solid', borderColor: 'divider', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+                <Table>
+                    <TableHead sx={{ bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Etablissement</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Contact</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Localisation</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Date</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Statut</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }} align="center">Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredDemandes
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((demande) => (
+                                <TableRow key={demande.id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                                    <TableCell>
+                                        <Stack direction="row" spacing={2} alignItems="center">
+                                            <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 700, border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
+                                                {demande.nomEtablissement.charAt(0)}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="body2" fontWeight={700}>
+                                                    {demande.nomEtablissement}
+                                                </Typography>
+                                                {demande.siteWeb && (
+                                                    <Typography variant="caption" color="primary.main" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                                                        {demande.siteWeb.replace('https://', '')}
                                                     </Typography>
-                                                    {demande.siteWeb && (
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {demande.siteWeb}
-                                                        </Typography>
-                                                    )}
-                                                </Box>
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2">{demande.emailPro}</Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {demande.telephonePro}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2">{demande.localisation}</Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2">{formatDate(demande.dateDemande)}</Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <StatusChip status={demande.statut} label={getStatutLabel(demande.statut)} />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Stack direction="row" spacing={1} justifyContent="center">
-                                                <Tooltip title="Voir détails">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => handleViewDetails(demande)}
-                                                    >
-                                                        <VisibilityIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                {demande.statut === 'en_attente' && (
-                                                    <>
-                                                        <Tooltip title="Approuver">
-                                                            <IconButton
-                                                                size="small"
-                                                                color="success"
-                                                                onClick={() => handleOpenConfirmDialog(demande, 'approve')}
-                                                            >
-                                                                <CheckCircleIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Rejeter">
-                                                            <IconButton
-                                                                size="small"
-                                                                color="error"
-                                                                onClick={() => handleOpenConfirmDialog(demande, 'reject')}
-                                                            >
-                                                                <CancelIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </>
                                                 )}
-                                            </Stack>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                            </Box>
+                                        </Stack>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" fontWeight={500}>{demande.emailPro}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{demande.telephonePro}</Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{demande.localisation}</Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2">{formatDate(demande.dateDemande)}</Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <StatusChip status={demande.statut} label={getStatutLabel(demande.statut)} />
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Stack direction="row" spacing={1} justifyContent="center">
+                                            <Tooltip title="Examiner le dossier">
+                                                <IconButton size="small" sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }} onClick={() => handleViewDetails(demande)}>
+                                                    <VisibilityIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                            {demande.statut === 'en_attente' && (
+                                                <>
+                                                    <Tooltip title="Approuver">
+                                                        <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => handleOpenConfirmDialog(demande, 'approve')}>
+                                                            <CheckCircleIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Rejeter">
+                                                        <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => handleOpenConfirmDialog(demande, 'reject')}>
+                                                            <CancelIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </>
+                                            )}
+                                        </Stack>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                    </TableBody>
+                </Table>
                 <TablePagination
                     component="div"
                     count={filteredDemandes.length}
@@ -352,213 +321,110 @@ const ValidationInscriptions: React.FC = () => {
                     onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Lignes par page"
-                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
+                    sx={{ borderTop: '1px solid', borderColor: 'divider' }}
                 />
-            </Card>
+            </TableContainer>
 
-            {/* Dialog de détails */}
-            <Dialog
-                open={detailDialogOpen}
-                onClose={() => setDetailDialogOpen(false)}
-                maxWidth="md"
-                fullWidth
-            >
+            {/* Dialog de détails Premium */}
+            <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px', backgroundImage: 'none' } }}>
                 {selectedDemande && (
                     <>
-                        <DialogTitle>
+                        <DialogTitle sx={{ p: 4, pb: 2 }}>
                             <Stack direction="row" spacing={2} alignItems="center">
-                                <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: 56, height: 56 }}>
-                                    <BusinessIcon color="primary" sx={{ fontSize: 32 }} />
+                                <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: 64, height: 64, border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}` }}>
+                                    <BusinessIcon color="primary" sx={{ fontSize: 36 }} />
                                 </Avatar>
                                 <Box>
-                                    <Typography variant="h6" fontWeight={700}>
+                                    <Typography variant="h5" fontWeight={800} letterSpacing="-0.02em">
                                         {selectedDemande.nomEtablissement}
                                     </Typography>
-                                    <StatusChip status={selectedDemande.statut} label={getStatutLabel(selectedDemande.statut)} />
+                                    <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+                                        <StatusChip status={selectedDemande.statut} label={getStatutLabel(selectedDemande.statut)} />
+                                        <Typography variant="caption" sx={{ color: 'text.disabled', alignSelf: 'center' }}>
+                                            Demande #INS-{selectedDemande.id}
+                                        </Typography>
+                                    </Stack>
                                 </Box>
                             </Stack>
                         </DialogTitle>
-                        <DialogContent dividers>
-                            <Grid container spacing={3}>
+                        <DialogContent sx={{ p: 4 }}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={12}>
-                                    <Alert severity="info" sx={{ mb: 2 }}>
-                                        Demande soumise le {formatDate(selectedDemande.dateDemande)}
+                                    <Alert severity="info" variant="outlined" icon={<DescriptionIcon />} sx={{ borderRadius: '12px', bgcolor: alpha(theme.palette.info.main, 0.02) }}>
+                                        Dossier soumis le <strong>{formatDate(selectedDemande.dateDemande)}</strong>. Veuillez vérifier l'accréditation avant toute validation.
                                     </Alert>
                                 </Grid>
-                                
-                                <Grid item xs={12} md={6}>
-                                    <Stack direction="row" spacing={2} alignItems="center">
-                                        <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                                            <EmailIcon color="primary" />
-                                        </Avatar>
-                                        <Box>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Email professionnel
-                                            </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
-                                                {selectedDemande.emailPro}
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
-                                </Grid>
 
                                 <Grid item xs={12} md={6}>
-                                    <Stack direction="row" spacing={2} alignItems="center">
-                                        <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.1) }}>
-                                            <PhoneIcon color="success" />
-                                        </Avatar>
-                                        <Box>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Téléphone
-                                            </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
-                                                {selectedDemande.telephonePro}
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
-                                </Grid>
-
-                                <Grid item xs={12} md={6}>
-                                    <Stack direction="row" spacing={2} alignItems="center">
-                                        <Avatar sx={{ bgcolor: alpha(theme.palette.warning.main, 0.1) }}>
-                                            <LocationOnIcon color="warning" />
-                                        </Avatar>
-                                        <Box>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Localisation
-                                            </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
-                                                {selectedDemande.localisation}
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
-                                </Grid>
-
-                                {selectedDemande.siteWeb && (
-                                    <Grid item xs={12} md={6}>
+                                    <Typography variant="overline" sx={{ color: 'text.disabled', fontWeight: 800 }}>Informations de contact</Typography>
+                                    <Stack spacing={2} sx={{ mt: 2 }}>
                                         <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar sx={{ bgcolor: alpha(theme.palette.info.main, 0.1) }}>
-                                                <LanguageIcon color="info" />
-                                            </Avatar>
-                                            <Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    Site web
-                                                </Typography>
-                                                <Typography variant="body1" fontWeight={500}>
-                                                    {selectedDemande.siteWeb}
-                                                </Typography>
-                                            </Box>
+                                            <Avatar size="small" sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05), color: 'primary.main', width: 32, height: 32 }}><EmailIcon sx={{ fontSize: 18 }} /></Avatar>
+                                            <Typography variant="body2" fontWeight={600}>{selectedDemande.emailPro}</Typography>
                                         </Stack>
-                                    </Grid>
-                                )}
+                                        <Stack direction="row" spacing={2} alignItems="center">
+                                            <Avatar size="small" sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), color: 'success.main', width: 32, height: 32 }}><PhoneIcon sx={{ fontSize: 18 }} /></Avatar>
+                                            <Typography variant="body2" fontWeight={600}>{selectedDemande.telephonePro}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" spacing={2} alignItems="center">
+                                            <Avatar size="small" sx={{ bgcolor: alpha(theme.palette.warning.main, 0.05), color: 'warning.main', width: 32, height: 32 }}><LocationOnIcon sx={{ fontSize: 18 }} /></Avatar>
+                                            <Typography variant="body2" fontWeight={600}>{selectedDemande.localisation}</Typography>
+                                        </Stack>
+                                    </Stack>
+                                </Grid>
 
-                                <Grid item xs={12}>
-                                    <Divider sx={{ my: 1 }} />
+                                <Grid item xs={12} md={6}>
+                                    <Typography variant="overline" sx={{ color: 'text.disabled', fontWeight: 800 }}>Preuve d'accréditation</Typography>
+                                    <Box sx={{ mt: 2, p: 3, borderRadius: '16px', border: '1px dashed', borderColor: 'divider', bgcolor: alpha(theme.palette.background.default, 0.5), textAlign: 'center' }}>
+                                        <DescriptionIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
+                                        <Typography variant="body2" fontWeight={700} display="block">Certificat d'Homologation</Typography>
+                                        <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 2 }}>PDF - 2.4 MB</Typography>
+                                        <Button variant="contained" size="small" startIcon={<DownloadIcon />} sx={{ borderRadius: '8px', textTransform: 'none' }}>
+                                            Visualiser le PDF
+                                        </Button>
+                                    </Box>
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                                        Description de l'établissement
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                                    <Divider sx={{ mb: 3 }} />
+                                    <Typography variant="overline" sx={{ color: 'text.disabled', fontWeight: 800 }}>Description de l'établissement</Typography>
+                                    <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary', lineHeight: 1.8, bgcolor: alpha(theme.palette.background.default, 0.3), p: 2, borderRadius: '12px' }}>
                                         {selectedDemande.description}
                                     </Typography>
                                 </Grid>
-
-                                <Grid item xs={12}>
-                                    <Card sx={{ bgcolor: alpha(theme.palette.grey[500], 0.1) }}>
-                                        <CardContent>
-                                            <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-                                                <Stack direction="row" spacing={2} alignItems="center">
-                                                    <DescriptionIcon color="action" />
-                                                    <Box>
-                                                        <Typography variant="subtitle2">
-                                                            Document d'accréditation
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {selectedDemande.documentAccreditationUrl}
-                                                        </Typography>
-                                                    </Box>
-                                                </Stack>
-                                                <Button
-                                                    variant="outlined"
-                                                    startIcon={<DownloadIcon />}
-                                                    size="small"
-                                                >
-                                                    Télécharger
-                                                </Button>
-                                            </Stack>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
                             </Grid>
                         </DialogContent>
-                        <DialogActions sx={{ px: 3, py: 2 }}>
-                            <Button onClick={() => setDetailDialogOpen(false)}>
-                                Fermer
-                            </Button>
+                        <DialogActions sx={{ p: 4, pt: 0 }}>
+                            <Button onClick={() => setDetailDialogOpen(false)} sx={{ fontWeight: 700, px: 3 }}>Fermer</Button>
+                            <Box sx={{ flexGrow: 1 }} />
                             {selectedDemande.statut === 'en_attente' && (
-                                <>
-                                    <Button
-                                        variant="outlined"
-                                        color="error"
-                                        startIcon={<CancelIcon />}
-                                        onClick={() => {
-                                            setDetailDialogOpen(false);
-                                            handleOpenConfirmDialog(selectedDemande, 'reject');
-                                        }}
-                                    >
-                                        Rejeter
+                                <Stack direction="row" spacing={2}>
+                                    <Button variant="outlined" color="error" startIcon={<CancelIcon />} sx={{ borderRadius: '10px', fontWeight: 700 }}
+                                        onClick={() => { setDetailDialogOpen(false); handleOpenConfirmDialog(selectedDemande, 'reject'); }}>
+                                        Rejeter le dossier
                                     </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="success"
-                                        startIcon={<CheckCircleIcon />}
-                                        onClick={() => {
-                                            setDetailDialogOpen(false);
-                                            handleOpenConfirmDialog(selectedDemande, 'approve');
-                                        }}
-                                    >
-                                        Approuver
+                                    <Button variant="contained" color="success" startIcon={<CheckCircleIcon />} sx={{ borderRadius: '10px', fontWeight: 700, boxShadow: `0 8px 16px ${alpha(theme.palette.success.main, 0.25)}` }}
+                                        onClick={() => { setDetailDialogOpen(false); handleOpenConfirmDialog(selectedDemande, 'approve'); }}>
+                                        Valider l'établissement
                                     </Button>
-                                </>
+                                </Stack>
                             )}
                         </DialogActions>
                     </>
                 )}
             </Dialog>
 
-            {/* Dialog de confirmation */}
-            <Dialog
+            {/* Confirmation Dialog */}
+            <ConfirmDialog
                 open={confirmDialogOpen}
-                onClose={() => setConfirmDialogOpen(false)}
-                maxWidth="xs"
-                fullWidth
-            >
-                <DialogTitle>
-                    {confirmAction === 'approve' ? 'Confirmer l\'approbation' : 'Confirmer le rejet'}
-                </DialogTitle>
-                <DialogContent>
-                    <Typography variant="body1">
-                        {confirmAction === 'approve'
-                            ? `Êtes-vous sûr de vouloir approuver la demande de "${selectedDemande?.nomEtablissement}" ? Un email sera envoyé à l'établissement avec ses identifiants de connexion.`
-                            : `Êtes-vous sûr de vouloir rejeter la demande de "${selectedDemande?.nomEtablissement}" ? L'établissement sera notifié par email.`}
-                    </Typography>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, py: 2 }}>
-                    <Button onClick={() => setConfirmDialogOpen(false)}>
-                        Annuler
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color={confirmAction === 'approve' ? 'success' : 'error'}
-                        onClick={handleConfirmAction}
-                    >
-                        {confirmAction === 'approve' ? 'Approuver' : 'Rejeter'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                title={confirmAction === 'approve' ? 'Confirmer l\'approbation' : 'Confirmer le rejet'}
+                message={confirmAction === 'approve'
+                    ? `Souhaitez-vous valider l'entrée de "${selectedDemande?.nomEtablissement}" sur ScholarWay ? Un email d'activation sera envoyé.`
+                    : `Confirmez-vous le rejet de cette demande ? L'établissement sera informé par email.`
+                }
+                onConfirm={handleConfirmAction}
+                onCancel={() => setConfirmDialogOpen(false)}
+            />
         </Box>
     );
 };

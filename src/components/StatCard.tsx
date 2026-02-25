@@ -1,7 +1,6 @@
 import React from 'react';
-import { Box, Card, CardContent, Typography, type SvgIconProps, useTheme } from '@mui/material';
+import { Box, Card, CardContent, Typography, type SvgIconProps, useTheme, alpha } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
-import { BORDER_RADIUS, SHADOWS } from '../constants';
 
 interface StatCardProps {
   title: string;
@@ -13,58 +12,59 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }) => {
   const isPositiveGrowth = growth !== undefined && growth >= 0;
-
   const theme = useTheme();
-
-  const colorMap = {
-    primary: { main: theme.palette.primary.main, light: 'rgba(21,101,192,0.08)' },
-    secondary: { main: theme.palette.secondary.main, light: 'rgba(46,125,50,0.08)' },
-    success: { main: theme.palette.success.main, light: 'rgba(46,125,50,0.08)' },
-    warning: { main: theme.palette.warning.main, light: 'rgba(237,108,2,0.06)' },
-    error: { main: theme.palette.error.main, light: 'rgba(211,47,47,0.06)' },
-    info: { main: theme.palette.info.main, light: 'rgba(2,136,209,0.06)' },
-  } as const;
 
   return (
     <Card
       sx={{
         height: '100%',
-        borderRadius: BORDER_RADIUS.md,
-        boxShadow: SHADOWS.card,
-        transition: 'transform 0.2s, box-shadow 0.2s',
+        borderRadius: '20px',
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        bgcolor: 'background.paper',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: SHADOWS.cardHover,
+          transform: 'translateY(-6px)',
+          boxShadow: theme.palette.mode === 'dark'
+            ? `0 20px 40px -12px ${alpha(theme.palette[color].main, 0.25)}`
+            : `0 20px 40px -12px ${alpha(theme.palette[color].main, 0.15)}`,
+          borderColor: alpha(theme.palette[color].main, 0.3),
         },
       }}
     >
       <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: '0.05em' }}>
               {title}
             </Typography>
-            <Typography variant="h4" fontWeight={700} color="text.primary">
+            <Typography variant="h3" fontWeight={800} sx={{ color: 'text.primary', mt: 0.5 }}>
               {typeof value === 'number' ? value.toLocaleString('fr-FR') : value}
             </Typography>
             {growth !== undefined && (
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                {isPositiveGrowth ? (
-                  <TrendingUp sx={{ fontSize: 18, color: 'success.main', mr: 0.5 }} />
-                ) : (
-                  <TrendingDown sx={{ fontSize: 18, color: 'error.main', mr: 0.5 }} />
-                )}
-                <Typography
-                  variant="body2"
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1.5 }}>
+                <Box
                   sx={{
-                    color: isPositiveGrowth ? 'success.main' : 'error.main',
-                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    px: 1,
+                    py: 0.2,
+                    borderRadius: '12px',
+                    bgcolor: isPositiveGrowth ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.error.main, 0.1),
+                    color: isPositiveGrowth ? 'success.main' : 'error.main'
                   }}
                 >
-                  {isPositiveGrowth ? '+' : ''}{growth}%
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                  ce mois
+                  {isPositiveGrowth ? (
+                    <TrendingUp sx={{ fontSize: 16, mr: 0.5 }} />
+                  ) : (
+                    <TrendingDown sx={{ fontSize: 16, mr: 0.5 }} />
+                  )}
+                  <Typography variant="caption" fontWeight={700}>
+                    {isPositiveGrowth ? '+' : ''}{growth}%
+                  </Typography>
+                </Box>
+                <Typography variant="caption" sx={{ ml: 1, color: 'text.disabled', fontWeight: 500 }}>
+                  vs mois dernier
                 </Typography>
               </Box>
             )}
@@ -73,16 +73,17 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, growth, icon, color }
             sx={{
               width: 56,
               height: 56,
-              borderRadius: BORDER_RADIUS.full,
-              bgcolor: colorMap[color].light,
+              borderRadius: '16px',
+              bgcolor: alpha(theme.palette[color].main, 0.1),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: `1px solid ${theme.palette.divider}`,
+              color: `${color}.main`,
+              boxShadow: `inset 0 0 12px ${alpha(theme.palette[color].main, 0.1)}`,
             }}
           >
             {React.cloneElement(icon, {
-              sx: { fontSize: 26, color: colorMap[color].main },
+              sx: { fontSize: 28 },
             })}
           </Box>
         </Box>

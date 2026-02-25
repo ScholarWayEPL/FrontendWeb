@@ -19,6 +19,10 @@ import {
   Skeleton,
   Pagination,
   Divider,
+  useTheme,
+  alpha,
+  Stack,
+  Fade,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -36,7 +40,6 @@ import {
 } from '@mui/icons-material';
 import { formatCFA } from '../../constants';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   fetchProgrammes,
   fetchDomaines,
@@ -57,6 +60,7 @@ const niveauOptions: { value: string; label: string }[] = [
 ];
 
 const Programmes: React.FC = () => {
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const { programmes, loading, pagination, filters, domaines } = useAppSelector(
     (state) => state.programmes
@@ -119,19 +123,10 @@ const Programmes: React.FC = () => {
     if (programmeToDelete) {
       try {
         await dispatch(deleteProgramme(programmeToDelete.idProgramme)).unwrap();
-        dispatch(
-          showSnackbar({
-            message: 'Programme supprimé avec succès',
-            severity: 'success',
-          })
-        );
+        dispatch(showSnackbar({ message: 'Programme supprimé avec succès', severity: 'success' }));
+        loadData();
       } catch {
-        dispatch(
-          showSnackbar({
-            message: 'Erreur lors de la suppression',
-            severity: 'error',
-          })
-        );
+        dispatch(showSnackbar({ message: 'Erreur lors de la suppression', severity: 'error' }));
       }
     }
     setDeleteDialogOpen(false);
@@ -154,14 +149,12 @@ const Programmes: React.FC = () => {
 
   const getNiveauConfig = (niveau: NiveauProgramme) => {
     const config = {
-      Licence: { color: '#2196f3', bg: '#e3f2fd', label: 'Licence (Bac+3)' },
-      Master: { color: '#9c27b0', bg: '#f3e5f5', label: 'Master (Bac+5)' },
-      Doctorat: { color: '#f44336', bg: '#ffebee', label: 'Doctorat (Bac+8)' },
+      Licence: { color: theme.palette.primary.main, label: 'Licence (Bac+3)' },
+      Master: { color: theme.palette.secondary.main, label: 'Master (Bac+5)' },
+      Doctorat: { color: theme.palette.error.main, label: 'Doctorat (Bac+8)' },
     };
-    return config[niveau];
+    return config[niveau] || { color: theme.palette.text.secondary, label: niveau };
   };
-
-  // formatCFA importé depuis constants
 
   const domaineOptions = [
     { value: '', label: 'Tous les domaines' },
@@ -172,396 +165,182 @@ const Programmes: React.FC = () => {
 
   const ProgrammeCard: React.FC<{ programme: Programme }> = ({ programme }) => {
     const niveauConfig = getNiveauConfig(programme.niveau);
-    
+
     return (
       <Card
         sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          transition: 'all 0.3s ease-in-out',
-          borderRadius: BORDER_RADIUS.md,
-          borderTop: `4px solid ${niveauConfig.color}`,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderRadius: '24px',
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          position: 'relative',
+          overflow: 'hidden',
           '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: 6,
+            transform: 'translateY(-6px)',
+            boxShadow: theme.palette.mode === 'dark' ? '0 20px 40px rgba(0,0,0,0.4)' : '0 20px 40px rgba(0,0,0,0.06)',
+            borderColor: alpha(niveauConfig.color, 0.3),
           },
         }}
       >
-        <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-          {/* En-tête avec niveau */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box sx={{ height: 6, width: '100%', bgcolor: alpha(niveauConfig.color, 0.5) }} />
+
+        <CardContent sx={{ flexGrow: 1, p: 3 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2.5 }}>
             <Chip
               label={niveauConfig.label}
               size="small"
               sx={{
-                bgcolor: niveauConfig.bg,
+                bgcolor: alpha(niveauConfig.color, 0.1),
                 color: niveauConfig.color,
-                fontWeight: 600,
-                fontSize: '0.7rem',
+                fontWeight: 800,
+                fontSize: '0.65rem',
+                borderRadius: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
               }}
             />
-            <Chip
-              label={programme.domaine}
-              size="small"
-              variant="outlined"
-              sx={{ fontSize: '0.7rem' }}
-            />
-          </Box>
+            <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 600 }}>{programme.domaine}</Typography>
+          </Stack>
 
-          {/* Titre du programme */}
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            gutterBottom
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              minHeight: '3.6em',
-              lineHeight: 1.3,
-            }}
-          >
+          <Typography variant="h6" fontWeight={800} sx={{ mb: 1.5, letterSpacing: '-0.01em', lineHeight: 1.3, minHeight: '2.6em' }}>
             {programme.nomProgramme}
           </Typography>
 
-          {/* Établissement */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <BusinessIcon fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {programme.etablissementNom || 'Établissement non spécifié'}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2.5 }}>
+            <Avatar sx={{ width: 20, height: 20, bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}>
+              <BusinessIcon sx={{ fontSize: 12 }} />
+            </Avatar>
+            <Typography variant="body2" color="text.secondary" fontWeight={500} noWrap>
+              {programme.etablissementNom || 'Établissement Admin'}
             </Typography>
-          </Box>
+          </Stack>
 
-          <Divider sx={{ my: 1.5 }} />
+          <Divider sx={{ mb: 2.5, opacity: 0.5 }} />
 
-          {/* Infos clés - Design amélioré */}
-          <Box sx={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: 1.5,
-            mb: 1.5,
-          }}>
-            {/* Durée */}
-            <Box sx={{ 
-              p: 1.5, 
-              borderRadius: BORDER_RADIUS.md, 
-              bgcolor: 'rgba(2, 136, 209, 0.08)',
-              border: '1px solid',
-              borderColor: 'rgba(2, 136, 209, 0.2)',
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <DurationIcon sx={{ fontSize: 16, color: 'info.main' }} />
-                <Typography variant="caption" color="info.main" fontWeight={500}>
-                  Durée
-                </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box sx={{ p: 1.5, borderRadius: '16px', bgcolor: alpha(theme.palette.info.main, 0.05), border: `1px solid ${alpha(theme.palette.info.main, 0.1)}` }}>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                  <DurationIcon sx={{ fontSize: 14, color: 'info.main' }} />
+                  <Typography variant="caption" color="info.main" fontWeight={800} textTransform="uppercase">Durée</Typography>
+                </Stack>
+                <Typography variant="body2" fontWeight={800}>{programme.duree} an{programme.duree > 1 ? 's' : ''}</Typography>
               </Box>
-              <Typography variant="body2" fontWeight={700}>
-                {programme.duree} an{programme.duree > 1 ? 's' : ''}
-              </Typography>
-            </Box>
-            
-            {/* Frais */}
-            <Box sx={{ 
-              p: 1.5, 
-              borderRadius: BORDER_RADIUS.md, 
-              bgcolor: programme.fraisScolarite === 0 ? 'rgba(46, 125, 50, 0.08)' : 'rgba(237, 108, 2, 0.08)',
-              border: '1px solid',
-              borderColor: programme.fraisScolarite === 0 ? 'rgba(46, 125, 50, 0.2)' : 'rgba(237, 108, 2, 0.2)',
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <MoneyIcon sx={{ fontSize: 16, color: programme.fraisScolarite === 0 ? 'success.main' : 'warning.main' }} />
-                <Typography variant="caption" color={programme.fraisScolarite === 0 ? 'success.main' : 'warning.main'} fontWeight={500}>
-                  Frais/an
-                </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ p: 1.5, borderRadius: '16px', bgcolor: alpha(theme.palette.success.main, 0.05), border: `1px solid ${alpha(theme.palette.success.main, 0.1)}` }}>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                  <MoneyIcon sx={{ fontSize: 14, color: 'success.main' }} />
+                  <Typography variant="caption" color="success.main" fontWeight={800} textTransform="uppercase">Scolarité</Typography>
+                </Stack>
+                <Typography variant="body2" fontWeight={800}>{formatCFA(programme.fraisScolarite)}</Typography>
               </Box>
-              <Typography variant="body2" fontWeight={700} color={programme.fraisScolarite === 0 ? 'success.main' : 'text.primary'}>
-                {formatCFA(programme.fraisScolarite)}
-              </Typography>
-            </Box>
-          </Box>
+            </Grid>
+          </Grid>
 
-          {/* Débouchés */}
-          <Box sx={{ 
-            p: 1.5, 
-            borderRadius: BORDER_RADIUS.md, 
-            bgcolor: 'grey.50',
-            border: '1px solid',
-            borderColor: 'grey.200',
-            mb: 1.5,
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-              <WorkIcon sx={{ fontSize: 16, color: 'secondary.main' }} />
-              <Typography variant="caption" color="secondary.main" fontWeight={500}>
-                Débouchés
-              </Typography>
-            </Box>
-            <Tooltip title={programme.debouchesProfessionnels}>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                }}
-              >
-                {programme.debouchesProfessionnels}
-              </Typography>
-            </Tooltip>
+          <Box sx={{ mt: 2.5, p: 2, borderRadius: '16px', bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+              <WorkIcon sx={{ fontSize: 14, color: 'secondary.main' }} />
+              <Typography variant="caption" color="secondary.main" fontWeight={800} textTransform="uppercase">Débouchés</Typography>
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '3em' }}>
+              {programme.debouchesProfessionnels}
+            </Typography>
           </Box>
         </CardContent>
 
-        <CardActions sx={{ justifyContent: 'flex-end', gap: 1, px: 2, pb: 2, pt: 0 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<EditIcon />}
-            onClick={() => handleEdit(programme)}
-            sx={{ borderRadius: BORDER_RADIUS.md, textTransform: 'none' }}
-          >
-            Modifier
-          </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={() => handleDeleteClick(programme)}
-            sx={{ borderRadius: BORDER_RADIUS.md, textTransform: 'none' }}
-          >
-            Supprimer
-          </Button>
+        <CardActions sx={{ p: 2, pt: 0, justifyContent: 'flex-end', gap: 1 }}>
+          <Button size="small" variant="text" startIcon={<EditIcon />} onClick={() => handleEdit(programme)} sx={{ borderRadius: '10px', fontWeight: 700 }}>Modifier</Button>
+          <Button size="small" variant="text" color="error" startIcon={<DeleteIcon />} onClick={() => handleDeleteClick(programme)} sx={{ borderRadius: '10px', fontWeight: 700 }}>Supprimer</Button>
         </CardActions>
       </Card>
     );
   };
 
-  const SkeletonCard = () => (
-    <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Skeleton variant="rounded" width={100} height={24} />
-          <Skeleton variant="rounded" width={80} height={24} />
-        </Box>
-        <Skeleton variant="text" sx={{ fontSize: '1.5rem' }} />
-        <Skeleton variant="text" sx={{ fontSize: '1.5rem', width: '60%' }} />
-        <Skeleton variant="text" sx={{ mt: 2 }} />
-        <Skeleton variant="text" />
-        <Skeleton variant="text" />
-      </CardContent>
-    </Card>
-  );
-
   return (
-    <Box>
-      {/* En-tête */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+    <Box sx={{ p: { xs: 1, md: 3 } }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <SchoolIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant="h4" fontWeight={700}>
-              Programmes
-            </Typography>
-          </Box>
-          <Typography variant="body1" color="text.secondary">
-            Gérez les programmes de formation disponibles sur ScholarWay
-          </Typography>
+          <Typography variant="h4" fontWeight={800} sx={{ color: 'text.primary', mb: 1, letterSpacing: '-0.02em' }}>Programmes</Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>Gérez le catalogue des formations ScholarWay</Typography>
         </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAdd}
-          size="large"
-          sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}
+          sx={{ px: 3, py: 1.2, borderRadius: '12px', background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`, boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.25)}` }}
         >
-          Ajouter un programme
+          Nouveau Programme
         </Button>
       </Box>
 
-      {/* Barre de recherche et filtres */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* Barre de recherche & Filtres */}
+      <Card sx={{ mb: 4, borderRadius: '16px', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+        <CardContent sx={{ p: 2.5 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
-              placeholder="Rechercher un programme, un domaine..."
+              placeholder="Rechercher un programme, domaine..."
               value={filters.search}
               onChange={handleSearchChange}
               size="small"
-              sx={{ flexGrow: 1, minWidth: 300 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
+              fullWidth
+              sx={{ maxWidth: { sm: 400 }, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+              InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="primary" fontSize="small" /></InputAdornment>) }}
             />
-            <Button
-              variant={showFilters ? 'contained' : 'outlined'}
-              startIcon={<FilterIcon />}
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              Filtres {hasActiveFilters && `(${[filters.domaine, filters.niveau].filter(Boolean).length})`}
-            </Button>
-            <Tooltip title="Rafraîchir">
-              <IconButton onClick={loadData} color="primary">
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+            <Box sx={{ flexGrow: 1 }} />
+            <Button variant={showFilters ? 'contained' : 'outlined'} startIcon={<FilterIcon />} onClick={() => setShowFilters(!showFilters)} sx={{ borderRadius: '10px' }}>Filtres</Button>
+            <Tooltip title="Actualiser"><IconButton onClick={loadData} sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }}><RefreshIcon fontSize="small" /></IconButton></Tooltip>
+          </Stack>
 
-          {/* Filtres avancés */}
-          {showFilters && (
-            <Box sx={{ mt: 3 }}>
-              <Grid container spacing={2} alignItems="center">
+          <Fade in={showFilters} mountOnEnter unmountOnExit>
+            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Grid container spacing={3}>
                 <Grid item xs={12} sm={5}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Domaine</InputLabel>
-                    <Select
-                      value={filters.domaine}
-                      label="Domaine"
-                      onChange={(e) => handleFilterChange('domaine', e.target.value)}
-                    >
-                      {domaineOptions.map((opt) => (
-                        <MenuItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </MenuItem>
-                      ))}
+                  <FormControl fullWidth size="small"><InputLabel>Domaine d'études</InputLabel>
+                    <Select value={filters.domaine} label="Domaine d'études" onChange={(e) => handleFilterChange('domaine', e.target.value)} sx={{ borderRadius: '10px' }}>
+                      {domaineOptions.map((opt) => (<MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>))}
                     </Select>
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={5}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Niveau</InputLabel>
-                    <Select
-                      value={filters.niveau}
-                      label="Niveau"
-                      onChange={(e) => handleFilterChange('niveau', e.target.value)}
-                    >
-                      {niveauOptions.map((opt) => (
-                        <MenuItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </MenuItem>
-                      ))}
+                  <FormControl fullWidth size="small"><InputLabel>Niveau académique</InputLabel>
+                    <Select value={filters.niveau} label="Niveau académique" onChange={(e) => handleFilterChange('niveau', e.target.value)} sx={{ borderRadius: '10px' }}>
+                      {niveauOptions.map((opt) => (<MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>))}
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={2}>
-                  <Button
-                    fullWidth
-                    variant="text"
-                    startIcon={<CloseIcon />}
-                    onClick={handleResetFilters}
-                    disabled={!hasActiveFilters}
-                  >
-                    Réinitialiser
-                  </Button>
-                </Grid>
+                <Grid item xs={12} sm={2}><Button fullWidth variant="text" startIcon={<CloseIcon />} onClick={handleResetFilters} disabled={!hasActiveFilters} sx={{ borderRadius: '10px', height: 40 }}>Reset</Button></Grid>
               </Grid>
             </Box>
-          )}
+          </Fade>
         </CardContent>
       </Card>
 
-      {/* Stats rapides */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Chip
-          icon={<SchoolIcon />}
-          label={`${pagination.total} programme${pagination.total > 1 ? 's' : ''}`}
-          color="primary"
-          variant="outlined"
-        />
-        {filters.domaine && (
-          <Chip
-            label={`Domaine: ${filters.domaine}`}
-            onDelete={() => handleFilterChange('domaine', '')}
-            color="secondary"
-          />
-        )}
-        {filters.niveau && (
-          <Chip
-            label={`Niveau: ${filters.niveau}`}
-            onDelete={() => handleFilterChange('niveau', '')}
-            color="info"
-          />
-        )}
-      </Box>
-
-      {/* Grille de programmes */}
       <Grid container spacing={3}>
-        {loading
-          ? Array.from({ length: 6 }).map((_, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <SkeletonCard />
-              </Grid>
-            ))
-          : programmes.map((programme) => (
-              <Grid item xs={12} sm={6} md={4} key={programme.idProgramme}>
-                <ProgrammeCard programme={programme} />
-              </Grid>
-            ))}
+        {loading ? Array.from({ length: 6 }).map((_, i) => (<Grid item xs={12} sm={6} md={4} key={i}><Skeleton variant="rectangular" height={340} sx={{ borderRadius: '24px' }} /></Grid>))
+          : programmes.map((p) => (<Grid item xs={12} sm={6} md={4} key={p.idProgramme}><ProgrammeCard programme={p} /></Grid>))}
       </Grid>
 
-      {/* Message si aucun résultat */}
       {!loading && programmes.length === 0 && (
-        <Card sx={{ py: 8, textAlign: 'center' }}>
-          <SchoolIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            Aucun programme trouvé
-          </Typography>
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
-            {hasActiveFilters
-              ? 'Essayez de modifier vos filtres de recherche'
-              : 'Commencez par ajouter votre premier programme'}
-          </Typography>
-          {hasActiveFilters ? (
-            <Button variant="outlined" onClick={handleResetFilters}>
-              Réinitialiser les filtres
-            </Button>
-          ) : (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
-              Ajouter un programme
-            </Button>
-          )}
-        </Card>
-      )}
-
-      {/* Pagination */}
-      {!loading && pagination.totalPages > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Pagination
-            count={pagination.totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
-            showFirstButton
-            showLastButton
-          />
+        <Box sx={{ py: 10, textAlign: 'center', bgcolor: alpha(theme.palette.background.paper, 0.5), borderRadius: '24px', border: '1px dashed', borderColor: 'divider' }}>
+          <SchoolIcon sx={{ fontSize: 64, color: 'text.disabled', opacity: 0.3, mb: 2 }} />
+          <Typography variant="h6" color="text.secondary">Aucun programme ne correspond</Typography>
+          <Button variant="text" sx={{ mt: 1 }} onClick={handleResetFilters}>Réinitialiser les filtres</Button>
         </Box>
       )}
 
-      {/* Modal Ajouter/Modifier */}
-      <ProgrammeModal
-        open={modalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleModalSuccess}
-        programme={selectedProgramme}
-      />
+      {!loading && pagination.totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+          <Pagination count={pagination.totalPages} page={currentPage} onChange={handlePageChange} color="primary" sx={{ '& .MuiPaginationItem-root': { fontWeight: 700, borderRadius: '8px' } }} />
+        </Box>
+      )}
 
-      {/* Dialog de confirmation suppression */}
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        title="Supprimer le programme"
-        message={`Êtes-vous sûr de vouloir supprimer "${programmeToDelete?.nomProgramme}" ? Cette action est irréversible.`}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteDialogOpen(false)}
-      />
+      <ProgrammeModal open={modalOpen} onClose={handleModalClose} onSuccess={handleModalSuccess} programme={selectedProgramme} />
+      <ConfirmDialog open={deleteDialogOpen} title="Supprimer le programme" message={`Voulez-vous vraiment retirer "${programmeToDelete?.nomProgramme}" du catalogue ?`} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteDialogOpen(false)} />
     </Box>
   );
 };

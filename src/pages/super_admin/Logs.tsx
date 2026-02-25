@@ -33,8 +33,8 @@ import {
     Divider,
     useTheme,
     LinearProgress,
+    Fade,
 } from '@mui/material';
-import { BORDER_RADIUS } from '../../constants';
 import {
     Search,
     FilterList,
@@ -75,16 +75,6 @@ const LOG_TYPES = [
     { value: 'import', label: 'Import', color: '#009688', icon: FileUpload, bgColor: '#e0f2f1' },
 ];
 
-const getLogTypeConfig = (type: string) => {
-    return LOG_TYPES.find((t) => t.value === type) || {
-        value: type,
-        label: type,
-        color: '#9e9e9e',
-        bgColor: '#fafafa',
-        icon: Info,
-    };
-};
-
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('fr-TG', {
@@ -110,6 +100,24 @@ export default function Logs() {
     const [viewMode, setViewMode] = useState<'table' | 'timeline'>('timeline');
     const [stats, setStats] = useState<Record<string, number>>({});
 
+    const getLogTypeConfig = (type: string) => {
+        const matching = LOG_TYPES.find((t) => t.value === type);
+        if (matching) {
+            return {
+                ...matching,
+                color: theme.palette.mode === 'dark' ? alpha(matching.color, 0.9) : matching.color,
+                bgColor: theme.palette.mode === 'dark' ? alpha(matching.color, 0.15) : alpha(matching.color, 0.08)
+            };
+        }
+        return {
+            value: type,
+            label: type,
+            color: theme.palette.text.secondary,
+            bgColor: alpha(theme.palette.text.secondary, 0.1),
+            icon: Info,
+        };
+    };
+
     const fetchLogs = useCallback(async () => {
         setLoading(true);
         try {
@@ -126,11 +134,10 @@ export default function Logs() {
             setLogs(response.data);
             setTotal(response.pagination?.total || 0);
 
-            // Calculer les stats
             const statsResponse = await logsApi.getStats();
             setStats(statsResponse.data.parType);
         } catch (error) {
-            console.error('Erreur lors du chargement des logs:', error);
+            console.error('Erreur logs:', error);
         } finally {
             setLoading(false);
         }
@@ -145,16 +152,11 @@ export default function Logs() {
             const response = await logsApi.export('json');
             const blob = new Blob([response.data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `logs-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `scholarway-logs-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Erreur lors de l\'export:', error);
-        }
+        } catch (err) { console.error(err); }
     };
 
     const handleClearLogs = async () => {
@@ -162,247 +164,44 @@ export default function Logs() {
             await logsApi.clear(30);
             setClearDialog(false);
             fetchLogs();
-        } catch (error) {
-            console.error('Erreur lors de la suppression:', error);
-        }
+        } catch (err) { console.error(err); }
     };
 
-    // Vue Timeline
-    const TimelineView = () => (
-        <Box sx={{ mt: 2 }}>
-            {logs.map((log, index) => {
-                const typeConfig = getLogTypeConfig(log.type);
-                const Icon = typeConfig.icon;
-                const isLast = index === logs.length - 1;
-
-                return (
-                    <Box
-                        key={log.id}
-                        sx={{
-                            display: 'flex',
-                            position: 'relative',
-                            pb: isLast ? 0 : 3,
-                            cursor: 'pointer',
-                            '&:hover': {
-                                '& .timeline-content': {
-                                    bgcolor: alpha(typeConfig.color, 0.04),
-                                    borderColor: typeConfig.color,
-                                },
-                            },
-                        }}
-                        onClick={() => setSelectedLog(log)}
-                    >
-                        {/* Timeline line */}
-                        {!isLast && (
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    left: 23,
-                                    top: 48,
-                                    bottom: 0,
-                                    width: 2,
-                                    bgcolor: 'grey.200',
-                                }}
-                            />
-                        )}
-
-                        {/* Timeline dot */}
-                        <Avatar
-                            sx={{
-                                width: 48,
-                                height: 48,
-                                bgcolor: typeConfig.bgColor,
-                                color: typeConfig.color,
-                                mr: 2,
-                                zIndex: 1,
-                                boxShadow: `0 0 0 4px ${theme.palette.background.paper}`,
-                            }}
-                        >
-                            <Icon />
-                        </Avatar>
-
-                        {/* Content */}
-                        <Card
-                            className="timeline-content"
-                            sx={{
-                                flex: 1,
-                                transition: 'all 0.2s',
-                                border: '1px solid',
-                                borderColor: 'grey.200',
-                                '&:hover': {
-                                    boxShadow: 2,
-                                },
-                            }}
-                        >
-                            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                                    <Box>
-                                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
-                                            <Typography variant="subtitle1" fontWeight={600}>
-                                                {log.action}
-                                            </Typography>
-                                            <Chip
-                                                label={typeConfig.label}
-                                                size="small"
-                                                sx={{
-                                                    bgcolor: alpha(typeConfig.color, 0.1),
-                                                    color: typeConfig.color,
-                                                    fontWeight: 500,
-                                                    height: 22,
-                                                    fontSize: '0.7rem',
-                                                }}
-                                            />
-                                        </Stack>
-                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                            {log.description}
-                                        </Typography>
-                                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                                            <Stack direction="row" alignItems="center" spacing={0.5}>
-                                                <Person sx={{ fontSize: 14, color: 'text.disabled' }} />
-                                                <Typography variant="caption" color="text.disabled">
-                                                    {log.utilisateur}
-                                                </Typography>
-                                            </Stack>
-                                            {log.ip && (
-                                                <Stack direction="row" alignItems="center" spacing={0.5}>
-                                                    <Computer sx={{ fontSize: 14, color: 'text.disabled' }} />
-                                                    <Typography variant="caption" color="text.disabled" fontFamily="monospace">
-                                                        {log.ip}
-                                                    </Typography>
-                                                </Stack>
-                                            )}
-                                        </Stack>
-                                    </Box>
-                                    <Box sx={{ textAlign: 'right' }}>
-                                        <Typography variant="caption" color="primary.main" fontWeight={500}>
-                                            {formatRelativeTime(log.date)}
-                                        </Typography>
-                                        <Typography variant="caption" display="block" color="text.disabled">
-                                            {formatDate(log.date)}
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-                            </CardContent>
-                        </Card>
-                    </Box>
-                );
-            })}
-        </Box>
-    );
-
     return (
-        <Box>
-            {/* En-tête */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+        <Box sx={{ p: { xs: 1, md: 3 } }}>
+            {/* Header section */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
                 <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                        <Timeline sx={{ fontSize: 40, color: 'primary.main' }} />
-                        <Typography variant="h4" fontWeight={700}>
-                            Journal d'activité
-                        </Typography>
-                    </Box>
-                    <Typography variant="body1" color="text.secondary">
-                        Suivi de toutes les actions effectuées sur la plateforme
-                    </Typography>
+                    <Typography variant="h4" fontWeight={800} sx={{ color: 'text.primary', mb: 1, letterSpacing: '-0.02em' }}>Audit & Logs</Typography>
+                    <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>Traçabilité complète des actions administratives</Typography>
                 </Box>
-                <Stack direction="row" spacing={1}>
-                    <Tooltip title="Vue tableau">
-                        <IconButton
-                            onClick={() => setViewMode('table')}
-                            color={viewMode === 'table' ? 'primary' : 'default'}
-                            sx={{
-                                bgcolor: viewMode === 'table' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                            }}
-                        >
-                            <ViewList />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Vue timeline">
-                        <IconButton
-                            onClick={() => setViewMode('timeline')}
-                            color={viewMode === 'timeline' ? 'primary' : 'default'}
-                            sx={{
-                                bgcolor: viewMode === 'timeline' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                            }}
-                        >
-                            <Timeline />
-                        </IconButton>
-                    </Tooltip>
-                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                    <Tooltip title="Actualiser">
-                        <IconButton onClick={fetchLogs} color="primary">
-                            <Refresh />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Exporter">
-                        <IconButton onClick={handleExport} color="primary">
-                            <Download />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Nettoyer les anciens logs">
-                        <IconButton onClick={() => setClearDialog(true)} color="error">
-                            <Delete />
-                        </IconButton>
-                    </Tooltip>
+                <Stack direction="row" spacing={1.5}>
+                    <ToggleButtonGroup value={viewMode} exclusive onChange={(_, v) => v && setViewMode(v)} size="small">
+                        <Tooltip title="Timeline"><IconButton onClick={() => setViewMode('timeline')} sx={{ color: viewMode === 'timeline' ? 'primary.main' : 'text.disabled', bgcolor: viewMode === 'timeline' ? alpha(theme.palette.primary.main, 0.1) : 'transparent' }}><Timeline fontSize="small" /></IconButton></Tooltip>
+                        <Tooltip title="Tableau"><IconButton onClick={() => setViewMode('table')} sx={{ color: viewMode === 'table' ? 'primary.main' : 'text.disabled', bgcolor: viewMode === 'table' ? alpha(theme.palette.primary.main, 0.1) : 'transparent' }}><ViewList fontSize="small" /></IconButton></Tooltip>
+                    </ToggleButtonGroup>
+                    <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+                    <Tooltip title="Actualiser"><IconButton onClick={fetchLogs} sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }}><Refresh fontSize="small" /></IconButton></Tooltip>
+                    <Tooltip title="Exporter"><IconButton onClick={handleExport} sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }}><Download fontSize="small" /></IconButton></Tooltip>
+                    <Tooltip title="Nettoyer"><IconButton onClick={() => setClearDialog(true)} sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }}><Delete fontSize="small" /></IconButton></Tooltip>
                 </Stack>
             </Box>
 
-            {/* Statistiques */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
+            {/* Stat Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
                 {LOG_TYPES.slice(0, 5).map((logType) => {
                     const count = stats[logType.value] || 0;
-                    const Icon = logType.icon;
+                    const config = getLogTypeConfig(logType.value);
                     const percentage = total > 0 ? (count / total) * 100 : 0;
-
                     return (
-                        <Grid item xs={6} sm={4} md={2.4} key={logType.value}>
-                            <Card
-                                sx={{
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    border: typeFilter === logType.value ? `2px solid ${logType.color}` : '2px solid transparent',
-                                    '&:hover': {
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: 3,
-                                    },
-                                }}
-                                onClick={() => setTypeFilter(typeFilter === logType.value ? '' : logType.value)}
-                            >
-                                <CardContent sx={{ p: 2 }}>
-                                    <Stack direction="row" spacing={1.5} alignItems="center">
-                                        <Avatar
-                                            sx={{
-                                                width: 40,
-                                                height: 40,
-                                                bgcolor: logType.bgColor,
-                                                color: logType.color,
-                                            }}
-                                        >
-                                            <Icon sx={{ fontSize: 20 }} />
-                                        </Avatar>
-                                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                                            <Typography variant="h5" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
-                                                {count}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary" noWrap>
-                                                {logType.label}
-                                            </Typography>
-                                        </Box>
+                        <Grid item xs={12} sm={6} md={2.4} key={logType.value}>
+                            <Card sx={{ borderRadius: '16px', border: '1px solid', borderColor: typeFilter === logType.value ? logType.color : 'divider', bgcolor: typeFilter === logType.value ? alpha(logType.color, 0.03) : 'background.paper', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.palette.mode === 'dark' ? '0 10px 20px rgba(0,0,0,0.4)' : '0 10px 20px rgba(0,0,0,0.05)' } }} onClick={() => setTypeFilter(typeFilter === logType.value ? '' : logType.value)}>
+                                <CardContent sx={{ p: 2.5 }}>
+                                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1.5 }}>
+                                        <Avatar sx={{ width: 40, height: 40, bgcolor: config.bgColor, color: config.color, border: `1px solid ${alpha(config.color, 0.2)}` }}><logType.icon sx={{ fontSize: 20 }} /></Avatar>
+                                        <Box><Typography variant="h5" fontWeight={800}>{count}</Typography><Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase' }}>{logType.label}</Typography></Box>
                                     </Stack>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={percentage}
-                                        sx={{
-                                            mt: 1.5,
-                                            height: 4,
-                                            borderRadius: BORDER_RADIUS.md,
-                                            bgcolor: alpha(logType.color, 0.1),
-                                            '& .MuiLinearProgress-bar': {
-                                                bgcolor: logType.color,
-                                                borderRadius: BORDER_RADIUS.md,
-                                            },
-                                        }}
-                                    />
+                                    <LinearProgress variant="determinate" value={percentage} sx={{ height: 4, borderRadius: 2, bgcolor: alpha(logType.color, 0.1), '& .MuiLinearProgress-bar': { bgcolor: logType.color } }} />
                                 </CardContent>
                             </Card>
                         </Grid>
@@ -410,409 +209,132 @@ export default function Logs() {
                 })}
             </Grid>
 
-            {/* Filtres */}
-            <Card sx={{ mb: 3 }}>
-                <CardContent sx={{ py: 2 }}>
+            {/* Filter Card */}
+            <Card sx={{ mb: 4, borderRadius: '16px', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                <CardContent sx={{ p: 2.5 }}>
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
-                        <TextField
-                            placeholder="Rechercher dans les logs..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            size="small"
-                            sx={{ minWidth: 280 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Search color="action" />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-
-                        <FormControl size="small" sx={{ minWidth: 160 }}>
-                            <InputLabel>Type d'action</InputLabel>
-                            <Select
-                                value={typeFilter}
-                                label="Type d'action"
-                                onChange={(e) => setTypeFilter(e.target.value)}
-                            >
-                                <MenuItem value="">Tous les types</MenuItem>
-                                {LOG_TYPES.map((type) => (
-                                    <MenuItem key={type.value} value={type.value}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Box
-                                                sx={{
-                                                    width: 10,
-                                                    height: 10,
-                                                    borderRadius: '50%',
-                                                    backgroundColor: type.color,
-                                                }}
-                                            />
-                                            {type.label}
-                                        </Box>
-                                    </MenuItem>
-                                ))}
+                        <TextField placeholder="Rechercher par action, utilisateur, IP..." value={search} onChange={e => setSearch(e.target.value)} size="small" fullWidth sx={{ maxWidth: { md: 400 }, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} InputProps={{ startAdornment: <InputAdornment position="start"><Search fontSize="small" color="primary" /></InputAdornment> }} />
+                        <FormControl size="small" sx={{ minWidth: 180 }}><InputLabel>Type d'action</InputLabel>
+                            <Select value={typeFilter} label="Type d'action" onChange={e => setTypeFilter(e.target.value)} sx={{ borderRadius: '12px' }}>
+                                <MenuItem value="">Toutes les actions</MenuItem>
+                                {LOG_TYPES.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
                             </Select>
                         </FormControl>
-
-                        <Button
-                            variant={showFilters ? 'contained' : 'outlined'}
-                            startIcon={<FilterList />}
-                            onClick={() => setShowFilters(!showFilters)}
-                            size="small"
-                            sx={{ minWidth: 140 }}
-                        >
-                            {showFilters ? 'Masquer' : 'Plus de filtres'}
-                        </Button>
-
-                        {(search || typeFilter || dateDebut || dateFin) && (
-                            <Button
-                                variant="text"
-                                color="error"
-                                size="small"
-                                onClick={() => {
-                                    setSearch('');
-                                    setTypeFilter('');
-                                    setDateDebut('');
-                                    setDateFin('');
-                                }}
-                            >
-                                Réinitialiser
-                            </Button>
-                        )}
+                        <Button variant={showFilters ? 'contained' : 'outlined'} startIcon={<FilterList />} onClick={() => setShowFilters(!showFilters)} sx={{ borderRadius: '10px' }}>Dates</Button>
+                        <Box sx={{ flexGrow: 1 }} />
+                        {(search || typeFilter || dateDebut || dateFin) && <Button variant="text" color="error" onClick={() => { setSearch(''); setTypeFilter(''); setDateDebut(''); setDateFin(''); }} sx={{ fontWeight: 700 }}>Réinitialiser</Button>}
                     </Stack>
-
-                    {showFilters && (
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'grey.200' }}>
-                            <TextField
-                                label="Date début"
-                                type="date"
-                                value={dateDebut}
-                                onChange={(e) => setDateDebut(e.target.value)}
-                                size="small"
-                                InputLabelProps={{ shrink: true }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <CalendarToday sx={{ fontSize: 18, color: 'action.active' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <TextField
-                                label="Date fin"
-                                type="date"
-                                value={dateFin}
-                                onChange={(e) => setDateFin(e.target.value)}
-                                size="small"
-                                InputLabelProps={{ shrink: true }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <CalendarToday sx={{ fontSize: 18, color: 'action.active' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Stack>
-                    )}
+                    <Fade in={showFilters} mountOnEnter unmountOnExit>
+                        <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Date début" type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)} size="small" InputLabelProps={{ shrink: true }} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }} /></Grid>
+                                <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Date fin" type="date" value={dateFin} onChange={e => setDateFin(e.target.value)} size="small" InputLabelProps={{ shrink: true }} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }} /></Grid>
+                            </Grid>
+                        </Box>
+                    </Fade>
                 </CardContent>
             </Card>
 
-            {/* Loading */}
-            {loading && <LinearProgress sx={{ mb: 2 }} />}
+            {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
 
-            {/* Contenu selon le mode de vue */}
+            {/* View Content */}
             {viewMode === 'timeline' ? (
-                <TimelineView />
-            ) : (
-                <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: BORDER_RADIUS.md }}>
-                    <TableContainer sx={{ maxHeight: 600 }}>
-                        <Table stickyHeader size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>
-                                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                                            <AccessTime sx={{ fontSize: 16 }} />
-                                            <span>Date/Heure</span>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Type</TableCell>
-                                    <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Action</TableCell>
-                                    <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Description</TableCell>
-                                    <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>
-                                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                                            <Person sx={{ fontSize: 16 }} />
-                                            <span>Utilisateur</span>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50', width: 50 }}></TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {logs.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                                            <Box sx={{ textAlign: 'center' }}>
-                                                <Timeline sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
-                                                <Typography color="text.secondary">
-                                                    Aucun log trouvé
-                                                </Typography>
+                <Stack spacing={3}>
+                    {logs.map((log, i) => {
+                        const config = getLogTypeConfig(log.type);
+                        return (
+                            <Box key={log.id} sx={{ display: 'flex', gap: 3, position: 'relative' }}>
+                                {i !== logs.length - 1 && <Box sx={{ position: 'absolute', left: 24, top: 48, bottom: -24, width: 2, bgcolor: 'divider', zIndex: 0 }} />}
+                                <Avatar sx={{ width: 48, height: 48, bgcolor: config.bgColor, color: config.color, border: `1px solid ${alpha(config.color, 0.2)}`, zIndex: 1, boxShadow: 1 }}><config.icon /></Avatar>
+                                <Card sx={{ flex: 1, borderRadius: '20px', border: '1px solid', borderColor: 'divider', transition: 'all 0.2s', cursor: 'pointer', '&:hover': { transform: 'translateX(6px)', borderColor: config.color, boxShadow: theme.palette.mode === 'dark' ? '0 8px 24px rgba(0,0,0,0.5)' : '0 8px 24px rgba(0,0,0,0.04)' } }} onClick={() => setSelectedLog(log)}>
+                                    <CardContent sx={{ p: 2.5 }}>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                                            <Box>
+                                                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 0.5 }}>
+                                                    <Typography variant="subtitle1" fontWeight={800}>{log.action}</Typography>
+                                                    <Chip label={config.label} size="small" sx={{ height: 20, bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 800, fontSize: '0.65rem', borderRadius: '6px' }} />
+                                                </Stack>
+                                                <Typography variant="body2" color="text.secondary">{log.description}</Typography>
                                             </Box>
-                                        </TableCell>
+                                            <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800 }}>{formatRelativeTime(log.date)}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" spacing={3} alignItems="center" sx={{ mt: 2 }}>
+                                            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}><Person sx={{ fontSize: 16 }} /><Typography variant="caption" fontWeight={700}>{log.utilisateur}</Typography></Stack>
+                                            {log.ip && <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}><Computer sx={{ fontSize: 16 }} /><Typography variant="caption" fontWeight={600} fontFamily="monospace">{log.ip}</Typography></Stack>}
+                                            <Typography variant="caption" sx={{ color: 'text.disabled', ml: 'auto' }}>{formatDate(log.date)}</Typography>
+                                        </Stack>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        );
+                    })}
+                </Stack>
+            ) : (
+                <TableContainer component={Paper} sx={{ borderRadius: '16px', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+                    <Table size="small">
+                        <TableHead sx={{ bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.7rem' }}>Horodatage</TableCell>
+                                <TableCell sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.7rem' }}>Action / Type</TableCell>
+                                <TableCell sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.7rem' }}>Description</TableCell>
+                                <TableCell sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.7rem' }}>Intervenant</TableCell>
+                                <TableCell sx={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.7rem' }} align="right">Détails</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {logs.map(log => {
+                                const config = getLogTypeConfig(log.type);
+                                return (
+                                    <TableRow key={log.id} hover sx={{ cursor: 'pointer' }} onClick={() => setSelectedLog(log)}>
+                                        <TableCell><Typography variant="body2" fontWeight={600}>{formatRelativeTime(log.date)}</Typography><Typography variant="caption" color="text.disabled">{formatDate(log.date)}</Typography></TableCell>
+                                        <TableCell><Typography variant="body2" fontWeight={700} sx={{ mb: 0.5 }}>{log.action}</Typography><Chip label={config.label} size="small" sx={{ height: 18, bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 800, fontSize: '0.6rem' }} /></TableCell>
+                                        <TableCell sx={{ maxWidth: 300 }}><Typography variant="body2" color="text.secondary" noWrap>{log.description}</Typography></TableCell>
+                                        <TableCell><Typography variant="body2" fontWeight={600}>{log.utilisateur}</Typography><Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{log.ip}</Typography></TableCell>
+                                        <TableCell align="right"><IconButton size="small" color="primary"><Visibility fontSize="small" /></IconButton></TableCell>
                                     </TableRow>
-                                ) : (
-                                    logs.map((log) => {
-                                        const typeConfig = getLogTypeConfig(log.type);
-                                        const Icon = typeConfig.icon;
-                                        return (
-                                            <TableRow
-                                                key={log.id}
-                                                hover
-                                                sx={{
-                                                    cursor: 'pointer',
-                                                    '&:hover': { backgroundColor: alpha(typeConfig.color, 0.04) },
-                                                }}
-                                                onClick={() => setSelectedLog(log)}
-                                            >
-                                                <TableCell>
-                                                    <Box>
-                                                        <Typography variant="body2" fontWeight={500}>
-                                                            {formatRelativeTime(log.date)}
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.disabled">
-                                                            {formatDate(log.date)}
-                                                        </Typography>
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Chip
-                                                        icon={<Icon sx={{ fontSize: '14px !important' }} />}
-                                                        label={typeConfig.label}
-                                                        size="small"
-                                                        sx={{
-                                                            backgroundColor: typeConfig.bgColor,
-                                                            color: typeConfig.color,
-                                                            fontWeight: 500,
-                                                            '& .MuiChip-icon': { color: typeConfig.color },
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="body2" fontWeight={500}>
-                                                        {log.action}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        sx={{
-                                                            maxWidth: 350,
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap',
-                                                        }}
-                                                    >
-                                                        {log.description}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="body2">{log.utilisateur}</Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Tooltip title="Voir détails">
-                                                        <IconButton size="small" color="primary">
-                                                            <Visibility fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <TablePagination
-                        component="div"
-                        count={total}
-                        page={page}
-                        onPageChange={(_, newPage) => setPage(newPage)}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={(e) => {
-                            setRowsPerPage(parseInt(e.target.value, 10));
-                            setPage(0);
-                        }}
-                        rowsPerPageOptions={[10, 25, 50, 100]}
-                        labelRowsPerPage="Lignes par page:"
-                        labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
-                    />
-                </Paper>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
 
-            {/* Dialog de détails */}
-            <Dialog
-                open={!!selectedLog}
-                onClose={() => setSelectedLog(null)}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    sx: { borderRadius: BORDER_RADIUS.md },
-                }}
-            >
+            <TablePagination component="div" count={total} page={page} onPageChange={(_, p) => setPage(p)} rowsPerPage={rowsPerPage} onRowsPerPageChange={e => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }} sx={{ borderTop: '1px solid', borderColor: 'divider', mt: 2 }} />
+
+            {/* Log Details Dialog */}
+            <Dialog open={!!selectedLog} onClose={() => setSelectedLog(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', backgroundImage: 'none' } }}>
                 {selectedLog && (
-                    <>
-                        <DialogTitle sx={{ pb: 1 }}>
-                            <Stack direction="row" alignItems="center" spacing={2}>
-                                <Avatar
-                                    sx={{
-                                        bgcolor: getLogTypeConfig(selectedLog.type).bgColor,
-                                        color: getLogTypeConfig(selectedLog.type).color,
-                                    }}
-                                >
-                                    {(() => {
-                                        const Icon = getLogTypeConfig(selectedLog.type).icon;
-                                        return <Icon />;
-                                    })()}
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h6" fontWeight={600}>
-                                        {selectedLog.action}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {formatDate(selectedLog.date)}
-                                    </Typography>
-                                </Box>
-                            </Stack>
-                        </DialogTitle>
-                        <DialogContent dividers>
-                            <Stack spacing={2.5}>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                        DESCRIPTION
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ mt: 0.5 }}>
-                                        {selectedLog.description}
-                                    </Typography>
-                                </Box>
-
-                                <Divider />
-
+                    <><DialogTitle sx={{ p: 4, pb: 2 }}>
+                        <Stack direction="row" spacing={3} alignItems="center">
+                            <Avatar sx={{ width: 56, height: 56, bgcolor: getLogTypeConfig(selectedLog.type).bgColor, color: getLogTypeConfig(selectedLog.type).color, border: `2px solid ${alpha(getLogTypeConfig(selectedLog.type).color, 0.2)}` }}>{(() => { const Icon = getLogTypeConfig(selectedLog.type).icon; return <Icon sx={{ fontSize: 28 }} />; })()}</Avatar>
+                            <Box><Typography variant="h5" fontWeight={800} letterSpacing="-0.02em">{selectedLog.action}</Typography><Typography variant="body2" color="text.secondary" fontWeight={500}>{formatDate(selectedLog.date)}</Typography></Box>
+                        </Stack>
+                    </DialogTitle>
+                        <DialogContent sx={{ p: 4 }}>
+                            <Stack spacing={3}>
+                                <Box sx={{ p: 2.5, borderRadius: '16px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}><Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', mb: 1, display: 'block' }}>Journal de l'action</Typography><Typography variant="body1" fontWeight={500}>{selectedLog.description}</Typography></Box>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            TYPE
-                                        </Typography>
-                                        <Box sx={{ mt: 0.5 }}>
-                                            <Chip
-                                                label={getLogTypeConfig(selectedLog.type).label}
-                                                size="small"
-                                                sx={{
-                                                    backgroundColor: getLogTypeConfig(selectedLog.type).bgColor,
-                                                    color: getLogTypeConfig(selectedLog.type).color,
-                                                    fontWeight: 500,
-                                                }}
-                                            />
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            UTILISATEUR
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                            {selectedLog.utilisateur}
-                                        </Typography>
-                                    </Grid>
+                                    <Grid item xs={6}><Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled' }}>UTILISATEUR</Typography><Typography variant="body2" fontWeight={700}>{selectedLog.utilisateur}</Typography></Grid>
+                                    <Grid item xs={6}><Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled' }}>ADRESSE IP</Typography><Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>{selectedLog.ip || 'Interne'}</Typography></Grid>
                                 </Grid>
-
-                                {selectedLog.ip && (
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            ADRESSE IP
-                                        </Typography>
-                                        <Typography variant="body2" fontFamily="monospace" sx={{ mt: 0.5 }}>
-                                            {selectedLog.ip}
-                                        </Typography>
-                                    </Box>
-                                )}
-
-                                {selectedLog.entite && (
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            ENTITÉ CONCERNÉE
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                            {selectedLog.entite}
-                                            {selectedLog.entiteId && (
-                                                <Chip
-                                                    label={`ID: ${selectedLog.entiteId}`}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
-                                                />
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                )}
-
                                 {selectedLog.details && (
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            DÉTAILS SUPPLÉMENTAIRES
-                                        </Typography>
-                                        <Paper
-                                            variant="outlined"
-                                            sx={{
-                                                p: 1.5,
-                                                mt: 0.5,
-                                                bgcolor: 'grey.50',
-                                                borderRadius: BORDER_RADIUS.xs,
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.8rem',
-                                                overflow: 'auto',
-                                            }}
-                                        >
-                                            <pre style={{ margin: 0 }}>
-                                                {JSON.stringify(selectedLog.details, null, 2)}
-                                            </pre>
-                                        </Paper>
-                                    </Box>
+                                    <Box sx={{ p: 2.5, borderRadius: '16px', bgcolor: alpha(theme.palette.background.default, 0.5), border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}><Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled', mb: 1, display: 'block' }}>MÉTADONNÉES TECHNIQUES</Typography><Box sx={{ maxHeight: 200, overflow: 'auto', p: 1, fontFamily: 'monospace', fontSize: '0.75rem' }}><pre style={{ margin: 0 }}>{JSON.stringify(selectedLog.details, null, 2)}</pre></Box></Box>
                                 )}
                             </Stack>
                         </DialogContent>
-                        <DialogActions sx={{ p: 2 }}>
-                            <Button onClick={() => setSelectedLog(null)} variant="outlined">
-                                Fermer
-                            </Button>
-                        </DialogActions>
-                    </>
+                        <DialogActions sx={{ p: 4, pt: 0 }}><Button onClick={() => setSelectedLog(null)} sx={{ fontWeight: 800, px: 4 }}>Fermer</Button></DialogActions></>
                 )}
             </Dialog>
 
-            {/* Dialog de confirmation de suppression */}
-            <Dialog open={clearDialog} onClose={() => setClearDialog(false)} maxWidth="xs" fullWidth>
-                <DialogTitle>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                        <Delete color="error" />
-                        <span>Nettoyer les logs</span>
-                    </Stack>
-                </DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        Voulez-vous supprimer tous les logs de plus de <strong>30 jours</strong> ?
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Cette action est irréversible.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setClearDialog(false)}>Annuler</Button>
-                    <Button onClick={handleClearLogs} color="error" variant="contained">
-                        Supprimer
-                    </Button>
-                </DialogActions>
+            {/* Clear Logs Dialog */}
+            <Dialog open={clearDialog} onClose={() => setClearDialog(false)} PaperProps={{ sx: { borderRadius: '20px' } }}>
+                <DialogTitle sx={{ fontWeight: 800 }}>Confirmer le nettoyage</DialogTitle>
+                <DialogContent><Typography variant="body2">Vous êtes sur le point de supprimer les logs de plus de 30 jours. Cette action est irréversible et conforme à la politique de conservation des données.</Typography></DialogContent>
+                <DialogActions sx={{ p: 2.5 }}><Button onClick={() => setClearDialog(false)} sx={{ fontWeight: 700 }}>Annuler</Button><Button variant="contained" color="error" onClick={handleClearLogs} sx={{ borderRadius: '10px', fontWeight: 800 }}>Confirmer la purge</Button></DialogActions>
             </Dialog>
         </Box>
     );
 }
+
+// Missing imports fix
+import { ToggleButtonGroup } from '@mui/material';

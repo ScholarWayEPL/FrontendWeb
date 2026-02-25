@@ -191,7 +191,7 @@ export type StatutCompte = 'ACTIF' | 'INACTIF' | 'SUSPENDU' | 'EN_ATTENTE';
 export type StatutCampagne = 'A_VENIR' | 'OUVERTE' | 'CLOTUREE';
 export type StatutCandidature = 'SOUMISE' | 'EN_COURS' | 'ACCEPTEE' | 'REFUSEE' | 'EN_ATTENTE_CONCOURS';
 export type TypeModification = 'CREATION' | 'MODIFICATION' | 'SUPPRESSION';
-export type RoleUtilisateur = 'ROLE_ADMINISTRATEUR' | 'ROLE_ADMIN_ETABLISSEMENT' | 'ROLE_BACHELIER';
+export type RoleUtilisateur = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMINISTRATEUR' | 'ROLE_ADMIN_ETABLISSEMENT' | 'ROLE_BACHELIER';
 
 // 👤 Utilisateur (Backend model)
 export interface Utilisateur {

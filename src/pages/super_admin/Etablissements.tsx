@@ -24,6 +24,10 @@ import {
   Tooltip,
   CircularProgress,
   Link,
+  Stack,
+  alpha,
+  useTheme,
+  Fade,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -37,7 +41,6 @@ import {
   Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   fetchEtablissements,
   setFilters,
@@ -64,6 +67,7 @@ const localisationOptions = [
 ];
 
 const Etablissements: React.FC = () => {
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const { etablissements, loading, pagination, filters } = useAppSelector(
     (state) => state.etablissements
@@ -90,11 +94,6 @@ const Etablissements: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  const handleViewDetails = (etablissement: Etablissement) => {
-    setViewingEtablissement(etablissement);
-    setDetailsOpen(true);
-  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setFilters({ search: event.target.value }));
@@ -147,23 +146,14 @@ const Etablissements: React.FC = () => {
     if (etablissementToDelete) {
       try {
         await dispatch(deleteEtablissement(etablissementToDelete.idEtablissement)).unwrap();
-        dispatch(
-          showSnackbar({
-            message: 'Établissement supprimé avec succès',
-            severity: 'success',
-          })
-        );
+        dispatch(showSnackbar({ message: 'Établissement supprimé avec succès', severity: 'success' }));
+        loadData();
       } catch {
-        dispatch(
-          showSnackbar({
-            message: 'Erreur lors de la suppression',
-            severity: 'error',
-          })
-        );
+        dispatch(showSnackbar({ message: 'Erreur lors de la suppression', severity: 'error' }));
       }
     }
     setDeleteDialogOpen(false);
-    setEtablissementToDelete(null);
+    etablissementToDelete && setEtablissementToDelete(null);
   };
 
   const handleModalClose = () => {
@@ -183,77 +173,92 @@ const Etablissements: React.FC = () => {
       'Institut': { color: 'info' as const },
     };
     const config = typeConfig[type];
-    return <Chip label={type} color={config.color} size="small" />;
+    return <Chip label={type} color={config.color} size="small" sx={{ fontWeight: 700, borderRadius: '6px' }} />;
   };
 
   return (
-    <Box>
+    <Box sx={{ p: { xs: 1, md: 3 } }}>
       {/* En-tête */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <BusinessIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant="h4" fontWeight={700}>
-              Établissements
-            </Typography>
-          </Box>
-          <Typography variant="body1" color="text.secondary">
-            Gérez les établissements partenaires de ScholarWay
+          <Typography variant="h4" fontWeight={800} sx={{ color: 'text.primary', mb: 1, letterSpacing: '-0.02em' }}>
+            Établissements
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+            Partenariats et structures de formation ScholarWay
           </Typography>
         </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAdd}
-          size="large"
-          sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}
+          sx={{
+            px: 3,
+            py: 1.2,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.25)}`,
+          }}
         >
-          Ajouter un établissement
+          Nouvel établissement
         </Button>
       </Box>
 
-      {/* Filtres et recherche */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* Filtres */}
+      <Card
+        sx={{
+          mb: 4,
+          borderRadius: '16px',
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <CardContent sx={{ p: 2.5 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
               placeholder="Rechercher un établissement..."
               value={filters.search}
               onChange={handleSearchChange}
               size="small"
-              sx={{ minWidth: 300 }}
+              fullWidth
+              sx={{
+                maxWidth: { sm: 400 },
+                '& .MuiOutlinedInput-root': { borderRadius: '12px' }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon color="action" />
+                    <SearchIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                   </InputAdornment>
                 ),
               }}
             />
+            <Box sx={{ flexGrow: 1 }} />
             <Button
               variant={showFilters ? 'contained' : 'outlined'}
               startIcon={<FilterIcon />}
               onClick={() => setShowFilters(!showFilters)}
+              sx={{ borderRadius: '10px' }}
             >
               Filtres
             </Button>
             <Tooltip title="Rafraîchir">
-              <IconButton onClick={loadData}>
-                <RefreshIcon />
+              <IconButton onClick={loadData} sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05), color: 'primary.main' }}>
+                <RefreshIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Box>
+          </Stack>
 
-          {/* Filtres avancés */}
-          {showFilters && (
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={12} sm={6}>
+          <Fade in={showFilters} mountOnEnter unmountOnExit>
+            <Grid container spacing={3} sx={{ mt: 2, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Grid item xs={12} sm={6} md={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Type</InputLabel>
+                  <InputLabel>Type d'établissement</InputLabel>
                   <Select
                     value={filters.type}
-                    label="Type"
+                    label="Type d'établissement"
                     onChange={(e) => handleFilterChange('type', e.target.value)}
+                    sx={{ borderRadius: '10px' }}
                   >
                     {typeOptions.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
@@ -263,13 +268,14 @@ const Etablissements: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} md={4}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Région</InputLabel>
                   <Select
                     value={filters.localisation}
                     label="Région"
                     onChange={(e) => handleFilterChange('localisation', e.target.value)}
+                    sx={{ borderRadius: '10px' }}
                   >
                     {localisationOptions.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
@@ -279,126 +285,133 @@ const Etablissements: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
-                <Button variant="text" onClick={handleResetFilters}>
-                  Réinitialiser les filtres
+              <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Button variant="text" onClick={handleResetFilters} size="small">
+                  Réinitialiser tous les filtres
                 </Button>
               </Grid>
             </Grid>
-          )}
+          </Fade>
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
+      {/* Tableau */}
+      <TableContainer
+        component={Card}
+        sx={{
+          borderRadius: '16px',
+          border: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Table>
+          <TableHead sx={{ bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Etablissement</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Type</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Localisation</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Contact</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Site Web</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }} align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                <TableCell>Nom</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Localisation</TableCell>
-                <TableCell>Contact</TableCell>
-                <TableCell>Site Web</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                  <CircularProgress size={32} />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                    <CircularProgress />
+            ) : etablissements.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                  <BusinessIcon sx={{ fontSize: 48, color: 'text.disabled', opacity: 0.3, mb: 2 }} />
+                  <Typography color="text.secondary" fontWeight={500}>
+                    Aucun établissement ne correspond à votre recherche
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              etablissements.map((etablissement: Etablissement) => (
+                <TableRow
+                  key={etablissement.idEtablissement}
+                  hover
+                  sx={{ '&:last-child td': { border: 0 } }}
+                >
+                  <TableCell>
+                    <Box>
+                      <Typography variant="body2" fontWeight={700}>
+                        {etablissement.nom}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 1,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          maxWidth: 300,
+                        }}
+                      >
+                        {etablissement.description}
+                      </Typography>
+                    </Box>
                   </TableCell>
-                </TableRow>
-              ) : etablissements.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">
-                      Aucun établissement trouvé
+                  <TableCell>{getTypeChip(etablissement.type)}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>{etablissement.localisation}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {etablissement.contact}
                     </Typography>
                   </TableCell>
-                </TableRow>
-              ) : (
-                etablissements.map((etablissement: Etablissement) => (
-                  <TableRow
-                    key={etablissement.idEtablissement}
-                    hover
-                    sx={{ '&:last-child td': { border: 0 } }}
-                  >
-                    <TableCell>
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>
-                          {etablissement.nom}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            maxWidth: 250,
-                          }}
-                        >
-                          {etablissement.description}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{getTypeChip(etablissement.type)}</TableCell>
-                    <TableCell>{etablissement.localisation}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ maxWidth: 200 }}>
-                        {etablissement.contact}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {etablissement.siteWeb && (
-                        <Link
-                          href={etablissement.siteWeb}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                        >
-                          Visiter <OpenInNewIcon fontSize="small" />
-                        </Link>
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Voir détails">
-                        <IconButton
-                          size="small"
-                          color="info"
-                          onClick={() => handleViewDetails(etablissement)}
-                        >
+                  <TableCell>
+                    {etablissement.siteWeb && (
+                      <Link
+                        href={etablissement.siteWeb}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                          color: 'primary.main',
+                          '&:hover': { textDecoration: 'underline' }
+                        }}
+                      >
+                        Visiter <OpenInNewIcon sx={{ fontSize: 14 }} />
+                      </Link>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={0.5} justifyContent="center">
+                      <Tooltip title="Détails">
+                        <IconButton size="small" color="primary" onClick={() => handleViewDetails(etablissement)}>
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Modifier">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleEdit(etablissement)}
-                        >
+                        <IconButton size="small" color="info" onClick={() => handleEdit(etablissement)}>
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Supprimer">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(etablissement)}
-                        >
+                        <IconButton size="small" color="error" onClick={() => handleDeleteClick(etablissement)}>
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
         <TablePagination
           component="div"
           count={pagination.total}
@@ -407,14 +420,11 @@ const Etablissements: React.FC = () => {
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          labelRowsPerPage="Lignes par page"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`
-          }
+          sx={{ borderTop: '1px solid', borderColor: 'divider' }}
         />
-      </Card>
+      </TableContainer>
 
-      {/* Modal Ajouter/Modifier */}
+      {/* Modals */}
       <EtablissementModal
         open={modalOpen}
         onClose={handleModalClose}
@@ -422,22 +432,17 @@ const Etablissements: React.FC = () => {
         etablissement={selectedEtablissement}
       />
 
-      {/* Modal Détails */}
       <EtablissementDetails
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
         etablissement={viewingEtablissement}
-        onEdit={(etab) => {
-          setDetailsOpen(false);
-          handleEdit(etab);
-        }}
+        onEdit={(etab) => { setDetailsOpen(false); handleEdit(etab); }}
       />
 
-      {/* Dialog de confirmation suppression */}
       <ConfirmDialog
         open={deleteDialogOpen}
         title="Supprimer l'établissement"
-        message={`Êtes-vous sûr de vouloir supprimer "${etablissementToDelete?.nom}" ? Cette action est irréversible.`}
+        message={`Voulez-vous vraiment retirer "${etablissementToDelete?.nom}" de la plateforme ?`}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialogOpen(false)}
       />

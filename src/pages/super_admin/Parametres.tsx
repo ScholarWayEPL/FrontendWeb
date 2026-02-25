@@ -25,8 +25,8 @@ import {
   Tab,
   Tabs,
   LinearProgress,
+  Fade,
 } from '@mui/material';
-import { BORDER_RADIUS } from '../../constants';
 import {
   Person as PersonIcon,
   Lock as LockIcon,
@@ -80,20 +80,21 @@ interface SystemInfo {
   uptime: string;
 }
 
-// Composant TabPanel défini hors du composant principal pour éviter les re-renders
 const TabPanel = ({ children, value, index }: { children: React.ReactNode; value: number; index: number }) => (
   <Box role="tabpanel" hidden={value !== index} sx={{ py: 3 }}>
-    {value === index && children}
+    {value === index && (
+      <Fade in={true} timeout={400}>
+        <Box>{children}</Box>
+      </Fade>
+    )}
   </Box>
 );
 
 const Parametres: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-
   const [activeTab, setActiveTab] = useState(0);
 
-  // État du profil admin
   const [profile, setProfile] = useState<AdminProfile>({
     nom: 'Mensah',
     prenom: 'Kodjo',
@@ -103,22 +104,11 @@ const Parametres: React.FC = () => {
     dateCreation: '2024-01-01',
   });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  // État temporaire pour l'édition (avant clic sur Enregistrer)
   const [editingProfile, setEditingProfile] = useState<AdminProfile>(profile);
 
-  // État du mot de passe
-  const [passwords, setPasswords] = useState({
-    current: '',
-    new: '',
-    confirm: '',
-  });
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
+  const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+  const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
 
-  // Paramètres notifications
   const [notifSettings, setNotifSettings] = useState<NotificationSettings>({
     emailNotifications: true,
     pushNotifications: true,
@@ -128,7 +118,6 @@ const Parametres: React.FC = () => {
     paymentAlerts: true,
   });
 
-  // Infos système
   const systemInfo: SystemInfo = {
     version: '1.2.0',
     lastUpdate: '4 février 2026',
@@ -141,12 +130,7 @@ const Parametres: React.FC = () => {
   const handleProfileSave = () => {
     setProfile(editingProfile);
     setIsEditingProfile(false);
-    dispatch(
-      showSnackbar({
-        message: 'Profil mis à jour avec succès',
-        severity: 'success',
-      })
-    );
+    dispatch(showSnackbar({ message: 'Profil mis à jour avec succès', severity: 'success' }));
   };
 
   const handleProfileCancel = () => {
@@ -154,18 +138,9 @@ const Parametres: React.FC = () => {
     setIsEditingProfile(false);
   };
 
-  const handleEditProfileStart = () => {
-    setEditingProfile(profile);
-    setIsEditingProfile(true);
-  };
-
   const handlePasswordChange = () => {
     if (passwords.new !== passwords.confirm) {
       dispatch(showSnackbar({ message: 'Les mots de passe ne correspondent pas', severity: 'error' }));
-      return;
-    }
-    if (passwords.new.length < 8) {
-      dispatch(showSnackbar({ message: 'Le mot de passe doit contenir au moins 8 caractères', severity: 'error' }));
       return;
     }
     setPasswords({ current: '', new: '', confirm: '' });
@@ -173,428 +148,120 @@ const Parametres: React.FC = () => {
   };
 
   const handleNotifSettingChange = (key: keyof NotificationSettings) => {
-    setNotifSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+    setNotifSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <Box>
-      {/* En-tête avec profil */}
+    <Box sx={{ p: { xs: 1, md: 3 } }}>
+      {/* Banner Profil Premium */}
       <Paper
         sx={{
-          p: 4,
+          p: { xs: 3, md: 5 },
           mb: 4,
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: 'white',
-          borderRadius: BORDER_RADIUS.md,
+          background: theme.palette.mode === 'dark'
+            ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.4)} 0%, ${alpha(theme.palette.background.paper, 0.2)} 100%)`
+            : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: theme.palette.mode === 'dark' ? 'text.primary' : 'white',
+          borderRadius: '24px',
           position: 'relative',
           overflow: 'hidden',
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       >
-        {/* Pattern décoratif */}
-        <Box
-          sx={{
-            position: 'absolute',
-            right: -50,
-            top: -50,
-            width: 200,
-            height: 200,
-            borderRadius: '50%',
-            bgcolor: 'rgba(255,255,255,0.1)',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            right: 50,
-            bottom: -30,
-            width: 100,
-            height: 100,
-            borderRadius: '50%',
-            bgcolor: 'rgba(255,255,255,0.05)',
-          }}
-        />
+        {/* Cercles décoratifs */}
+        <Box sx={{ position: 'absolute', right: -60, top: -60, width: 200, height: 200, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.05)' }} />
+        <Box sx={{ position: 'absolute', left: '20%', bottom: -40, width: 120, height: 120, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.03)' }} />
 
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems={{ md: 'center' }}>
-          {/* Avatar */}
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
           <Box sx={{ position: 'relative' }}>
             <Avatar
               sx={{
-                width: 120,
-                height: 120,
-                bgcolor: 'white',
+                width: 140,
+                height: 140,
+                bgcolor: 'background.paper',
                 color: 'primary.main',
-                fontSize: '2.5rem',
-                fontWeight: 700,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                fontSize: '3rem',
+                fontWeight: 800,
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                border: '4px solid',
+                borderColor: alpha('#FFF', 0.2)
               }}
             >
               {profile.prenom.charAt(0)}{profile.nom.charAt(0)}
             </Avatar>
-            <IconButton
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                bgcolor: 'white',
-                boxShadow: 2,
-                '&:hover': { bgcolor: 'grey.100' },
-              }}
-              size="small"
-            >
+            <IconButton sx={{ position: 'absolute', bottom: 5, right: 5, bgcolor: 'background.paper', boxShadow: 3, '&:hover': { bgcolor: 'action.hover' } }} size="small">
               <PhotoCamera sx={{ fontSize: 18, color: 'primary.main' }} />
             </IconButton>
           </Box>
 
-          {/* Infos */}
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-              <Typography variant="h4" fontWeight={700}>
+          <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
+            <Stack direction="row" alignItems="center" spacing={1.5} justifyContent={{ xs: 'center', md: 'flex-start' }} sx={{ mb: 1 }}>
+              <Typography variant="h3" fontWeight={800} letterSpacing="-0.03em">
                 {profile.prenom} {profile.nom}
               </Typography>
-              <Verified sx={{ color: '#4fc3f7' }} />
+              <Verified sx={{ color: '#4fc3f7', fontSize: 28 }} />
             </Stack>
-            <Typography variant="body1" sx={{ opacity: 0.9, mb: 2 }}>
-              {profile.email}
-            </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-              <Chip
-                icon={<AdminPanelSettings sx={{ color: 'white !important' }} />}
-                label={profile.role}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  fontWeight: 600,
-                }}
-              />
-              <Chip
-                icon={<Schedule sx={{ color: 'white !important' }} />}
-                label={`Membre depuis ${new Date(profile.dateCreation).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.15)',
-                  color: 'white',
-                }}
-              />
+            <Typography variant="h6" sx={{ opacity: 0.8, fontWeight: 500, mb: 2.5 }}>{profile.email}</Typography>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" justifyContent={{ xs: 'center', md: 'flex-start' }}>
+              <Chip icon={<AdminPanelSettings sx={{ color: 'inherit !important' }} />} label={profile.role} sx={{ bgcolor: alpha('#FFF', 0.1), color: 'inherit', fontWeight: 700, backdropFilter: 'blur(4px)' }} />
+              <Chip icon={<Schedule sx={{ color: 'inherit !important' }} />} label={`Depuis ${new Date(profile.dateCreation).getFullYear()}`} sx={{ bgcolor: alpha('#FFF', 0.15), color: 'inherit', fontWeight: 600 }} />
             </Stack>
           </Box>
-
-          {/* Stats rapides */}
-          <Stack direction="row" spacing={3} sx={{ display: { xs: 'none', lg: 'flex' } }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" fontWeight={700}>
-                {systemInfo.usersCount}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                Utilisateurs
-              </Typography>
-            </Box>
-            <Divider orientation="vertical" flexItem sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" fontWeight={700}>
-                {systemInfo.uptime}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                Uptime
-              </Typography>
-            </Box>
-          </Stack>
         </Stack>
       </Paper>
 
-      {/* Onglets */}
-      <Paper sx={{ borderRadius: BORDER_RADIUS.md, mb: 3 }}>
-        <Tabs
-          value={activeTab}
-          onChange={(_, val) => setActiveTab(val)}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Tab icon={<PersonIcon />} label="Profil" iconPosition="start" />
-          <Tab icon={<LockIcon />} label="Sécurité" iconPosition="start" />
-          <Tab icon={<NotificationsIcon />} label="Notifications" iconPosition="start" />
-          <Tab icon={<Storage />} label="Système" iconPosition="start" />
+      {/* Navigation Tabs Premium */}
+      <Paper sx={{ borderRadius: '16px', mb: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="scrollable" scrollButtons="auto" sx={{ '& .MuiTab-root': { fontWeight: 800, px: 4, py: 2.5, minHeight: 64, color: 'text.secondary' }, '& .Mui-selected': { color: 'primary.main' } }}>
+          <Tab icon={<PersonIcon sx={{ mr: 1 }} />} label="Mon Profil" iconPosition="start" />
+          <Tab icon={<LockIcon sx={{ mr: 1 }} />} label="Sécurité" iconPosition="start" />
+          <Tab icon={<NotificationsIcon sx={{ mr: 1 }} />} label="Alertes" iconPosition="start" />
+          <Tab icon={<Storage sx={{ mr: 1 }} />} label="Système" iconPosition="start" />
         </Tabs>
       </Paper>
 
-      {/* Tab Profil */}
+      {/* Contenu des onglets */}
       <TabPanel value={activeTab} index={0}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                  <Typography variant="h6" fontWeight={600}>
-                    Informations personnelles
-                  </Typography>
-                  <Stack direction="row" gap={2}>
-                    {isEditingProfile && (
-                      <Button
-                        variant="outlined"
-                        color="inherit"
-                        onClick={handleProfileCancel}
-                      >
-                        Annuler
-                      </Button>
+        <Grid container spacing={4}>
+          <Grid item xs={12} lg={8}>
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
+              <CardContent sx={{ p: 4 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
+                  <Typography variant="h6" fontWeight={800}>Détails du compte</Typography>
+                  <Stack direction="row" spacing={2}>
+                    {isEditingProfile ? (
+                      <>
+                        <Button variant="outlined" color="inherit" onClick={handleProfileCancel} sx={{ borderRadius: '10px' }}>Annuler</Button>
+                        <Button variant="contained" startIcon={<SaveIcon />} onClick={handleProfileSave} sx={{ borderRadius: '10px', px: 3 }}>Enregistrer</Button>
+                      </>
+                    ) : (
+                      <Button variant="outlined" startIcon={<EditIcon />} onClick={() => setIsEditingProfile(true)} sx={{ borderRadius: '10px' }}>Modifier</Button>
                     )}
-                    <Button
-                      variant={isEditingProfile ? 'contained' : 'outlined'}
-                      startIcon={isEditingProfile ? <SaveIcon /> : <EditIcon />}
-                      onClick={isEditingProfile ? handleProfileSave : handleEditProfileStart}
-                    >
-                      {isEditingProfile ? 'Enregistrer' : 'Modifier'}
-                    </Button>
                   </Stack>
                 </Stack>
-
                 <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Prénom"
-                      value={editingProfile.prenom}
-                      onChange={(e) => setEditingProfile((p) => ({ ...p, prenom: e.target.value }))}
-                      disabled={!isEditingProfile}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <PersonIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Nom"
-                      value={editingProfile.nom}
-                      onChange={(e) => setEditingProfile((p) => ({ ...p, nom: e.target.value }))}
-                      disabled={!isEditingProfile}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <PersonIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Email"
-                      type="email"
-                      value={editingProfile.email}
-                      onChange={(e) => setEditingProfile((p) => ({ ...p, email: e.target.value }))}
-                      disabled={!isEditingProfile}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <EmailIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Téléphone"
-                      value={editingProfile.telephone}
-                      onChange={(e) => setEditingProfile((p) => ({ ...p, telephone: e.target.value }))}
-                      disabled={!isEditingProfile}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Typography color="text.secondary" sx={{ mr: 0.5 }}>
-                              {INDICATIF_TOGO}
-                            </Typography>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
+                  <Grid item xs={12} sm={6}><TextField fullWidth label="Prénom" value={editingProfile.prenom} disabled={!isEditingProfile} onChange={e => setEditingProfile({ ...editingProfile, prenom: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} /></Grid>
+                  <Grid item xs={12} sm={6}><TextField fullWidth label="Nom" value={editingProfile.nom} disabled={!isEditingProfile} onChange={e => setEditingProfile({ ...editingProfile, nom: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} /></Grid>
+                  <Grid item xs={12}><TextField fullWidth label="Adresse Email" value={editingProfile.email} disabled={!isEditingProfile} onChange={e => setEditingProfile({ ...editingProfile, email: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} /></Grid>
+                  <Grid item xs={12}><TextField fullWidth label="Téléphone" value={editingProfile.telephone} disabled={!isEditingProfile} InputProps={{ startAdornment: <InputAdornment position="start">{INDICATIF_TOGO}</InputAdornment> }} onChange={e => setEditingProfile({ ...editingProfile, telephone: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} /></Grid>
                 </Grid>
               </CardContent>
             </Card>
           </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Rôle & Permissions
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: BORDER_RADIUS.md,
-                    bgcolor: alpha(theme.palette.success.main, 0.1),
-                    border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                    mb: 2,
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Avatar sx={{ bgcolor: 'success.main', width: 40, height: 40 }}>
-                      <AdminPanelSettings />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {profile.role}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Accès complet au système
-                      </Typography>
-                    </Box>
+          <Grid item xs={12} lg={4}>
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider', height: '100%', bgcolor: alpha(theme.palette.success.main, 0.02) }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h6" fontWeight={800} gutterBottom>Permissions Actives</Typography>
+                <Box sx={{ mt: 3, p: 3, borderRadius: '16px', bgcolor: alpha(theme.palette.success.main, 0.05), border: `1px solid ${alpha(theme.palette.success.main, 0.1)}` }}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Avatar sx={{ bgcolor: 'success.main', color: 'white' }}><AdminPanelSettings /></Avatar>
+                    <Box><Typography variant="subtitle2" fontWeight={800}>{profile.role}</Typography><Typography variant="caption" color="text.secondary">Contrôle Total Hérité</Typography></Box>
                   </Stack>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
-                  En tant que Super Administrateur, vous avez accès à toutes les fonctionnalités de la plateforme.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </TabPanel>
-
-      {/* Tab Sécurité */}
-      <TabPanel value={activeTab} index={1}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Changer le mot de passe
-                </Typography>
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  Utilisez un mot de passe fort avec au moins 8 caractères, incluant majuscules, minuscules et chiffres.
-                </Alert>
-
-                <Stack spacing={3}>
-                  <TextField
-                    fullWidth
-                    label="Mot de passe actuel"
-                    type={showPasswords.current ? 'text' : 'password'}
-                    value={passwords.current}
-                    onChange={(e) => setPasswords((p) => ({ ...p, current: e.target.value }))}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPasswords((s) => ({ ...s, current: !s.current }))}>
-                            {showPasswords.current ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Nouveau mot de passe"
-                    type={showPasswords.new ? 'text' : 'password'}
-                    value={passwords.new}
-                    onChange={(e) => setPasswords((p) => ({ ...p, new: e.target.value }))}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPasswords((s) => ({ ...s, new: !s.new }))}>
-                            {showPasswords.new ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  {passwords.new && (
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" gutterBottom>
-                        Force du mot de passe
-                      </Typography>
-                      <LinearProgress
-                        variant="determinate"
-                        value={Math.min(passwords.new.length * 10, 100)}
-                        color={passwords.new.length >= 8 ? 'success' : passwords.new.length >= 5 ? 'warning' : 'error'}
-                        sx={{ height: 6, borderRadius: 3 }}
-                      />
-                    </Box>
-                  )}
-
-                  <TextField
-                    fullWidth
-                    label="Confirmer le nouveau mot de passe"
-                    type={showPasswords.confirm ? 'text' : 'password'}
-                    value={passwords.confirm}
-                    onChange={(e) => setPasswords((p) => ({ ...p, confirm: e.target.value }))}
-                    error={passwords.confirm !== '' && passwords.new !== passwords.confirm}
-                    helperText={passwords.confirm !== '' && passwords.new !== passwords.confirm ? 'Les mots de passe ne correspondent pas' : ''}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPasswords((s) => ({ ...s, confirm: !s.confirm }))}>
-                            {showPasswords.confirm ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<SecurityIcon />}
-                    onClick={handlePasswordChange}
-                    disabled={!passwords.current || !passwords.new || !passwords.confirm}
-                    fullWidth
-                    size="large"
-                  >
-                    Mettre à jour le mot de passe
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Sessions actives
-                </Typography>
-                <List>
-                  <ListItem sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: BORDER_RADIUS.md, mb: 1 }}>
-                    <ListItemIcon>
-                      <Avatar sx={{ bgcolor: 'success.main', width: 36, height: 36 }}>
-                        <CheckCircleIcon sx={{ fontSize: 20 }} />
-                      </Avatar>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Session actuelle"
-                      secondary="Lomé, Togo • Chrome sur Linux"
-                    />
-                    <Chip label="Actif" color="success" size="small" />
-                  </ListItem>
-                </List>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Dernières connexions
-                </Typography>
-                <List dense>
-                  {[
-                    { date: 'Aujourd\'hui, 09:15', ip: '192.168.1.100', location: 'Lomé' },
-                    { date: 'Hier, 18:30', ip: '192.168.1.100', location: 'Lomé' },
-                    { date: '2 fév, 14:00', ip: '41.207.xx.xx', location: 'Kara' },
-                  ].map((session, i) => (
-                    <ListItem key={i} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <History color="action" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={session.date}
-                        secondary={`${session.ip} • ${session.location}`}
-                      />
-                    </ListItem>
+                <List sx={{ mt: 2 }}>
+                  {['Gestion des utilisateurs', 'Configuration système', 'Flux financiers', 'Validation établissements'].map(p => (
+                    <ListItem key={p} sx={{ px: 0 }}><ListItemIcon sx={{ minWidth: 32 }}><CheckCircleIcon sx={{ fontSize: 18, color: 'success.main' }} /></ListItemIcon><ListItemText primary={p} primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }} /></ListItem>
                   ))}
                 </List>
               </CardContent>
@@ -603,67 +270,63 @@ const Parametres: React.FC = () => {
         </Grid>
       </TabPanel>
 
-      {/* Tab Notifications */}
-      <TabPanel value={activeTab} index={2}>
-        <Card>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              Préférences de notification
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Choisissez comment et quand vous souhaitez être notifié des événements importants.
-            </Typography>
+      <TabPanel value={activeTab} index={1}>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h6" fontWeight={800} gutterBottom>Sécurité du Compte</Typography>
+                <Alert severity="warning" sx={{ mb: 4, borderRadius: '12px' }}>Changer régulièrement votre mot de passe renforce la protection de vos données administratives.</Alert>
+                <Stack spacing={3}>
+                  <TextField fullWidth label="Mot de passe actuel" type={showPasswords.current ? "text" : "password"} value={passwords.current} onChange={e => setPasswords({ ...passwords, current: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}>{showPasswords.current ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment> }} />
+                  <TextField fullWidth label="Nouveau mot de passe" type={showPasswords.new ? "text" : "password"} value={passwords.new} onChange={e => setPasswords({ ...passwords, new: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}>{showPasswords.new ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment> }} />
+                  {passwords.new && <Box><LinearProgress variant="determinate" value={Math.min(passwords.new.length * 10, 100)} color={passwords.new.length >= 8 ? "success" : "warning"} sx={{ height: 6, borderRadius: 3, mb: 1 }} /><Typography variant="caption" color="text.secondary">Force: {passwords.new.length >= 8 ? 'Forte' : 'Faible'}</Typography></Box>}
+                  <TextField fullWidth label="Confirmation" type={showPasswords.confirm ? "text" : "password"} value={passwords.confirm} onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
+                  <Button variant="contained" size="large" fullWidth sx={{ py: 1.5, borderRadius: '12px', fontWeight: 800 }} onClick={handlePasswordChange}>Appliquer le changement</Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h6" fontWeight={800} gutterBottom>Journal d'accès</Typography>
+                <List divider>
+                  <ListItem sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: '12px', mb: 2 }}>
+                    <ListItemIcon><CheckCircleIcon color="success" /></ListItemIcon>
+                    <ListItemText primary="Session active" secondary="Lomé, Togo • 192.168.1.XX" primaryTypographyProps={{ fontWeight: 700 }} />
+                    <Chip label="Current" size="small" color="success" sx={{ fontWeight: 800 }} />
+                  </ListItem>
+                  {['Hier à 14:20 • Paris, FR', '02 Fév • Kara, TG'].map((log, i) => (
+                    <ListItem key={i} sx={{ px: 1 }}><ListItemIcon><History fontSize="small" /></ListItemIcon><ListItemText primary={log} secondary="Authentification réussie" primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }} /></ListItem>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </TabPanel>
 
-            <Grid container spacing={2}>
+      <TabPanel value={activeTab} index={2}>
+        <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>Préférences d'Alertes</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>Configurez les canaux et fréquences de réception des notifications critiques.</Typography>
+            <Grid container spacing={3}>
               {[
-                { key: 'emailNotifications', icon: EmailIcon, title: 'Notifications par email', desc: 'Recevoir les alertes par email' },
-                { key: 'pushNotifications', icon: NotificationsIcon, title: 'Notifications push', desc: 'Notifications dans le navigateur' },
-                { key: 'newUserAlerts', icon: PersonIcon, title: 'Nouveaux utilisateurs', desc: 'Alertes lors de nouvelles inscriptions' },
-                { key: 'paymentAlerts', icon: TrendingUp, title: 'Paiements', desc: 'Notifications de paiements reçus' },
-                { key: 'securityAlerts', icon: SecurityIcon, title: 'Alertes de sécurité', desc: 'Connexions suspectes et menaces' },
-                { key: 'weeklyReport', icon: Schedule, title: 'Rapport hebdomadaire', desc: 'Résumé chaque lundi matin' },
-              ].map(({ key, icon: Icon, title, desc }) => (
-                <Grid item xs={12} sm={6} key={key}>
-                  <Paper
-                    sx={{
-                      p: 2,
-                      border: `1px solid ${notifSettings[key as keyof NotificationSettings] ? theme.palette.primary.main : theme.palette.divider}`,
-                      borderRadius: BORDER_RADIUS.md,
-                      bgcolor: notifSettings[key as keyof NotificationSettings] ? alpha(theme.palette.primary.main, 0.02) : 'transparent',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      '&:hover': { borderColor: theme.palette.primary.main },
-                    }}
-                    onClick={() => handleNotifSettingChange(key as keyof NotificationSettings)}
-                  >
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Avatar
-                          sx={{
-                            bgcolor: notifSettings[key as keyof NotificationSettings]
-                              ? alpha(theme.palette.primary.main, 0.1)
-                              : 'grey.100',
-                            color: notifSettings[key as keyof NotificationSettings] ? 'primary.main' : 'text.secondary',
-                          }}
-                        >
-                          <Icon />
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            {title}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {desc}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                      <Switch
-                        checked={notifSettings[key as keyof NotificationSettings]}
-                        onChange={() => handleNotifSettingChange(key as keyof NotificationSettings)}
-                        color="primary"
-                      />
+                { k: 'emailNotifications', t: 'Emails direct', d: 'Réception immédiate des alertes par mail', i: EmailIcon },
+                { k: 'pushNotifications', t: 'Push Browser', d: 'Notifications de bureau en temps réel', i: NotificationsIcon },
+                { k: 'securityAlerts', t: 'Sécurité Critique', d: 'Tentatives d\'intrusion et échecs de connexion', i: SecurityIcon },
+                { k: 'weeklyReport', t: 'Résumé Hebdo', d: 'Rapport d\'activité consolidé chaque lundi', i: Schedule },
+              ].map(({ k, t, d, i: Icon }) => (
+                <Grid item xs={12} sm={6} key={k}>
+                  <Box sx={{ p: 3, borderRadius: '20px', border: '1px solid', borderColor: notifSettings[k as keyof NotificationSettings] ? 'primary.main' : 'divider', bgcolor: notifSettings[k as keyof NotificationSettings] ? alpha(theme.palette.primary.main, 0.03) : 'transparent', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Stack direction="row" spacing={2.5} alignItems="center">
+                      <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}><Icon /></Avatar>
+                      <Box><Typography variant="subtitle2" fontWeight={800}>{t}</Typography><Typography variant="caption" color="text.secondary">{d}</Typography></Box>
                     </Stack>
-                  </Paper>
+                    <Switch checked={notifSettings[k as keyof NotificationSettings]} onChange={() => handleNotifSettingChange(k as keyof NotificationSettings)} color="primary" />
+                  </Box>
                 </Grid>
               ))}
             </Grid>
@@ -671,105 +334,51 @@ const Parametres: React.FC = () => {
         </Card>
       </TabPanel>
 
-      {/* Tab Système */}
       <TabPanel value={activeTab} index={3}>
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           <Grid item xs={12}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Informations système
-                </Typography>
-
-                <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h6" fontWeight={800} sx={{ mb: 4 }}>État de Santé du Système</Typography>
+                <Grid container spacing={3}>
                   {[
-                    { icon: CloudDone, label: 'Version', value: `ScholarWay Admin v${systemInfo.version}`, color: 'primary' },
-                    { icon: Schedule, label: 'Dernière mise à jour', value: systemInfo.lastUpdate, color: 'info' },
-                    { icon: Storage, label: 'Base de données', value: systemInfo.dbSize, color: 'secondary' },
-                    { icon: Speed, label: 'Disponibilité', value: systemInfo.uptime, color: 'success' },
-                  ].map(({ icon: Icon, label, value, color }) => (
-                    <Grid item xs={12} sm={6} md={3} key={label}>
-                      <Paper
-                        sx={{
-                          p: 2.5,
-                          textAlign: 'center',
-                          border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: BORDER_RADIUS.md,
-                        }}
-                      >
-                        <Avatar
-                          sx={{
-                            mx: 'auto',
-                            mb: 1.5,
-                            bgcolor: alpha(theme.palette[color as 'primary'].main, 0.1),
-                            color: `${color}.main`,
-                            width: 48,
-                            height: 48,
-                          }}
-                        >
-                          <Icon />
-                        </Avatar>
-                        <Typography variant="h6" fontWeight={700}>
-                          {value}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {label}
-                        </Typography>
-                      </Paper>
+                    { l: 'Version SDK', v: `v${systemInfo.version}`, i: CloudDone, c: 'primary' },
+                    { l: 'Base de Données', v: systemInfo.dbSize, i: Storage, c: 'info' },
+                    { l: 'Uptime Réseau', v: systemInfo.uptime, i: Speed, c: 'success' },
+                    { l: 'Dernière MàJ', v: '04 Fév 2026', i: Backup, c: 'secondary' },
+                  ].map(stat => (
+                    <Grid item xs={12} sm={6} md={3} key={stat.l}>
+                      <Box sx={{ p: 3, textAlign: 'center', borderRadius: '20px', bgcolor: alpha(theme.palette[stat.c as 'primary'].main, 0.05), border: `1px solid ${alpha(theme.palette[stat.c as 'primary'].main, 0.1)}` }}>
+                        <Avatar sx={{ mx: 'auto', mb: 2, bgcolor: 'background.paper', color: `${stat.c}.main`, boxShadow: 1 }}><stat.i /></Avatar>
+                        <Typography variant="h6" fontWeight={900}>{stat.v}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>{stat.l}</Typography>
+                      </Box>
                     </Grid>
                   ))}
                 </Grid>
               </CardContent>
             </Card>
           </Grid>
-
           <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6" fontWeight={600}>
-                    Sauvegarde
-                  </Typography>
-                  <Chip
-                    icon={<CheckCircleIcon />}
-                    label="Automatique"
-                    color="success"
-                    size="small"
-                  />
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider', bgcolor: alpha(theme.palette.error.main, 0.03) }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h6" fontWeight={800} color="error.main" gutterBottom>Zone de Danger</Typography>
+                <Typography variant="body2" sx={{ mb: 3 }}>Actions irréversibles impactant la disponibilité de la plateforme.</Typography>
+                <Stack spacing={2}>
+                  <Button variant="outlined" color="error" fullWidth sx={{ borderRadius: '10px', py: 1.2, fontWeight: 700 }}>Vider les fichiers temporaires</Button>
+                  <Button variant="contained" color="error" fullWidth sx={{ borderRadius: '10px', py: 1.2, fontWeight: 800 }}>Maintenance Immédiate</Button>
                 </Stack>
-                <Alert severity="success" sx={{ mb: 2 }}>
-                  Dernière sauvegarde: Aujourd'hui à 03:00
-                </Alert>
-                <Button variant="outlined" startIcon={<Backup />} fullWidth>
-                  Lancer une sauvegarde manuelle
-                </Button>
               </CardContent>
             </Card>
           </Grid>
-
           <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Environnement
-                </Typography>
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography color="text.secondary">Mode</Typography>
-                    <Chip
-                      label={systemInfo.environment}
-                      color={systemInfo.environment === 'Production' ? 'success' : 'warning'}
-                      size="small"
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography color="text.secondary">Région</Typography>
-                    <Typography fontWeight={500}>Afrique de l'Ouest (Lomé)</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography color="text.secondary">Fuseau horaire</Typography>
-                    <Typography fontWeight={500}>GMT+0 (Togo)</Typography>
-                  </Box>
+            <Card sx={{ borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h6" fontWeight={800} gutterBottom>Configuration de l'Environnement</Typography>
+                <Stack spacing={2.5} sx={{ mt: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="body2" color="text.secondary">Serveur principal</Typography><Chip label="Europe West" size="small" variant="outlined" sx={{ fontWeight: 700 }} /></Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="body2" color="text.secondary">Base de données</Typography><Chip label="Replica Sync" color="success" size="small" sx={{ fontWeight: 700 }} /></Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="body2" color="text.secondary">SSL / TLS</Typography><Typography variant="body2" fontWeight={800} color="success.main">Activé (v1.3)</Typography></Box>
                 </Stack>
               </CardContent>
             </Card>

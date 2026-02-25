@@ -37,6 +37,7 @@ import {
   AdminPanelSettings,
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
+import ThemeToggle from '../components/layout/ThemeToggle';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { toggleSidebar, setSidebarOpen } from '../store/slices/uiSlice';
 import { logout } from '../store/slices/authSlice';
@@ -155,11 +156,12 @@ const DashboardLayout: React.FC = () => {
           width: { md: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%' },
           ml: { md: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
           // Glassy header: semi-transparent + blur, no border radius
-          bgcolor: alpha(theme.palette.background.paper, 0.64),
+          bgcolor: alpha(theme.palette.background.paper, 0.8),
           color: 'text.primary',
-          borderBottom: '1px solid rgba(0,0,0,0.06)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           boxShadow: 'none',
           borderRadius: 0,
           transition: theme.transitions.create(['width', 'margin'], {
@@ -176,9 +178,9 @@ const DashboardLayout: React.FC = () => {
             onClick={handleDrawerToggle}
             sx={{
               mr: 2,
-              color: 'grey.600',
+              color: 'text.secondary',
               '&:hover': {
-                bgcolor: 'grey.100',
+                bgcolor: 'action.hover',
                 color: 'primary.main',
               },
             }}
@@ -193,7 +195,7 @@ const DashboardLayout: React.FC = () => {
               noWrap
               fontWeight={700}
               sx={{
-                color: 'grey.800',
+                color: 'text.primary',
                 letterSpacing: '-0.02em',
               }}
             >
@@ -212,7 +214,7 @@ const DashboardLayout: React.FC = () => {
             <Typography
               variant="caption"
               sx={{
-                color: 'grey.500',
+                color: 'text.secondary',
                 display: 'block',
                 mt: -0.3,
               }}
@@ -226,31 +228,34 @@ const DashboardLayout: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* Notifications */}
-          <IconButton
-            onClick={(e) => setNotifAnchor(e.currentTarget)}
-            sx={{
-              color: 'grey.600',
-              '&:hover': {
-                bgcolor: 'grey.100',
-                color: 'primary.main',
-              },
-            }}
-          >
-            <Badge
-              badgeContent={unreadCount}
-              color="error"
+          <Stack direction="row" spacing={1} alignItems="center">
+            <ThemeToggle />
+
+            <IconButton
+              onClick={(e) => setNotifAnchor(e.currentTarget)}
               sx={{
-                '& .MuiBadge-badge': {
-                  fontSize: '0.7rem',
-                  minWidth: 18,
-                  height: 18,
+                color: 'text.secondary',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                  color: 'primary.main',
                 },
               }}
             >
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontSize: '0.7rem',
+                    minWidth: 18,
+                    height: 18,
+                  },
+                }}
+              >
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Stack>
 
           {/* Séparateur */}
           <Divider orientation="vertical" flexItem sx={{ mx: 1.5, my: 1.5 }} />
@@ -294,11 +299,12 @@ const DashboardLayout: React.FC = () => {
         slotProps={{
           paper: {
             sx: {
-              width: 380,
-              maxHeight: 480,
-              mt: 1,
-              borderRadius: 2,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              borderRadius: '16px',
+              border: '1px solid',
+              borderColor: 'divider',
+              boxShadow: theme.palette.mode === 'dark'
+                ? '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)'
+                : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
               overflow: 'hidden',
             },
           },
@@ -340,10 +346,10 @@ const DashboardLayout: React.FC = () => {
                 py: 1.5,
                 px: 2,
                 cursor: 'pointer',
-                bgcolor: !notif.read ? alpha(theme.palette.primary.main, 0.04) : 'transparent',
+                bgcolor: !notif.read ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
                 borderBottom: '1px solid',
-                borderColor: 'grey.100',
-                '&:hover': { bgcolor: 'grey.50' },
+                borderColor: 'divider',
+                '&:hover': { bgcolor: 'action.hover' },
               }}
             >
               <ListItemAvatar>
@@ -376,7 +382,7 @@ const DashboardLayout: React.FC = () => {
         </List>
 
         {/* Footer */}
-        <Box sx={{ p: 1.5, borderTop: '1px solid', borderColor: 'grey.200', bgcolor: 'grey.50' }}>
+        <Box sx={{ p: 1.5, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
           <Button
             fullWidth
             variant="text"
@@ -407,8 +413,12 @@ const DashboardLayout: React.FC = () => {
             sx: {
               width: 280,
               mt: 1,
-              borderRadius: 2,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              borderRadius: '16px',
+              border: '1px solid',
+              borderColor: 'divider',
+              boxShadow: theme.palette.mode === 'dark'
+                ? '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+                : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
               overflow: 'hidden',
             },
           },
@@ -468,7 +478,7 @@ const DashboardLayout: React.FC = () => {
               cursor: 'pointer',
               py: 1.5,
               px: 2,
-              '&:hover': { bgcolor: 'grey.50' },
+              '&:hover': { bgcolor: 'action.hover' },
             }}
           >
             <ListItemAvatar>
@@ -494,7 +504,7 @@ const DashboardLayout: React.FC = () => {
                 cursor: 'pointer',
                 py: 1.5,
                 px: 2,
-                '&:hover': { bgcolor: 'grey.50' },
+                '&:hover': { bgcolor: 'action.hover' },
               }}
             >
               <ListItemAvatar>
@@ -521,7 +531,7 @@ const DashboardLayout: React.FC = () => {
                 cursor: 'pointer',
                 py: 1.5,
                 px: 2,
-                '&:hover': { bgcolor: 'grey.50' },
+                '&:hover': { bgcolor: 'action.hover' },
               }}
             >
               <ListItemAvatar>
@@ -579,6 +589,9 @@ const DashboardLayout: React.FC = () => {
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: DRAWER_WIDTH,
+            bgcolor: 'background.paper',
+            borderRight: '1px solid',
+            borderColor: 'divider',
           },
         }}
       >
@@ -596,6 +609,9 @@ const DashboardLayout: React.FC = () => {
           '& .MuiDrawer-paper': {
             width: DRAWER_WIDTH,
             boxSizing: 'border-box',
+            bgcolor: 'background.paper',
+            borderRight: '1px solid',
+            borderColor: 'divider',
             transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,

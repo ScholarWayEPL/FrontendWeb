@@ -25,6 +25,9 @@ import {
   CircularProgress,
   Avatar,
   Stack,
+  alpha,
+  useTheme,
+  Fade,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -41,7 +44,6 @@ import {
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { BORDER_RADIUS, SHADOWS } from '../../constants';
 import {
   fetchBacheliers,
   fetchSeries,
@@ -59,6 +61,7 @@ import { formatCFA } from '../../constants';
 import UtilisateurDetails from '../../components/UtilisateurDetails';
 
 const Utilisateurs: React.FC = () => {
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const { bacheliers, loading, pagination, filters, series } = useAppSelector(
     (state) => state.users
@@ -88,11 +91,6 @@ const Utilisateurs: React.FC = () => {
     loadData();
     dispatch(fetchSeries());
   }, [loadData, dispatch]);
-
-  const handleViewDetails = (utilisateur: Bachelier) => {
-    setViewingUtilisateur(utilisateur);
-    setDetailsOpen(true);
-  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setFilters({ search: event.target.value }));
@@ -137,19 +135,10 @@ const Utilisateurs: React.FC = () => {
     if (utilisateurToDelete) {
       try {
         await dispatch(deleteBachelier(utilisateurToDelete.idBachelier)).unwrap();
-        dispatch(
-          showSnackbar({
-            message: 'Utilisateur supprimé avec succès',
-            severity: 'success',
-          })
-        );
+        dispatch(showSnackbar({ message: 'Utilisateur supprimé avec succès', severity: 'success' }));
+        loadData();
       } catch {
-        dispatch(
-          showSnackbar({
-            message: 'Erreur lors de la suppression',
-            severity: 'error',
-          })
-        );
+        dispatch(showSnackbar({ message: 'Erreur lors de la suppression', severity: 'error' }));
       }
     }
     setDeleteDialogOpen(false);
@@ -203,7 +192,7 @@ const Utilisateurs: React.FC = () => {
     }).format(new Date(dateString));
   };
 
-  const hasActiveFilters = filters.search || filters.serieBac;
+  const hasActiveFilters = Boolean(filters.search || filters.serieBac);
 
   const serieOptions = [
     { value: '', label: 'Toutes les séries' },
@@ -211,74 +200,107 @@ const Utilisateurs: React.FC = () => {
   ];
 
   return (
-    <Box>
-      {/* En-tête */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+    <Box sx={{ p: { xs: 1, md: 3 } }}>
+      {/* En-tête Dynamique */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant="h4" fontWeight={700}>
-              Utilisateurs
-            </Typography>
-          </Box>
-          <Typography variant="body1" color="text.secondary">
-            Gérez les bacheliers inscrits sur ScholarWay
+          <Typography variant="h4" fontWeight={800} sx={{ color: 'text.primary', mb: 1, letterSpacing: '-0.02em' }}>
+            Utilisateurs
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+            Gestion centralisée des bacheliers ScholarWay
           </Typography>
         </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAdd}
-          size="large"
-          sx={{ borderRadius: BORDER_RADIUS.md, boxShadow: SHADOWS.card }}
+          sx={{
+            px: 3,
+            py: 1.2,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.25)}`,
+          }}
         >
           Ajouter un utilisateur
         </Button>
       </Box>
 
-      {/* Filtres et recherche */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* Barre de Filtres Premium */}
+      <Card
+        sx={{
+          mb: 4,
+          borderRadius: '16px',
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+        }}
+      >
+        <CardContent sx={{ p: 2.5 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
-              placeholder="Rechercher par nom, prénom ou email..."
+              placeholder="Rechercher par nom, email..."
               value={filters.search}
               onChange={handleSearchChange}
               size="small"
-              sx={{ flexGrow: 1, minWidth: 300 }}
+              fullWidth
+              sx={{
+                maxWidth: { sm: 400 },
+                '& .MuiOutlinedInput-root': { borderRadius: '12px' }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon color="action" />
+                    <SearchIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                   </InputAdornment>
                 ),
               }}
             />
+
+            <Box sx={{ flexGrow: 1 }} />
+
             <Button
               variant={showFilters ? 'contained' : 'outlined'}
               startIcon={<FilterIcon />}
               onClick={() => setShowFilters(!showFilters)}
+              sx={{
+                borderRadius: '10px',
+                borderColor: showFilters ? 'primary.main' : 'divider',
+                color: showFilters ? 'white' : 'text.primary',
+                '&:hover': { borderColor: 'primary.main' }
+              }}
             >
-              Filtres {hasActiveFilters && `(${filters.serieBac ? 1 : 0})`}
+              Filtres {hasActiveFilters && `(Actifs)`}
             </Button>
-            <Tooltip title="Rafraîchir">
-              <IconButton onClick={loadData} color="primary">
-                <RefreshIcon />
+
+            <Tooltip title="Rafraîchir les données">
+              <IconButton
+                onClick={loadData}
+                sx={{
+                  bgcolor: alpha(theme.palette.primary.main, 0.05),
+                  color: 'primary.main',
+                  '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.1) }
+                }}
+              >
+                <RefreshIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Box>
+          </Stack>
 
-          {/* Filtres avancés */}
-          {showFilters && (
-            <Box sx={{ mt: 3 }}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} sm={8}>
+          {/* Filtres Avancés (Fade) */}
+          <Fade in={showFilters} mountOnEnter unmountOnExit>
+            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Série du Bac</InputLabel>
+                    <InputLabel id="serie-label">Série du Bac</InputLabel>
                     <Select
+                      labelId="serie-label"
                       value={filters.serieBac}
                       label="Série du Bac"
                       onChange={(e) => handleFilterChange('serieBac', e.target.value)}
+                      sx={{ borderRadius: '10px' }}
                     >
                       {serieOptions.map((opt) => (
                         <MenuItem key={opt.value} value={opt.value}>
@@ -288,201 +310,189 @@ const Utilisateurs: React.FC = () => {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6} md={3}>
                   <Button
                     fullWidth
                     variant="text"
                     startIcon={<CloseIcon />}
                     onClick={handleResetFilters}
                     disabled={!hasActiveFilters}
+                    sx={{ height: 40, borderRadius: '10px' }}
                   >
                     Réinitialiser
                   </Button>
                 </Grid>
               </Grid>
             </Box>
-          )}
+          </Fade>
         </CardContent>
       </Card>
 
-      {/* Stats rapides */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+      {/* Statistiques Rapides */}
+      <Stack direction="row" spacing={1.5} sx={{ mb: 3 }}>
         <Chip
-          icon={<PeopleIcon />}
+          icon={<PeopleIcon sx={{ color: 'white !important' }} />}
           label={`${pagination.total} utilisateur${pagination.total > 1 ? 's' : ''}`}
-          color="primary"
-          variant="outlined"
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            fontWeight: 700,
+            borderRadius: '8px'
+          }}
         />
         {filters.serieBac && (
           <Chip
             label={`Série: ${filters.serieBac}`}
             onDelete={() => handleFilterChange('serieBac', '')}
-            color="secondary"
+            variant="outlined"
+            sx={{ borderRadius: '8px', fontWeight: 600 }}
           />
         )}
-      </Box>
+      </Stack>
 
-      {/* Tableau */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.50' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Utilisateur</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Contact</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Bac</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="center">
-                  Moyenne
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">
-                  Budget max
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Inscription</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="center">
-                  Actions
+      {/* Table de Données Premium */}
+      <TableContainer
+        component={Card}
+        sx={{
+          borderRadius: '16px',
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: '0 10px 30px -12px rgba(0, 0, 0, 0.05)',
+        }}
+      >
+        <Table>
+          <TableHead sx={{ bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Utilisateur</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Contact</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Série</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }} align="center">Moyenne</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }} align="right">Budget max</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Inscription</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }} align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
+                  <CircularProgress size={32} />
+                  <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary', fontWeight: 500 }}>
+                    Chargement de l'espace utilisateurs...
+                  </Typography>
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
-                    <CircularProgress />
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                      Chargement des utilisateurs...
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : bacheliers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
-                    <PeopleIcon sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
-                    <Typography variant="body1" color="text.secondary">
-                      Aucun utilisateur trouvé
-                    </Typography>
-                    {hasActiveFilters && (
-                      <Button
-                        variant="text"
-                        onClick={handleResetFilters}
-                        sx={{ mt: 1 }}
-                      >
-                        Réinitialiser les filtres
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                bacheliers.map((bachelier) => (
-                  <TableRow
-                    key={bachelier.idBachelier}
-                    hover
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar
-                          sx={{
-                            bgcolor: 'primary.main',
-                            width: 40,
-                            height: 40,
-                          }}
-                        >
-                          {getInitials(bachelier.nom, bachelier.prenom)}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="body2" fontWeight={600}>
-                            {bachelier.prenom} {bachelier.nom}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {bachelier.objectifsProfessionnels.substring(0, 40)}...
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Stack spacing={0.5}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <EmailIcon fontSize="small" color="action" sx={{ fontSize: 16 }} />
-                          <Typography variant="body2">{bachelier.email}</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <PhoneIcon fontSize="small" color="action" sx={{ fontSize: 16 }} />
-                          <Typography variant="body2" color="text.secondary">
-                            {bachelier.telephone}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        icon={<SchoolIcon />}
-                        label={bachelier.serieBac}
-                        size="small"
-                        color={getSerieColor(bachelier.serieBac)}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Chip
-                        label={`${bachelier.moyenneBac}/20`}
-                        size="small"
+            ) : bacheliers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
+                  <PeopleIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2, opacity: 0.3 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Aucun résultat trouvé
+                  </Typography>
+                  <Typography variant="body2" color="text.disabled">
+                    Ajustez vos filtres ou lancez une nouvelle recherche
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              bacheliers.map((bachelier) => (
+                <TableRow
+                  key={bachelier.idBachelier}
+                  hover
+                  sx={{
+                    transition: 'background-color 0.2s ease',
+                    '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) }
+                  }}
+                >
+                  <TableCell>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Avatar
                         sx={{
-                          bgcolor:
-                            bachelier.moyenneBac >= 16
-                              ? 'success.light'
-                              : bachelier.moyenneBac >= 14
-                              ? 'info.light'
-                              : bachelier.moyenneBac >= 12
-                              ? 'warning.light'
-                              : 'grey.200',
-                          fontWeight: 600,
+                          width: 42,
+                          height: 42,
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          color: 'primary.main',
+                          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
                         }}
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="body2" fontWeight={600}>
-                        {formatCFA(bachelier.budgetMax)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatDate(bachelier.dateInscription)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Voir détails">
-                        <IconButton
-                          size="small"
-                          color="info"
-                          onClick={() => handleViewDetails(bachelier)}
-                        >
+                      >
+                        {getInitials(bachelier.nom, bachelier.prenom)}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" fontWeight={700} sx={{ color: 'text.primary' }}>
+                          {bachelier.prenom} {bachelier.nom}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                          {bachelier.serieBac} • ID: #{bachelier.idBachelier}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Stack spacing={0.3}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>{bachelier.email}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{bachelier.telephone}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={bachelier.serieBac}
+                      size="small"
+                      color={getSerieColor(bachelier.serieBac)}
+                      sx={{ fontWeight: 700, borderRadius: '6px', fontSize: '0.65rem' }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{
+                        display: 'inline-flex',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: '20px',
+                        fontWeight: 800,
+                        fontSize: '0.8rem',
+                        bgcolor: bachelier.moyenneBac >= 14 ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.warning.main, 0.1),
+                        color: bachelier.moyenneBac >= 14 ? 'success.main' : 'warning.main'
+                      }}
+                    >
+                      {bachelier.moyenneBac}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" fontWeight={700} color="text.primary">
+                      {formatCFA(bachelier.budgetMax)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
+                      {formatDate(bachelier.dateInscription)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={0.5} justifyContent="center">
+                      <Tooltip title="Détails complets">
+                        <IconButton size="small" onClick={() => { setViewingUtilisateur(bachelier); setDetailsOpen(true); }} sx={{ color: 'primary.main' }}>
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Modifier">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleEdit(bachelier)}
-                        >
+                        <IconButton size="small" onClick={() => handleEdit(bachelier)} sx={{ color: 'info.main' }}>
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Supprimer">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(bachelier)}
-                        >
+                        <IconButton size="small" onClick={() => handleDeleteClick(bachelier)} sx={{ color: 'error.main' }}>
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
         <TablePagination
           component="div"
           count={pagination.total}
@@ -491,14 +501,11 @@ const Utilisateurs: React.FC = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleRowsPerPageChange}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          labelRowsPerPage="Lignes par page"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`
-          }
+          sx={{ borderTop: '1px solid', borderColor: 'divider' }}
         />
-      </Card>
+      </TableContainer>
 
-      {/* Modal Ajouter/Modifier */}
+      {/* Modals & Dialogs */}
       <UtilisateurModal
         open={modalOpen}
         onClose={handleModalClose}
@@ -506,22 +513,17 @@ const Utilisateurs: React.FC = () => {
         utilisateur={selectedUtilisateur}
       />
 
-      {/* Modal Détails */}
       <UtilisateurDetails
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
         utilisateur={viewingUtilisateur}
-        onEdit={(user) => {
-          setDetailsOpen(false);
-          handleEdit(user);
-        }}
+        onEdit={(user) => { setDetailsOpen(false); handleEdit(user); }}
       />
 
-      {/* Dialog de confirmation suppression */}
       <ConfirmDialog
         open={deleteDialogOpen}
-        title="Supprimer l'utilisateur"
-        message={`Êtes-vous sûr de vouloir supprimer "${utilisateurToDelete?.prenom} ${utilisateurToDelete?.nom}" ? Cette action est irréversible.`}
+        title="Confirmation de suppression"
+        message={`Voulez-vous vraiment supprimer cet utilisateur ? Cette action effacera définitivement ses données.`}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialogOpen(false)}
       />

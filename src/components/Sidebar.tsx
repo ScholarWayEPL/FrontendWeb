@@ -9,6 +9,8 @@ import {
   ListItemText,
   Typography,
   Divider,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -62,6 +64,7 @@ const secondaryNavItems: NavItem[] = [
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAppSelector((state) => state.auth);
@@ -85,7 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     if (path === '/etablissement/dashboard') {
       return location.pathname === '/etablissement/dashboard' || location.pathname === '/etablissement';
     }
-    // Pour éviter la confusion entre /etablissements (Super Admin) et /etablissement/* (Admin Etablissement)
     if (path === '/etablissements') {
       return location.pathname === '/etablissements';
     }
@@ -98,7 +100,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'white',
+        bgcolor: 'background.paper',
+        borderRight: '1px solid',
+        borderColor: 'divider',
       }}
     >
       {/* Logo / Titre */}
@@ -109,131 +113,154 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           alignItems: 'center',
           gap: 2,
           borderBottom: '1px solid',
-          borderColor: 'grey.200',
+          borderColor: 'divider',
         }}
       >
         <Box
           sx={{
             width: 40,
             height: 40,
-            borderRadius: 2,
+            borderRadius: 2.5,
             bgcolor: 'primary.main',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`,
           }}
         >
           <SchoolIcon sx={{ color: 'white', fontSize: 24 }} />
         </Box>
         <Box>
-          <Typography variant="h6" fontWeight={700} color="primary.main">
+          <Typography variant="h6" fontWeight={800} sx={{ color: 'text.primary', lineHeight: 1.2 }}>
             ScholarWay
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             {user?.role === 'ROLE_ADMIN_ETABLISSEMENT' ? 'Espace Établissement' : 'Administration'}
           </Typography>
         </Box>
       </Box>
 
       {/* Navigation principale */}
-      <Box sx={{ flexGrow: 1, py: 2 }}>
+      <Box sx={{ flexGrow: 1, py: 2, overflowY: 'auto' }}>
         <Typography
           variant="overline"
-          sx={{ px: 3, color: 'text.secondary', fontWeight: 600 }}
+          sx={{ px: 3, color: 'text.disabled', fontWeight: 700, fontSize: '0.7rem' }}
         >
           Menu principal
         </Typography>
-        <List sx={{ px: 2 }}>
-          {mainNavItems.map((item) => (
-            <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton
-                onClick={() => handleNavigation(item.path)}
-                sx={{
-                  borderRadius: 2,
-                  bgcolor: isActive(item.path) ? 'primary.main' : 'transparent',
-                  color: isActive(item.path) ? 'white' : 'text.primary',
-                  '&:hover': {
-                    bgcolor: isActive(item.path) ? 'primary.dark' : 'grey.100',
-                  },
-                }}
-              >
-                <ListItemIcon
+        <List sx={{ px: 2, mt: 1 }}>
+          {mainNavItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => handleNavigation(item.path)}
                   sx={{
-                    color: isActive(item.path) ? 'white' : 'text.secondary',
-                    minWidth: 40,
+                    borderRadius: 2,
+                    bgcolor: active ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    color: active ? 'primary.main' : 'text.primary',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      bgcolor: active ? alpha(theme.palette.primary.main, 0.15) : 'action.hover',
+                      transform: 'translateX(4px)',
+                    },
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    fontWeight: isActive(item.path) ? 600 : 400,
-                    fontSize: '0.875rem',
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  <ListItemIcon
+                    sx={{
+                      color: active ? 'primary.main' : 'text.secondary',
+                      minWidth: 40,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.title}
+                    primaryTypographyProps={{
+                      fontWeight: active ? 700 : 500,
+                      fontSize: '0.875rem',
+                    }}
+                  />
+                  {active && (
+                    <Box
+                      sx={{
+                        width: 4,
+                        height: 18,
+                        bgcolor: 'primary.main',
+                        borderRadius: 2,
+                        ml: 1
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
 
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 2, mx: 3, opacity: 0.5 }} />
 
         {/* Navigation secondaire */}
         <Typography
           variant="overline"
-          sx={{ px: 3, color: 'text.secondary', fontWeight: 600 }}
+          sx={{ px: 3, color: 'text.disabled', fontWeight: 700, fontSize: '0.7rem' }}
         >
           Configuration
         </Typography>
-        <List sx={{ px: 2 }}>
-          {secondaryNavItems.map((item) => (
-            <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton
-                onClick={() => handleNavigation(item.path)}
-                sx={{
-                  borderRadius: 2,
-                  bgcolor: isActive(item.path) ? 'primary.main' : 'transparent',
-                  color: isActive(item.path) ? 'white' : 'text.primary',
-                  '&:hover': {
-                    bgcolor: isActive(item.path) ? 'primary.dark' : 'grey.100',
-                  },
-                }}
-              >
-                <ListItemIcon
+        <List sx={{ px: 2, mt: 1 }}>
+          {secondaryNavItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => handleNavigation(item.path)}
                   sx={{
-                    color: isActive(item.path) ? 'white' : 'text.secondary',
-                    minWidth: 40,
+                    borderRadius: 2,
+                    bgcolor: active ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    color: active ? 'primary.main' : 'text.primary',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      bgcolor: active ? alpha(theme.palette.primary.main, 0.15) : 'action.hover',
+                      transform: 'translateX(4px)',
+                    },
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    fontWeight: isActive(item.path) ? 600 : 400,
-                    fontSize: '0.875rem',
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  <ListItemIcon
+                    sx={{
+                      color: active ? 'primary.main' : 'text.secondary',
+                      minWidth: 40,
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.title}
+                    primaryTypographyProps={{
+                      fontWeight: active ? 700 : 500,
+                      fontSize: '0.875rem',
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       </Box>
 
       {/* Footer Sidebar */}
       <Box
         sx={{
-          p: 2,
+          p: 2.5,
           borderTop: '1px solid',
-          borderColor: 'grey.200',
-          bgcolor: 'grey.50',
+          borderColor: 'divider',
+          bgcolor: alpha(theme.palette.background.default, 0.5),
         }}
       >
-        <Typography variant="caption" color="text.secondary" display="block">
+        <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 600, display: 'block' }}>
           ScholarWay Admin v1.0
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 400 }}>
           © 2024 Tous droits réservés
         </Typography>
       </Box>

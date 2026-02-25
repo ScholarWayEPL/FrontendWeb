@@ -185,13 +185,25 @@ export interface ActivityItem {
 }
 
 // Enums basés sur le backend
-export type Sexe = 'MASCULIN' | 'FEMININ';
+export type Sexe = 'M' | 'F'; // valeurs backend
 export type Mention = 'PASSABLE' | 'ASSEZ_BIEN' | 'BIEN' | 'TRES_BIEN' | 'EXCELLENT';
 export type StatutCompte = 'ACTIF' | 'INACTIF' | 'SUSPENDU' | 'EN_ATTENTE';
 export type StatutCampagne = 'A_VENIR' | 'OUVERTE' | 'CLOTUREE';
 export type StatutCandidature = 'SOUMISE' | 'EN_COURS' | 'ACCEPTEE' | 'REFUSEE' | 'EN_ATTENTE_CONCOURS';
 export type TypeModification = 'CREATION' | 'MODIFICATION' | 'SUPPRESSION';
-export type RoleUtilisateur = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMINISTRATEUR' | 'ROLE_ADMIN_ETABLISSEMENT' | 'ROLE_BACHELIER';
+export type RoleUtilisateur =
+  | 'ROLE_SUPER_ADMIN'
+  | 'ROLE_ADMINISTRATEUR'
+  | 'ROLE_ADMIN_ETABLISSEMENT'
+  | 'ROLE_BACHELIER';
+export type TypeEtablissementBackend =
+  | 'UNIVERSITE_PUBLIQUE'
+  | 'UNIVERSITE_PRIVEE'
+  | 'ECOLE_SUPERIEURE_PUBLIQUE'
+  | 'ECOLE_SUPERIEURE_PRIVEE'
+  | 'INSTITUT_SUPERIEUR'
+  | 'GRANDE_ECOLE'
+  | 'CENTRE_FORMATION';
 
 // 👤 Utilisateur (Backend model)
 export interface Utilisateur {
@@ -215,7 +227,7 @@ export interface SerieBac {
   active: boolean;
 }
 
-// 🎓 Bachelier (Backend model)
+// 🎓 Bachelier (Backend model – entité interne)
 export interface BachelierBackend {
   id?: number;
   nom: string;
@@ -234,10 +246,39 @@ export interface BachelierBackend {
   utilisateur?: Utilisateur;
 }
 
+// 🎓 BachelierDTO – réponse complète de l'API (GET /bacheliers/:id, /me, etc.)
+export interface BachelierDTO {
+  idUtilisateur: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  dateNaissance: string;
+  age: number;
+  sexe: Sexe;
+  telephone: string;
+  serieBac: string;
+  moyenneBac: number;
+  mention: Mention;
+  matieresPrincipales?: string;
+  objectifsProfessionnels?: string;
+  budgetMax?: number;
+  role: RoleUtilisateur;
+  domainePreferenceId?: number;
+  domainePreferenceNom?: string;
+  parcoursPreferenceId?: number;
+  parcoursPreferenceNom?: string;
+  statut: StatutCompte;
+  dateCreation: string;
+  derniereConnexion?: string;
+  profilComplet: boolean;
+}
+
 // 🏫 Établissement (Backend model)
 export interface EtablissementBackend {
   id?: number;
   nomEtablissement: string;
+  email?: string;
+  typeEtablissement?: TypeEtablissementBackend;
   description?: string;
   logoUrl?: string;
   localisation: string;
@@ -247,6 +288,18 @@ export interface EtablissementBackend {
   scolariteGlobale?: string;
   valide: boolean;
   utilisateur?: Utilisateur;
+}
+
+// 🏫 RegisterEtablissementRequest – payload POST /api/auth/register/etablissement
+export interface RegisterEtablissementRequest {
+  nomEtablissement: string;
+  email: string;
+  motDePasse: string;
+  description?: string;
+  localisation: string;
+  siteWeb?: string;
+  telephonePro: string;
+  typeEtablissement: TypeEtablissementBackend;
 }
 
 // 👨‍💼 Administrateur (Backend model)

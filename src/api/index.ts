@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './auth';
 export * from './candidatures';
 export { default as apiClient } from './client';
 // API index - Export centralisé de toutes les APIs

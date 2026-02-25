@@ -1,5 +1,10 @@
 import client from './client';
-import type { ApiResponse, User, RoleUtilisateur } from '../types';
+import type { ApiResponse, User, RoleUtilisateur, RegisterEtablissementRequest, BachelierDTO } from '../types';
+
+// Re-export pour compatibilité des imports depuis `../api`
+export type { RegisterEtablissementRequest, BachelierDTO } from '../types';
+
+// ─── Auth response types ───────────────────────────────────────────
 
 export interface LoginResponse {
     token: string;
@@ -10,22 +15,11 @@ export interface LoginResponse {
     expiresAt: string;
 }
 
-export interface RegisterEtablissementRequest {
-    nomEtablissement: string;
-    email: string;
-    motDePasse: string;
-    description: string;
-    localisation: string;
-    siteWeb: string;
-    telephonePro: string;
-    typeEtablissement: string;
-}
+// ─── Auth API ─────────────────────────────────────────────────────
 
 export const authApi = {
     /**
-     * Authentifie un utilisateur et renvoie un token JWT
-     * @param email Email de l'utilisateur
-     * @param motDePasse Mot de passe de l'utilisateur
+     * Authentifie un utilisateur et renvoie un token JWT.
      */
     login: async (email: string, motDePasse: string): Promise<ApiResponse<LoginResponse>> => {
         const response = await client.post<ApiResponse<LoginResponse>>('/auth/login', {
@@ -36,16 +30,44 @@ export const authApi = {
     },
 
     /**
-     * Enregistre un nouvel établissement
-     * @param data Données de l'établissement
+     * Enregistre un nouvel établissement via multipart/form-data.
+     * Le champ `request` contient les données JSON et `documentAccreditation`
+     * le fichier PDF d'accréditation (optionnel).
      */
-    registerEtablissement: async (data: RegisterEtablissementRequest): Promise<ApiResponse<any>> => {
-        const response = await client.post<ApiResponse<any>>('/auth/register/etablissement', data);
+    registerEtablissement: async (
+        data: RegisterEtablissementRequest,
+        documentAccreditation?: File,
+    ): Promise<ApiResponse<any>> => {
+        const formData = new FormData();
+
+        // Sérialiser les données sous forme de Blob JSON (attendu côté Spring)
+        formData.append(
+            'request',
+            new Blob([JSON.stringify(data)], { type: 'application/json' }),
+        );
+
+        if (documentAccreditation) {
+            formData.append('documentAccreditation', documentAccreditation);
+        }
+
+        const response = await client.post<ApiResponse<any>>(
+            '/auth/register/etablissement',
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        );
         return response.data;
     },
 
     /**
-     * Vérifie le token actuel et récupère les infos de l'utilisateur
+     * Récupère les informations du bachelier connecté.
+     */
+    getCurrentBachelier: async (): Promise<ApiResponse<BachelierDTO>> => {
+        const response = await client.get<ApiResponse<BachelierDTO>>('/auth/me/bachelier');
+        return response.data;
+    },
+
+    /**
+     * Vérifie le token actuel et récupère les infos génériques de l'utilisateur.
      */
     getCurrentUser: async (): Promise<ApiResponse<User>> => {
         const response = await client.get<ApiResponse<User>>('/auth/me');

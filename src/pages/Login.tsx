@@ -8,7 +8,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setAuth, setError, setLoading } from '../store/slices/authSlice';
-import { authApi, type RegisterEtablissementRequest } from '../api';
+import { authApi } from '../api';
+import type { RegisterEtablissementRequest, TypeEtablissementBackend } from '../types';
 import BrandingPanel from '../components/auth/BrandingPanel';
 import LoginForm from '../components/auth/LoginForm';
 import RegistrationForm from '../components/auth/RegistrationForm';
@@ -148,8 +149,20 @@ const Login: React.FC = () => {
         dispatch(setError(null));
 
         try {
-            const data: RegisterEtablissementRequest = { ...inscriptionForm } as any;
-            const response = await authApi.registerEtablissement(data);
+            const data: RegisterEtablissementRequest = {
+                nomEtablissement: inscriptionForm.nomEtablissement,
+                email: inscriptionForm.emailPro,
+                motDePasse: inscriptionForm.motDePasse,
+                typeEtablissement: inscriptionForm.typeEtablissement as TypeEtablissementBackend,
+                telephonePro: inscriptionForm.telephonePro,
+                localisation: inscriptionForm.localisation,
+                siteWeb: inscriptionForm.siteWeb || undefined,
+                description: inscriptionForm.description || undefined,
+            };
+            const response = await authApi.registerEtablissement(
+                data,
+                inscriptionForm.documentAccreditation ?? undefined,
+            );
 
             if (response.success) {
                 setInscriptionSuccess(true);

@@ -40,26 +40,30 @@ const ValidationInscriptions: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState<StatutValidationEtablissement>('EN_ATTENTE');
     const [counts, setCounts] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
 
-    const fetchStats = useCallback(async () => {
+    const fetchAllAndCount = useCallback(async () => {
         try {
-            const [pendingRes, activeRes, rejectedRes] = await Promise.all([
-                etablissementsApi.getPending({ page: 0, size: 1, valide: 'EN_ATTENTE' }),
-                etablissementsApi.getPending({ page: 0, size: 1, valide: 'ACTIF' }),
-                etablissementsApi.getPending({ page: 0, size: 1, valide: 'REJETE' }),
-            ]);
-
-            const pending = pendingRes.pagination?.total || 0;
-            const approved = activeRes.pagination?.total || 0;
-            const rejected = rejectedRes.pagination?.total || 0;
-
-            setCounts({
-                total: pending + approved + rejected,
-                pending,
-                approved,
-                rejected
+            // Fetch a large enough page to count all (assuming < 1000 establishments)
+            const response = await etablissementsApi.getPending({
+                page: 0,
+                size: 1000,
+                sort: 'dateCreation,DESC'
             });
+
+            if (response.success && response.data) {
+                const all = response.data;
+                const pending = all.filter(e => String(e.valide) === 'EN_ATTENTE' || (e.valide as any) === false).length;
+                const approved = all.filter(e => String(e.valide) === 'ACTIF' || (e.valide as any) === true).length;
+                const rejected = all.filter(e => String(e.valide) === 'REJETE').length;
+
+                setCounts({
+                    total: all.length,
+                    pending,
+                    approved,
+                    rejected
+                });
+            }
         } catch (err) {
-            console.error('Erreur lors du chargement des statistiques:', err);
+            console.error('Erreur lors du comptage des établissements:', err);
         }
     }, []);
 
@@ -89,8 +93,8 @@ const ValidationInscriptions: React.FC = () => {
 
     useEffect(() => {
         fetchDemandes();
-        fetchStats();
-    }, [fetchDemandes, fetchStats]);
+        fetchAllAndCount();
+    }, [fetchDemandes, fetchAllAndCount]);
 
     const handleStatusChange = (_event: React.SyntheticEvent, newValue: StatutValidationEtablissement) => {
         setStatusFilter(newValue);
@@ -123,31 +127,38 @@ const ValidationInscriptions: React.FC = () => {
         setConfirmDialogOpen(true);
     };
 
+    const executeAction = async (demande: EtablissementEnAttente, action: 'approve' | 'reject') => {
+        try {
+            setLoading(true);
+            const apiCall = action === 'approve'
+                ? etablissementsApi.validate(demande.idUtilisateur)
+                : etablissementsApi.reject(demande.idUtilisateur);
+
+            const response = await apiCall;
+
+            if (response.success) {
+                // Recharger les données et les stats
+                await Promise.all([fetchDemandes(), fetchAllAndCount()]);
+            }
+        } catch (err) {
+            console.error(`Erreur lors de l'action ${action}:`, err);
+            setError(`Impossible de ${action === 'approve' ? 'valider' : 'rejeter'} l'établissement.`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleConfirmAction = async () => {
         if (selectedDemande && confirmAction) {
-            try {
-                setLoading(true);
-                const action = confirmAction === 'approve'
-                    ? etablissementsApi.validate(selectedDemande.idUtilisateur)
-                    : etablissementsApi.reject(selectedDemande.idUtilisateur);
-
-                const response = await action;
-
-                if (response.success) {
-                    // Recharger les données et les stats
-                    await Promise.all([fetchDemandes(), fetchStats()]);
-                    // On pourrait aussi afficher un message de succès ici si on avait un snackbar
-                }
-            } catch (err) {
-                console.error(`Erreur lors de l'action ${confirmAction}:`, err);
-                setError(`Impossible de ${confirmAction === 'approve' ? 'valider' : 'rejeter'} l'établissement.`);
-            } finally {
-                setLoading(false);
-            }
+            await executeAction(selectedDemande, confirmAction);
         }
         setConfirmDialogOpen(false);
         setSelectedDemande(null);
         setConfirmAction(null);
+    };
+
+    const handleQuickAction = async (demande: EtablissementEnAttente, action: 'approve' | 'reject') => {
+        await executeAction(demande, action);
     };
 
     const getStatutLabel = (statut: string) => {
@@ -232,8 +243,10 @@ const ValidationInscriptions: React.FC = () => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 onViewDetails={handleViewDetails}
-                onApprove={(d) => handleOpenConfirmDialog(d, 'approve')}
-                onReject={(d) => handleOpenConfirmDialog(d, 'reject')}
+                onApprove={(d: EtablissementEnAttente) => handleOpenConfirmDialog(d, 'approve')}
+                onReject={(d: EtablissementEnAttente) => handleOpenConfirmDialog(d, 'reject')}
+                onQuickApprove={(d: EtablissementEnAttente) => handleQuickAction(d, 'approve')}
+                onQuickReject={(d: EtablissementEnAttente) => handleQuickAction(d, 'reject')}
                 getStatutLabel={getStatutLabel}
                 formatDate={formatDate}
             />

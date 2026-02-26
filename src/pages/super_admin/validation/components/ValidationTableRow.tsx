@@ -22,8 +22,8 @@ import type { EtablissementEnAttente } from '../../../../types';
 interface ValidationTableRowProps {
     demande: EtablissementEnAttente;
     onViewDetails: (demande: EtablissementEnAttente) => void;
-    onApprove: (demande: EtablissementEnAttente) => void;
-    onReject: (demande: EtablissementEnAttente) => void;
+    onQuickApprove: (demande: EtablissementEnAttente) => void;
+    onQuickReject: (demande: EtablissementEnAttente) => void;
     getStatutLabel: (statut: string) => string;
     formatDate: (dateString: string) => string;
 }
@@ -31,8 +31,8 @@ interface ValidationTableRowProps {
 const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
     demande,
     onViewDetails,
-    onApprove,
-    onReject,
+    onQuickApprove,
+    onQuickReject,
     getStatutLabel,
     formatDate,
 }) => {
@@ -92,13 +92,13 @@ const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
                     </Tooltip>
                     {demande.valide === 'EN_ATTENTE' && (
                         <>
-                            <Tooltip title="Approuver">
-                                <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => onApprove(demande)}>
+                            <Tooltip title="Validation rapide">
+                                <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => onQuickApprove(demande)}>
                                     <CheckCircleIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title="Rejeter">
-                                <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => onReject(demande)}>
+                            <Tooltip title="Rejet rapide">
+                                <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => onQuickReject(demande)}>
                                     <CancelIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>

@@ -28,8 +28,8 @@ interface ValidationTableProps {
     onPageChange: (event: unknown, newPage: number) => void;
     onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     onViewDetails: (demande: EtablissementEnAttente) => void;
-    onApprove: (demande: EtablissementEnAttente) => void;
-    onReject: (demande: EtablissementEnAttente) => void;
+    onQuickApprove: (demande: EtablissementEnAttente) => void;
+    onQuickReject: (demande: EtablissementEnAttente) => void;
     getStatutLabel: (statut: string) => string;
     formatDate: (dateString: string) => string;
 }
@@ -44,8 +44,8 @@ const ValidationTable: React.FC<ValidationTableProps> = ({
     onPageChange,
     onRowsPerPageChange,
     onViewDetails,
-    onApprove,
-    onReject,
+    onQuickApprove,
+    onQuickReject,
     getStatutLabel,
     formatDate,
 }) => {
@@ -75,8 +75,8 @@ const ValidationTable: React.FC<ValidationTableProps> = ({
                             key={demande.idUtilisateur}
                             demande={demande}
                             onViewDetails={onViewDetails}
-                            onApprove={onApprove}
-                            onReject={onReject}
+                            onQuickApprove={onQuickApprove}
+                            onQuickReject={onQuickReject}
                             getStatutLabel={getStatutLabel}
                             formatDate={formatDate}
                         />

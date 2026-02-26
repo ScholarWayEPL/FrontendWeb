@@ -71,7 +71,17 @@ const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
                 <Typography variant="body2">{formatDate(demande.dateCreation)}</Typography>
             </TableCell>
             <TableCell>
-                <StatusChip status={demande.valide.toLowerCase()} label={getStatutLabel(demande.valide)} />
+                <StatusChip
+                    status={(() => {
+                        if (typeof demande.valide === 'boolean') return demande.valide ? 'actif' : 'en_attente';
+                        return String(demande.valide || 'en_attente').toLowerCase();
+                    })()}
+                    label={getStatutLabel(
+                        typeof demande.valide === 'boolean'
+                            ? (demande.valide ? 'ACTIF' : 'EN_ATTENTE')
+                            : String(demande.valide || 'EN_ATTENTE')
+                    )}
+                />
             </TableCell>
             <TableCell align="center">
                 <Stack direction="row" spacing={1} justifyContent="center">

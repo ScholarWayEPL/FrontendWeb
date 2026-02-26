@@ -66,7 +66,17 @@ const ValidationDetailsDialog: React.FC<ValidationDetailsDialogProps> = ({
                             {selectedDemande.nomEtablissement}
                         </Typography>
                         <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                            <StatusChip status={selectedDemande.statut.toLowerCase()} label={getStatutLabel(selectedDemande.statut)} />
+                            <StatusChip
+                                status={(() => {
+                                    if (typeof selectedDemande.valide === 'boolean') return selectedDemande.valide ? 'actif' : 'en_attente';
+                                    return String(selectedDemande.valide || 'en_attente').toLowerCase();
+                                })()}
+                                label={getStatutLabel(
+                                    typeof selectedDemande.valide === 'boolean'
+                                        ? (selectedDemande.valide ? 'ACTIF' : 'EN_ATTENTE')
+                                        : String(selectedDemande.valide || 'EN_ATTENTE')
+                                )}
+                            />
                             <Typography variant="caption" sx={{ color: 'text.disabled', alignSelf: 'center' }}>
                                 Demande #INS-{selectedDemande.idUtilisateur}
                             </Typography>

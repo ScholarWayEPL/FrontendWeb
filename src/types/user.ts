@@ -27,12 +27,12 @@ export interface Bachelier {
     age?: number;
     sexe?: Sexe;
     telephone: string;
-    serieBac: string;
-    moyenneBac: number;
+    serieBac: string | null;
+    moyenneBac: number | null;
     mention?: Mention;
     matieresPrincipales?: string;
     objectifsProfessionnels?: string;
-    budgetMax: number;
+    budgetMax: number | null;
     role?: RoleUtilisateur;
     domainePreferenceId?: number;
     domainePreferenceNom?: string;

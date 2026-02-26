@@ -163,7 +163,8 @@ const Utilisateurs: React.FC = () => {
     }
   };
 
-  const getSerieColor = (serie: string) => {
+  const getSerieColor = (serie: string | null) => {
+    if (!serie) return 'default';
     const colors: Record<string, 'primary' | 'secondary' | 'success' | 'warning' | 'info' | 'error'> = {
       C: 'primary',
       D: 'success',
@@ -421,7 +422,7 @@ const Utilisateurs: React.FC = () => {
                           {bachelier.prenom} {bachelier.nom}
                         </Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                          {bachelier.serieBac} • ID: #{bachelier.idUtilisateur}
+                          {bachelier.serieBac || 'Série N/A'} • ID: #{bachelier.idUtilisateur}
                         </Typography>
                       </Box>
                     </Stack>
@@ -434,7 +435,7 @@ const Utilisateurs: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={bachelier.serieBac}
+                      label={bachelier.serieBac || 'N/A'}
                       size="small"
                       color={getSerieColor(bachelier.serieBac)}
                       sx={{ fontWeight: 700, borderRadius: '6px', fontSize: '0.65rem' }}
@@ -449,16 +450,16 @@ const Utilisateurs: React.FC = () => {
                         borderRadius: '20px',
                         fontWeight: 800,
                         fontSize: '0.8rem',
-                        bgcolor: bachelier.moyenneBac >= 14 ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.warning.main, 0.1),
-                        color: bachelier.moyenneBac >= 14 ? 'success.main' : 'warning.main'
+                        bgcolor: bachelier.moyenneBac !== null && bachelier.moyenneBac >= 14 ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.warning.main, 0.1),
+                        color: bachelier.moyenneBac !== null && bachelier.moyenneBac >= 14 ? 'success.main' : 'warning.main'
                       }}
                     >
-                      {bachelier.moyenneBac}
+                      {bachelier.moyenneBac !== null ? bachelier.moyenneBac : 'N/A'}
                     </Box>
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight={700} color="text.primary">
-                      {formatCFA(bachelier.budgetMax)}
+                      {bachelier.budgetMax !== null ? formatCFA(bachelier.budgetMax) : 'N/A'}
                     </Typography>
                   </TableCell>
                   <TableCell>

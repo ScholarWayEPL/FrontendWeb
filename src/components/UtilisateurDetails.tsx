@@ -43,7 +43,10 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
 }) => {
   if (!utilisateur) return null;
 
-  const getSerieColor = (serie: string) => {
+  const { serieBac, moyenneBac, budgetMax } = utilisateur;
+
+  const getSerieColor = (serie: string | null) => {
+    if (!serie) return '#757575';
     const colors: Record<string, string> = {
       C: '#1976d2',
       D: '#2e7d32',
@@ -57,7 +60,8 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
     return colors[serie] || '#757575';
   };
 
-  const getMoyenneColor = (moyenne: number) => {
+  const getMoyenneColor = (moyenne: number | null) => {
+    if (moyenne === null) return '#9e9e9e';
     if (moyenne >= 16) return '#4caf50';
     if (moyenne >= 14) return '#2196f3';
     if (moyenne >= 12) return '#ff9800';
@@ -131,20 +135,20 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
             <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
               <Chip
                 icon={<School sx={{ color: 'white !important' }} />}
-                label={`Série ${utilisateur.serieBac}`}
+                label={serieBac ? `Série ${serieBac}` : 'Série N/A'}
                 size="small"
                 sx={{
-                  bgcolor: alpha(getSerieColor(utilisateur.serieBac), 0.3),
+                  bgcolor: alpha(getSerieColor(serieBac), 0.3),
                   color: 'white',
                   fontWeight: 600,
                   '& .MuiChip-icon': { color: 'white' },
                 }}
               />
               <Chip
-                label={`${utilisateur.moyenneBac}/20`}
+                label={moyenneBac !== null ? `${moyenneBac}/20` : 'Moyenne N/A'}
                 size="small"
                 sx={{
-                  bgcolor: alpha(getMoyenneColor(utilisateur.moyenneBac), 0.3),
+                  bgcolor: alpha(getMoyenneColor(moyenneBac), 0.3),
                   color: 'white',
                   fontWeight: 600,
                 }}
@@ -237,7 +241,7 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
                     Série du Baccalauréat
                   </Typography>
                   <Typography variant="body1" fontWeight={500}>
-                    {utilisateur.serieBac}
+                    {serieBac || 'N/A'}
                   </Typography>
                 </Box>
               </Box>
@@ -251,30 +255,34 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
                     Moyenne au Bac
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h5" fontWeight={700} color={getMoyenneColor(utilisateur.moyenneBac)}>
-                      {utilisateur.moyenneBac}
+                    <Typography variant="h5" fontWeight={700} color={getMoyenneColor(moyenneBac)}>
+                      {moyenneBac !== null ? moyenneBac : 'N/A'}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      / 20
-                    </Typography>
-                    <Chip
-                      label={
-                        utilisateur.moyenneBac >= 16
-                          ? 'Très Bien'
-                          : utilisateur.moyenneBac >= 14
-                            ? 'Bien'
-                            : utilisateur.moyenneBac >= 12
-                              ? 'Assez Bien'
-                              : 'Passable'
-                      }
-                      size="small"
-                      sx={{
-                        bgcolor: alpha(getMoyenneColor(utilisateur.moyenneBac), 0.1),
-                        color: getMoyenneColor(utilisateur.moyenneBac),
-                        fontWeight: 600,
-                        ml: 1,
-                      }}
-                    />
+                    {moyenneBac !== null && (
+                      <>
+                        <Typography variant="body2" color="text.secondary">
+                          / 20
+                        </Typography>
+                        <Chip
+                          label={
+                            moyenneBac >= 16
+                              ? 'Très Bien'
+                              : moyenneBac >= 14
+                                ? 'Bien'
+                                : moyenneBac >= 12
+                                  ? 'Assez Bien'
+                                  : 'Passable'
+                          }
+                          size="small"
+                          sx={{
+                            bgcolor: alpha(getMoyenneColor(moyenneBac), 0.1),
+                            color: getMoyenneColor(moyenneBac),
+                            fontWeight: 600,
+                            ml: 1,
+                          }}
+                        />
+                      </>
+                    )}
                   </Box>
                 </Box>
               </Box>
@@ -288,7 +296,7 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
                     Budget maximum
                   </Typography>
                   <Typography variant="h6" fontWeight={700} color="primary.main">
-                    {formatCFA(utilisateur.budgetMax)}
+                    {budgetMax !== null ? formatCFA(budgetMax) : 'N/A'}
                   </Typography>
                 </Box>
               </Box>

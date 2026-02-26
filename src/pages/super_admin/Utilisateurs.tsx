@@ -56,6 +56,7 @@ import UtilisateurModal from '../../components/UtilisateurModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { formatCFA } from '../../constants';
 import UtilisateurDetails from '../../components/UtilisateurDetails';
+import { usersApi } from '../../api/users';
 
 const Utilisateurs: React.FC = () => {
   const theme = useTheme();
@@ -68,6 +69,7 @@ const Utilisateurs: React.FC = () => {
   const [selectedUtilisateur, setSelectedUtilisateur] = useState<Bachelier | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [viewingUtilisateur, setViewingUtilisateur] = useState<Bachelier | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [utilisateurToDelete, setUtilisateurToDelete] = useState<Bachelier | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -121,6 +123,22 @@ const Utilisateurs: React.FC = () => {
   const handleEdit = (utilisateur: Bachelier) => {
     setSelectedUtilisateur(utilisateur);
     setModalOpen(true);
+  };
+
+  const handleViewDetails = async (bachelier: Bachelier) => {
+    setDetailsOpen(true);
+    setLoadingDetails(true);
+    setViewingUtilisateur(bachelier); // Show what we have first
+    try {
+      const response = await usersApi.getById(bachelier.idUtilisateur);
+      if (response.success) {
+        setViewingUtilisateur(response.data);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des détails:', error);
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   const handleDeleteClick = (utilisateur: Bachelier) => {
@@ -470,7 +488,7 @@ const Utilisateurs: React.FC = () => {
                   <TableCell align="center">
                     <Stack direction="row" spacing={0.5} justifyContent="center">
                       <Tooltip title="Détails complets">
-                        <IconButton size="small" onClick={() => { setViewingUtilisateur(bachelier); setDetailsOpen(true); }} sx={{ color: 'primary.main' }}>
+                        <IconButton size="small" onClick={() => handleViewDetails(bachelier)} sx={{ color: 'primary.main' }}>
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -515,6 +533,7 @@ const Utilisateurs: React.FC = () => {
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
         utilisateur={viewingUtilisateur}
+        loading={loadingDetails}
         onEdit={(user) => { setDetailsOpen(false); handleEdit(user); }}
       />
 

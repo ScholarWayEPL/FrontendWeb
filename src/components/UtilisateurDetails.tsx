@@ -13,6 +13,7 @@ import {
   Stack,
   alpha,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import {
   Close,
@@ -32,6 +33,7 @@ interface UtilisateurDetailsProps {
   open: boolean;
   onClose: () => void;
   utilisateur: Bachelier | null;
+  loading?: boolean;
   onEdit?: (utilisateur: Bachelier) => void;
 }
 
@@ -39,11 +41,12 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
   open,
   onClose,
   utilisateur,
+  loading = false,
   onEdit,
 }) => {
   if (!utilisateur) return null;
 
-  const { serieBac, moyenneBac, budgetMax } = utilisateur;
+  const { serieBac, moyenneBac, budgetMax, objectifsProfessionnels: objectives } = utilisateur;
 
   const getSerieColor = (serie: string | null) => {
     if (!serie) return '#757575';
@@ -90,6 +93,25 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
         sx: { borderRadius: 10, overflow: 'hidden' },
       }}
     >
+      {loading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: alpha('#fff', 0.6),
+            zIndex: 10,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
+
       {/* Header avec gradient */}
       <Box
         sx={{
@@ -317,14 +339,18 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
           <Typography
             variant="body1"
             sx={{
-              p: 2,
+              p: 2.5,
               bgcolor: 'grey.50',
-              borderRadius: 8,
-              lineHeight: 1.7,
-              fontStyle: 'italic',
+              borderRadius: '12px',
+              lineHeight: 1.8,
+              fontStyle: objectives ? 'italic' : 'normal',
+              color: objectives ? 'text.primary' : 'text.disabled',
+              textAlign: objectives ? 'left' : 'center',
+              border: '1px dashed',
+              borderColor: 'divider',
             }}
           >
-            "{utilisateur.objectifsProfessionnels}"
+            {objectives ? `"${objectives}"` : "Aucun objectif professionnel défini pour le moment."}
           </Typography>
         </Box>
       </DialogContent>

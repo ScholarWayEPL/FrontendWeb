@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Card,
@@ -25,6 +25,7 @@ import {
     useTheme,
     alpha,
     Alert,
+    CircularProgress,
 } from '@mui/material';
 import {
     Visibility as VisibilityIcon,
@@ -41,107 +42,63 @@ import {
 import { SearchField, StatusChip } from '../../components/ui';
 import StatCard from '../../components/StatCard';
 import { ConfirmDialog } from '../../components';
-
-// Types
-interface DemandeInscription {
-    id: number;
-    nomEtablissement: string;
-    emailPro: string;
-    telephonePro: string;
-    localisation: string;
-    siteWeb?: string;
-    description: string;
-    documentAccreditationUrl: string;
-    dateDemande: string;
-    statut: 'en_attente' | 'approuvee' | 'rejetee';
-}
-
-// Données de démonstration
-const initialDemandes: DemandeInscription[] = [
-    {
-        id: 1,
-        nomEtablissement: 'Institut Africain de Management (IAM)',
-        emailPro: 'contact@iam-togo.tg',
-        telephonePro: '+228 90 12 34 56',
-        localisation: 'Lomé, Boulevard du 13 Janvier',
-        siteWeb: 'https://www.iam-togo.tg',
-        description: 'Institut supérieur de formation en management, commerce international et marketing digital.',
-        documentAccreditationUrl: '/documents/accreditation_iam.pdf',
-        dateDemande: '2024-02-15',
-        statut: 'en_attente',
-    },
-    {
-        id: 2,
-        nomEtablissement: 'École Supérieure des Métiers du Numérique (ESMN)',
-        emailPro: 'info@esmn.tg',
-        telephonePro: '+228 91 23 45 67',
-        localisation: 'Lomé, Quartier Tokoin',
-        siteWeb: 'https://www.esmn.tg',
-        description: 'Formation en développement web, cybersécurité et intelligence artificielle.',
-        documentAccreditationUrl: '/documents/accreditation_esmn.pdf',
-        dateDemande: '2024-02-14',
-        statut: 'en_attente',
-    },
-    {
-        id: 3,
-        nomEtablissement: 'Centre de Formation Technique Avancée (CFTA)',
-        emailPro: 'admission@cfta.tg',
-        telephonePro: '+228 92 34 56 78',
-        localisation: 'Kara, Zone Industrielle',
-        description: 'Centre spécialisé en formation technique et professionnelle.',
-        documentAccreditationUrl: '/documents/accreditation_cfta.pdf',
-        dateDemande: '2024-02-13',
-        statut: 'en_attente',
-    },
-    {
-        id: 4,
-        nomEtablissement: 'Université Privée de Sokodé (UPS)',
-        emailPro: 'rectorat@ups.tg',
-        telephonePro: '+228 93 45 67 89',
-        localisation: 'Sokodé, Avenue de la République',
-        siteWeb: 'https://www.ups.tg',
-        description: 'Université pluridisciplinaire offrant des formations en sciences, lettres et économie.',
-        documentAccreditationUrl: '/documents/accreditation_ups.pdf',
-        dateDemande: '2024-02-10',
-        statut: 'approuvee',
-    },
-    {
-        id: 5,
-        nomEtablissement: 'Institut de Formation Non Accrédité',
-        emailPro: 'contact@ifna.tg',
-        telephonePro: '+228 94 56 78 90',
-        localisation: 'Lomé',
-        description: 'Formation générale.',
-        documentAccreditationUrl: '/documents/accreditation_ifna.pdf',
-        dateDemande: '2024-02-08',
-        statut: 'rejetee',
-    },
-];
+import { etablissementsApi } from '../../api/etablissements';
+import type { EtablissementEnAttente } from '../../types';
 
 const ValidationInscriptions: React.FC = () => {
     const theme = useTheme();
-    const [demandes, setDemandes] = useState<DemandeInscription[]>(initialDemandes);
+    const [demandes, setDemandes] = useState<EtablissementEnAttente[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [selectedDemande, setSelectedDemande] = useState<DemandeInscription | null>(null);
+    const [totalElements, setTotalElements] = useState(0);
+    const [selectedDemande, setSelectedDemande] = useState<EtablissementEnAttente | null>(null);
     const [detailDialogOpen, setDetailDialogOpen] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null);
 
-    // Filtrer les demandes
+    const fetchDemandes = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await etablissementsApi.getPending({
+                page: page,
+                size: rowsPerPage,
+                sort: 'dateCreation,DESC'
+            });
+            if (response.success) {
+                setDemandes(response.data);
+                if (response.pagination) {
+                    setTotalElements(response.pagination.total);
+                }
+                setError(null);
+            }
+        } catch (err) {
+            console.error('Erreur lors du chargement des demandes:', err);
+            setError('Impossible de charger les demandes d\'inscription.');
+        } finally {
+            setLoading(false);
+        }
+    }, [page, rowsPerPage]);
+
+    useEffect(() => {
+        fetchDemandes();
+    }, [fetchDemandes]);
+
+    // Filtrer les demandes localement pour la recherche instantanée
     const filteredDemandes = demandes.filter((demande) =>
         demande.nomEtablissement.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        demande.emailPro.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        demande.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         demande.localisation.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Stats
+    // Stats simplifiées pour cet écran qui ne montre que les demandes "en attente"
     const stats = {
-        total: demandes.length,
-        enAttente: demandes.filter((d) => d.statut === 'en_attente').length,
-        approuvees: demandes.filter((d) => d.statut === 'approuvee').length,
-        rejetees: demandes.filter((d) => d.statut === 'rejetee').length,
+        total: totalElements,
+        enAttente: totalElements,
+        approuvees: 0,
+        rejetees: 0,
     };
 
     const handleChangePage = (_event: unknown, newPage: number) => {
@@ -153,42 +110,40 @@ const ValidationInscriptions: React.FC = () => {
         setPage(0);
     };
 
-    const handleViewDetails = (demande: DemandeInscription) => {
+    const handleViewDetails = (demande: EtablissementEnAttente) => {
         setSelectedDemande(demande);
         setDetailDialogOpen(true);
     };
 
-    const handleOpenConfirmDialog = (demande: DemandeInscription, action: 'approve' | 'reject') => {
+    const handleOpenConfirmDialog = (demande: EtablissementEnAttente, action: 'approve' | 'reject') => {
         setSelectedDemande(demande);
         setConfirmAction(action);
         setConfirmDialogOpen(true);
     };
 
     const handleConfirmAction = () => {
+        // TODO: Implémenter l'appel API pour valider/rejeter
         if (selectedDemande && confirmAction) {
-            setDemandes((prev) =>
-                prev.map((d) =>
-                    d.id === selectedDemande.id
-                        ? { ...d, statut: confirmAction === 'approve' ? 'approuvee' : 'rejetee' }
-                        : d
-                )
-            );
+            // Pour l'instant on simule la suppression de la liste localement
+            setDemandes((prev) => prev.filter((d) => d.idUtilisateur !== selectedDemande.idUtilisateur));
+            setTotalElements((prev) => prev - 1);
         }
         setConfirmDialogOpen(false);
         setSelectedDemande(null);
         setConfirmAction(null);
     };
 
-    const getStatutLabel = (statut: DemandeInscription['statut']) => {
+    const getStatutLabel = (statut: string) => {
         switch (statut) {
-            case 'en_attente': return 'En attente';
-            case 'approuvee': return 'Approuvée';
-            case 'rejetee': return 'Rejetée';
+            case 'EN_ATTENTE': return 'En attente';
+            case 'ACTIF': return 'Approuvée';
+            case 'INACTIF': return 'Rejetée';
             default: return statut;
         }
     };
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('fr-FR', {
             day: '2-digit',
             month: 'long',
@@ -239,98 +194,120 @@ const ValidationInscriptions: React.FC = () => {
             </Card>
 
             {/* Liste des demandes */}
-            <TableContainer component={Card} sx={{ borderRadius: '16px', border: '1px solid', borderColor: 'divider', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <TableContainer component={Card} sx={{ borderRadius: '16px', border: '1px solid', borderColor: 'divider', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', position: 'relative' }}>
+                {loading && (
+                    <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: alpha(theme.palette.background.paper, 0.7), zIndex: 1 }}>
+                        <CircularProgress />
+                    </Box>
+                )}
                 <Table>
                     <TableHead sx={{ bgcolor: alpha(theme.palette.background.default, 0.5) }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Etablissement</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Contact</TableCell>
-                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Localisation</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.7rem' }}>Localisation</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Date</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}>Statut</TableCell>
                             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }} align="center">Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredDemandes
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((demande) => (
-                                <TableRow key={demande.id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                                    <TableCell>
-                                        <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 700, border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
-                                                {demande.nomEtablissement.charAt(0)}
-                                            </Avatar>
-                                            <Box>
-                                                <Typography variant="body2" fontWeight={700}>
-                                                    {demande.nomEtablissement}
+                        {filteredDemandes.map((demande) => (
+                            <TableRow key={demande.idUtilisateur} hover sx={{ '&:last-child td': { border: 0 } }}>
+                                <TableCell>
+                                    <Stack direction="row" spacing={2} alignItems="center">
+                                        <Avatar
+                                            src={demande.logoUrl ? `https://scholarway.pepit.cloud/api/files/${demande.logoUrl}` : undefined}
+                                            sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 700, border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}
+                                        >
+                                            {demande.nomEtablissement.charAt(0)}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight={700}>
+                                                {demande.nomEtablissement}
+                                            </Typography>
+                                            {demande.siteWeb && (
+                                                <Typography variant="caption" color="primary.main" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }} component="a" href={demande.siteWeb} target="_blank">
+                                                    {demande.siteWeb.replace(/^https?:\/\//, '')}
                                                 </Typography>
-                                                {demande.siteWeb && (
-                                                    <Typography variant="caption" color="primary.main" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-                                                        {demande.siteWeb.replace('https://', '')}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" fontWeight={500}>{demande.emailPro}</Typography>
-                                        <Typography variant="caption" color="text.secondary">{demande.telephonePro}</Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{demande.localisation}</Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2">{formatDate(demande.dateDemande)}</Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <StatusChip status={demande.statut} label={getStatutLabel(demande.statut)} />
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Stack direction="row" spacing={1} justifyContent="center">
-                                            <Tooltip title="Examiner le dossier">
-                                                <IconButton size="small" sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }} onClick={() => handleViewDetails(demande)}>
-                                                    <VisibilityIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            {demande.statut === 'en_attente' && (
-                                                <>
-                                                    <Tooltip title="Approuver">
-                                                        <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => handleOpenConfirmDialog(demande, 'approve')}>
-                                                            <CheckCircleIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Tooltip title="Rejeter">
-                                                        <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => handleOpenConfirmDialog(demande, 'reject')}>
-                                                            <CancelIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </>
                                             )}
-                                        </Stack>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                        </Box>
+                                    </Stack>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="body2" fontWeight={500}>{demande.email}</Typography>
+                                    <Typography variant="caption" color="text.secondary">{demande.telephonePro}</Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>{demande.localisation}</Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="body2">{formatDate(demande.dateCreation)}</Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <StatusChip status={demande.statut.toLowerCase()} label={getStatutLabel(demande.statut)} />
+                                </TableCell>
+                                <TableCell align="center">
+                                    <Stack direction="row" spacing={1} justifyContent="center">
+                                        <Tooltip title="Examiner le dossier">
+                                            <IconButton size="small" sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }} onClick={() => handleViewDetails(demande)}>
+                                                <VisibilityIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Approuver">
+                                            <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => handleOpenConfirmDialog(demande, 'approve')}>
+                                                <CheckCircleIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Rejeter">
+                                            <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => handleOpenConfirmDialog(demande, 'reject')}>
+                                                <CancelIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Stack>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        {!loading && filteredDemandes.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                                    <Typography variant="body1" color="text.secondary">
+                                        Aucune demande d'inscription trouvée.
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {error && !loading && (
+                            <TableRow>
+                                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                                    <Alert severity="error" sx={{ mx: 'auto', width: 'fit-content' }}>{error}</Alert>
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
                 <TablePagination
                     component="div"
-                    count={filteredDemandes.length}
+                    count={totalElements}
                     page={page}
                     onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Lignes par page"
                     sx={{ borderTop: '1px solid', borderColor: 'divider' }}
                 />
             </TableContainer>
 
-            {/* Dialog de détails Premium */}
+            {/* Dialog de détails */}
             <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px', backgroundImage: 'none' } }}>
                 {selectedDemande && (
                     <>
                         <DialogTitle sx={{ p: 4, pb: 2 }}>
                             <Stack direction="row" spacing={2} alignItems="center">
-                                <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: 64, height: 64, border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}` }}>
+                                <Avatar
+                                    src={selectedDemande.logoUrl ? `https://scholarway.pepit.cloud/api/files/${selectedDemande.logoUrl}` : undefined}
+                                    sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: 64, height: 64, border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}` }}
+                                >
                                     <BusinessIcon color="primary" sx={{ fontSize: 36 }} />
                                 </Avatar>
                                 <Box>
@@ -338,9 +315,9 @@ const ValidationInscriptions: React.FC = () => {
                                         {selectedDemande.nomEtablissement}
                                     </Typography>
                                     <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                                        <StatusChip status={selectedDemande.statut} label={getStatutLabel(selectedDemande.statut)} />
+                                        <StatusChip status={selectedDemande.statut.toLowerCase()} label={getStatutLabel(selectedDemande.statut)} />
                                         <Typography variant="caption" sx={{ color: 'text.disabled', alignSelf: 'center' }}>
-                                            Demande #INS-{selectedDemande.id}
+                                            Demande #INS-{selectedDemande.idUtilisateur}
                                         </Typography>
                                     </Stack>
                                 </Box>
@@ -350,7 +327,7 @@ const ValidationInscriptions: React.FC = () => {
                             <Grid container spacing={4}>
                                 <Grid item xs={12}>
                                     <Alert severity="info" variant="outlined" icon={<DescriptionIcon />} sx={{ borderRadius: '12px', bgcolor: alpha(theme.palette.info.main, 0.02) }}>
-                                        Dossier soumis le <strong>{formatDate(selectedDemande.dateDemande)}</strong>. Veuillez vérifier l'accréditation avant toute validation.
+                                        Dossier soumis le <strong>{formatDate(selectedDemande.dateCreation)}</strong>. Veuillez vérifier l'accréditation avant toute validation.
                                     </Alert>
                                 </Grid>
 
@@ -359,7 +336,7 @@ const ValidationInscriptions: React.FC = () => {
                                     <Stack spacing={2} sx={{ mt: 2 }}>
                                         <Stack direction="row" spacing={2} alignItems="center">
                                             <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05), color: 'primary.main', width: 32, height: 32 }}><EmailIcon sx={{ fontSize: 18 }} /></Avatar>
-                                            <Typography variant="body2" fontWeight={600}>{selectedDemande.emailPro}</Typography>
+                                            <Typography variant="body2" fontWeight={600}>{selectedDemande.email}</Typography>
                                         </Stack>
                                         <Stack direction="row" spacing={2} alignItems="center">
                                             <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.05), color: 'success.main', width: 32, height: 32 }}><PhoneIcon sx={{ fontSize: 18 }} /></Avatar>
@@ -377,9 +354,17 @@ const ValidationInscriptions: React.FC = () => {
                                     <Box sx={{ mt: 2, p: 3, borderRadius: '16px', border: '1px dashed', borderColor: 'divider', bgcolor: alpha(theme.palette.background.default, 0.5), textAlign: 'center' }}>
                                         <DescriptionIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
                                         <Typography variant="body2" fontWeight={700} display="block">Certificat d'Homologation</Typography>
-                                        <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 2 }}>PDF - 2.4 MB</Typography>
-                                        <Button variant="contained" size="small" startIcon={<DownloadIcon />} sx={{ borderRadius: '8px', textTransform: 'none' }}>
-                                            Visualiser le PDF
+                                        <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 2 }}>Fichier joint</Typography>
+                                        <Button
+                                            variant="contained"
+                                            size="small"
+                                            startIcon={<DownloadIcon />}
+                                            sx={{ borderRadius: '8px', textTransform: 'none' }}
+                                            disabled={!selectedDemande.documentAccreditationUrl}
+                                            href={selectedDemande.documentAccreditationUrl ? `https://scholarway.pepit.cloud/api/files/${selectedDemande.documentAccreditationUrl}` : '#'}
+                                            target="_blank"
+                                        >
+                                            Visualiser le document
                                         </Button>
                                     </Box>
                                 </Grid>
@@ -388,7 +373,7 @@ const ValidationInscriptions: React.FC = () => {
                                     <Divider sx={{ mb: 3 }} />
                                     <Typography variant="overline" sx={{ color: 'text.disabled', fontWeight: 800 }}>Description de l'établissement</Typography>
                                     <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary', lineHeight: 1.8, bgcolor: alpha(theme.palette.background.default, 0.3), p: 2, borderRadius: '12px' }}>
-                                        {selectedDemande.description}
+                                        {selectedDemande.description || "Aucune description fournie."}
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -396,18 +381,16 @@ const ValidationInscriptions: React.FC = () => {
                         <DialogActions sx={{ p: 4, pt: 0 }}>
                             <Button onClick={() => setDetailDialogOpen(false)} sx={{ fontWeight: 700, px: 3 }}>Fermer</Button>
                             <Box sx={{ flexGrow: 1 }} />
-                            {selectedDemande.statut === 'en_attente' && (
-                                <Stack direction="row" spacing={2}>
-                                    <Button variant="outlined" color="error" startIcon={<CancelIcon />} sx={{ borderRadius: '10px', fontWeight: 700 }}
-                                        onClick={() => { setDetailDialogOpen(false); handleOpenConfirmDialog(selectedDemande, 'reject'); }}>
-                                        Rejeter le dossier
-                                    </Button>
-                                    <Button variant="contained" color="success" startIcon={<CheckCircleIcon />} sx={{ borderRadius: '10px', fontWeight: 700, boxShadow: `0 8px 16px ${alpha(theme.palette.success.main, 0.25)}` }}
-                                        onClick={() => { setDetailDialogOpen(false); handleOpenConfirmDialog(selectedDemande, 'approve'); }}>
-                                        Valider l'établissement
-                                    </Button>
-                                </Stack>
-                            )}
+                            <Stack direction="row" spacing={2}>
+                                <Button variant="outlined" color="error" startIcon={<CancelIcon />} sx={{ borderRadius: '10px', fontWeight: 700 }}
+                                    onClick={() => { setDetailDialogOpen(false); handleOpenConfirmDialog(selectedDemande, 'reject'); }}>
+                                    Rejeter le dossier
+                                </Button>
+                                <Button variant="contained" color="success" startIcon={<CheckCircleIcon />} sx={{ borderRadius: '10px', fontWeight: 700, boxShadow: `0 8px 16px ${alpha(theme.palette.success.main, 0.25)}` }}
+                                    onClick={() => { setDetailDialogOpen(false); handleOpenConfirmDialog(selectedDemande, 'approve'); }}>
+                                    Valider l'établissement
+                                </Button>
+                            </Stack>
                         </DialogActions>
                     </>
                 )}

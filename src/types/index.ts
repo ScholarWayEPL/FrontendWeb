@@ -16,6 +16,17 @@ export interface ApiResponse<T> {
   pagination?: PaginationParams;
 }
 
+// Backend Pagination Interface (Spring Data Page)
+export interface PaginatedBackendResponse<T> {
+  content: T[];
+  page: {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+  };
+}
+
 // Enums
 export type TypeEtablissement = 'Université' | 'École' | 'Institut';
 export type NiveauProgramme = 'Licence' | 'Master' | 'Doctorat';
@@ -288,6 +299,28 @@ export interface EtablissementBackend {
   scolariteGlobale?: string;
   valide: boolean;
   utilisateur?: Utilisateur;
+}
+
+// 🏫 Établissement en attente (Backend response for /api/admin/etablissements/en-attente)
+export interface EtablissementEnAttente {
+  idUtilisateur: number;
+  nomEtablissement: string;
+  description: string | null;
+  email: string;
+  logoUrl: string | null;
+  localisation: string;
+  siteWeb: string | null;
+  telephonePro: string;
+  scolariteGlobale: string | null;
+  documentAccreditationUrl: string | null;
+  typeEtablissement: TypeEtablissementBackend;
+  valide: boolean;
+  dateValidationAdmin: string | null;
+  statut: StatutCompte;
+  dateCreation: string;
+  derniereConnexion: string | null;
+  nombreParcours: number | null;
+  nombreCampagnesActives: number | null;
 }
 
 // 🏫 RegisterEtablissementRequest – payload POST /api/auth/register/etablissement

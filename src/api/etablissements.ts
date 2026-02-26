@@ -1,4 +1,11 @@
-import type { Etablissement, ApiResponse, EtablissementFilters } from '../types';
+import client from './client';
+import type {
+  Etablissement,
+  ApiResponse,
+  EtablissementFilters,
+  EtablissementEnAttente,
+  PaginatedBackendResponse
+} from '../types';
 import { mockEtablissements } from './mockData';
 import { delay } from '../utils/helpers';
 import { REGIONS_TOGO } from '../constants';
@@ -10,6 +17,28 @@ const etablissements = [...mockEtablissements];
 let maxId = Math.max(...etablissements.map((e) => e.idEtablissement));
 
 export const etablissementsApi = {
+  // Récupérer les établissements en attente (Backend API)
+  getPending: async (params: {
+    page: number;
+    size: number;
+    sort?: string;
+  }): Promise<ApiResponse<EtablissementEnAttente[]>> => {
+    const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('/admin/etablissements/en-attente', {
+      params
+    });
+
+    return {
+      success: true,
+      data: response.data.content,
+      pagination: {
+        page: response.data.page.number,
+        limit: response.data.page.size,
+        total: response.data.page.totalElements,
+        totalPages: response.data.page.totalPages
+      }
+    };
+  },
+
   // Récupérer tous les établissements avec pagination et filtres
   getAll: async (params: {
     page: number;

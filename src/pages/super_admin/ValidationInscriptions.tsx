@@ -4,19 +4,15 @@ import {
     Typography,
     Card,
     CardContent,
-} from '@mui/material';
-import {
-    VerifiedUser as VerifiedUserIcon,
-} from '@mui/icons-material';
-import { SearchField } from '../../components/ui';
-import { ConfirmDialog } from '../../components';
-import { etablissementsApi } from '../../api/etablissements';
-import type { EtablissementEnAttente, StatutValidationEtablissement } from '../../types';
-import {
     Tabs,
     Tab,
     Stack,
 } from '@mui/material';
+import { VerifiedUser as VerifiedUserIcon } from '@mui/icons-material';
+import { SearchField } from '../../components/ui';
+import { ConfirmDialog } from '../../components';
+import { etablissementsApi } from '../../api/etablissements';
+import type { EtablissementEnAttente, StatutValidationEtablissement } from '../../types';
 
 // Modular components
 import {
@@ -51,12 +47,12 @@ const ValidationInscriptions: React.FC = () => {
 
             if (response.success && response.data) {
                 const all = response.data;
-                const pending = all.filter(e => String(e.valide) === 'EN_ATTENTE' || (e.valide as any) === false).length;
-                const approved = all.filter(e => String(e.valide) === 'ACTIF' || (e.valide as any) === true).length;
-                const rejected = all.filter(e => String(e.valide) === 'REJETE').length;
+                const pending = all.filter(e => String(e.valide).toUpperCase() === 'EN_ATTENTE' || (e.valide as any) === false).length;
+                const approved = all.filter(e => String(e.valide).toUpperCase() === 'ACTIF' || (e.valide as any) === true).length;
+                const rejected = all.filter(e => String(e.valide).toUpperCase() === 'REJETE').length;
 
                 setCounts({
-                    total: all.length,
+                    total: response.pagination?.total || all.length,
                     pending,
                     approved,
                     rejected
@@ -243,8 +239,6 @@ const ValidationInscriptions: React.FC = () => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 onViewDetails={handleViewDetails}
-                onApprove={(d: EtablissementEnAttente) => handleOpenConfirmDialog(d, 'approve')}
-                onReject={(d: EtablissementEnAttente) => handleOpenConfirmDialog(d, 'reject')}
                 onQuickApprove={(d: EtablissementEnAttente) => handleQuickAction(d, 'approve')}
                 onQuickReject={(d: EtablissementEnAttente) => handleQuickAction(d, 'reject')}
                 getStatutLabel={getStatutLabel}
@@ -258,8 +252,8 @@ const ValidationInscriptions: React.FC = () => {
                 selectedDemande={selectedDemande}
                 getStatutLabel={getStatutLabel}
                 formatDate={formatDate}
-                onApprove={(d) => { setDetailDialogOpen(false); handleOpenConfirmDialog(d, 'approve'); }}
-                onReject={(d) => { setDetailDialogOpen(false); handleOpenConfirmDialog(d, 'reject'); }}
+                onApprove={(d: EtablissementEnAttente) => { setDetailDialogOpen(false); handleOpenConfirmDialog(d, 'approve'); }}
+                onReject={(d: EtablissementEnAttente) => { setDetailDialogOpen(false); handleOpenConfirmDialog(d, 'reject'); }}
             />
 
             {/* Confirmation Dialog */}

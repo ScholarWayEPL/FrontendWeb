@@ -131,7 +131,7 @@ const Utilisateurs: React.FC = () => {
   const handleDeleteConfirm = async () => {
     if (utilisateurToDelete) {
       try {
-        await dispatch(deleteBachelier(utilisateurToDelete.idBachelier)).unwrap();
+        await dispatch(deleteBachelier(utilisateurToDelete.idUtilisateur)).unwrap();
         dispatch(showSnackbar({ message: 'Utilisateur supprimé avec succès', severity: 'success' }));
         loadData();
       } catch {
@@ -150,10 +150,10 @@ const Utilisateurs: React.FC = () => {
   const handleModalSuccess = async (data: Partial<Bachelier>) => {
     try {
       if (selectedUtilisateur) {
-        await dispatch(updateBachelier({ id: selectedUtilisateur.idBachelier, data })).unwrap();
+        await dispatch(updateBachelier({ id: selectedUtilisateur.idUtilisateur, data })).unwrap();
         dispatch(showSnackbar({ message: 'Utilisateur modifié avec succès', severity: 'success' }));
       } else {
-        await dispatch(createBachelier(data as Omit<Bachelier, 'idBachelier' | 'dateInscription'>)).unwrap();
+        await dispatch(createBachelier(data as Omit<Bachelier, 'idUtilisateur' | 'dateCreation'>)).unwrap();
         dispatch(showSnackbar({ message: 'Utilisateur créé avec succès', severity: 'success' }));
       }
       handleModalClose();
@@ -394,7 +394,7 @@ const Utilisateurs: React.FC = () => {
             ) : (
               bacheliers.map((bachelier) => (
                 <TableRow
-                  key={bachelier.idBachelier}
+                  key={bachelier.idUtilisateur}
                   hover
                   sx={{
                     transition: 'background-color 0.2s ease',
@@ -421,7 +421,7 @@ const Utilisateurs: React.FC = () => {
                           {bachelier.prenom} {bachelier.nom}
                         </Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                          {bachelier.serieBac} • ID: #{bachelier.idBachelier}
+                          {bachelier.serieBac} • ID: #{bachelier.idUtilisateur}
                         </Typography>
                       </Box>
                     </Stack>
@@ -463,7 +463,7 @@ const Utilisateurs: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
-                      {formatDate(bachelier.dateInscription)}
+                      {formatDate(bachelier.dateCreation)}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">

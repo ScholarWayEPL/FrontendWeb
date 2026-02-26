@@ -18,19 +18,30 @@ export interface AdministrateurBackend {
     utilisateur?: Utilisateur;
 }
 
-// 🎓 Bachelier
 export interface Bachelier {
-    idBachelier: number;
+    idUtilisateur: number;
     nom: string;
     prenom: string;
     email: string;
+    dateNaissance?: string;
+    age?: number;
+    sexe?: Sexe;
     telephone: string;
     serieBac: string;
     moyenneBac: number;
-    matieresPrincipales: string;
+    mention?: Mention;
+    matieresPrincipales?: string;
+    objectifsProfessionnels?: string;
     budgetMax: number;
-    objectifsProfessionnels: string;
-    dateInscription: string;
+    role?: RoleUtilisateur;
+    domainePreferenceId?: number;
+    domainePreferenceNom?: string;
+    parcoursPreferenceId?: number;
+    parcoursPreferenceNom?: string;
+    statut: StatutCompte;
+    dateCreation: string;
+    derniereConnexion?: string;
+    profilComplet: boolean;
 }
 
 // 📚 SerieBac

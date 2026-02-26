@@ -200,7 +200,7 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
                     Date d'inscription
                   </Typography>
                   <Typography variant="body1" fontWeight={500}>
-                    {formatDate(utilisateur.dateInscription)}
+                    {formatDate(utilisateur.dateCreation)}
                   </Typography>
                 </Box>
               </Box>
@@ -262,10 +262,10 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
                         utilisateur.moyenneBac >= 16
                           ? 'Très Bien'
                           : utilisateur.moyenneBac >= 14
-                          ? 'Bien'
-                          : utilisateur.moyenneBac >= 12
-                          ? 'Assez Bien'
-                          : 'Passable'
+                            ? 'Bien'
+                            : utilisateur.moyenneBac >= 12
+                              ? 'Assez Bien'
+                              : 'Passable'
                       }
                       size="small"
                       sx={{

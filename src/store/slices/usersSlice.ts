@@ -68,7 +68,7 @@ export const fetchSeries = createAsyncThunk(
 
 export const createBachelier = createAsyncThunk(
   'users/createBachelier',
-  async (data: Omit<Bachelier, 'idBachelier' | 'dateInscription'>, { rejectWithValue }) => {
+  async (data: Omit<Bachelier, 'idUtilisateur' | 'dateCreation'>, { rejectWithValue }) => {
     try {
       const response = await usersApi.create(data);
       return response;
@@ -164,7 +164,7 @@ const usersSlice = createSlice({
       .addCase(updateBachelier.fulfilled, (state, action) => {
         state.loading = false;
         const index = state.bacheliers.findIndex(
-          (b) => b.idBachelier === action.payload.data.idBachelier
+          (b) => b.idUtilisateur === action.payload.data.idUtilisateur
         );
         if (index !== -1) {
           state.bacheliers[index] = action.payload.data;
@@ -180,7 +180,7 @@ const usersSlice = createSlice({
       })
       .addCase(deleteBachelier.fulfilled, (state, action) => {
         state.loading = false;
-        state.bacheliers = state.bacheliers.filter((b) => b.idBachelier !== action.payload);
+        state.bacheliers = state.bacheliers.filter((b) => b.idUtilisateur !== action.payload);
         state.pagination.total -= 1;
       })
       .addCase(deleteBachelier.rejected, (state, action) => {

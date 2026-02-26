@@ -1,13 +1,6 @@
-import type { Bachelier, ApiResponse } from '../types';
-import { mockBacheliers } from './mockData';
-import { delay } from '../utils/helpers';
+import client from './client';
+import type { Bachelier, ApiResponse, PaginatedBackendResponse } from '../types';
 import { SERIES_BAC_TOGO } from '../constants';
-
-// Copie locale pour les mutations
-const bacheliers = [...mockBacheliers];
-
-// Fonction pour générer un nouvel ID
-let maxId = Math.max(...bacheliers.map((b) => b.idBachelier));
 
 export const usersApi = {
   // Récupérer tous les bacheliers avec pagination et filtres
@@ -16,73 +9,43 @@ export const usersApi = {
     limit: number;
     filters?: { search?: string; serieBac?: string };
   }): Promise<ApiResponse<Bachelier[]>> => {
-    await delay(500);
-
-    let filteredData = [...bacheliers];
-
-    if (params.filters) {
-      const { search, serieBac } = params.filters;
-
-      if (search) {
-        const searchLower = search.toLowerCase();
-        filteredData = filteredData.filter(
-          (b) =>
-            b.nom.toLowerCase().includes(searchLower) ||
-            b.prenom.toLowerCase().includes(searchLower) ||
-            b.email.toLowerCase().includes(searchLower)
-        );
+    const response = await client.get<PaginatedBackendResponse<Bachelier>>('/bacheliers', {
+      params: {
+        page: params.page - 1, // API uses 0-based indexing
+        size: params.limit,
+        sort: 'dateCreation,DESC',
+        // Note: The backend might not support search/serieBac as query params directly on /bacheliers 
+        // without a specific search endpoint, but we pass them just in case.
+        ...params.filters
       }
-
-      if (serieBac) {
-        filteredData = filteredData.filter((b) => b.serieBac === serieBac);
-      }
-    }
-
-    const total = filteredData.length;
-    const totalPages = Math.ceil(total / params.limit);
-    const start = (params.page - 1) * params.limit;
-    const end = start + params.limit;
-    const paginatedData = filteredData.slice(start, end);
+    });
 
     return {
-      data: paginatedData,
       success: true,
+      data: response.data.content,
       pagination: {
-        page: params.page,
-        limit: params.limit,
-        total,
-        totalPages,
-      },
+        page: response.data.page.number + 1,
+        limit: response.data.page.size,
+        total: response.data.page.totalElements,
+        totalPages: response.data.page.totalPages
+      }
     };
   },
 
   // Récupérer un bachelier par ID
   getById: async (id: number): Promise<ApiResponse<Bachelier>> => {
-    await delay(300);
-    const bachelier = bacheliers.find((b) => b.idBachelier === id);
-
-    if (!bachelier) {
-      throw new Error('Bachelier non trouvé');
-    }
-
+    const response = await client.get<Bachelier>(`/bacheliers/${id}`);
     return {
-      data: bachelier,
+      data: response.data,
       success: true,
     };
   },
 
   // Créer un nouveau bachelier
-  create: async (data: Omit<Bachelier, 'idBachelier' | 'dateInscription'>): Promise<ApiResponse<Bachelier>> => {
-    await delay(500);
-    maxId++;
-    const newBachelier: Bachelier = {
-      ...data,
-      idBachelier: maxId,
-      dateInscription: new Date().toISOString(),
-    };
-    bacheliers.unshift(newBachelier);
+  create: async (data: any): Promise<ApiResponse<Bachelier>> => {
+    const response = await client.post<Bachelier>('/bacheliers', data);
     return {
-      data: newBachelier,
+      data: response.data,
       success: true,
       message: 'Bachelier créé avec succès',
     };
@@ -90,14 +53,9 @@ export const usersApi = {
 
   // Mettre à jour un bachelier
   update: async (id: number, data: Partial<Bachelier>): Promise<ApiResponse<Bachelier>> => {
-    await delay(500);
-    const index = bacheliers.findIndex((b) => b.idBachelier === id);
-    if (index === -1) {
-      throw new Error('Bachelier non trouvé');
-    }
-    bacheliers[index] = { ...bacheliers[index], ...data };
+    const response = await client.put<Bachelier>(`/bacheliers/${id}`, data);
     return {
-      data: bacheliers[index],
+      data: response.data,
       success: true,
       message: 'Bachelier modifié avec succès',
     };
@@ -105,12 +63,7 @@ export const usersApi = {
 
   // Supprimer un bachelier
   delete: async (id: number): Promise<ApiResponse<null>> => {
-    await delay(500);
-    const index = bacheliers.findIndex((b) => b.idBachelier === id);
-    if (index === -1) {
-      throw new Error('Bachelier non trouvé');
-    }
-    bacheliers.splice(index, 1);
+    await client.delete(`/bacheliers/${id}`);
     return {
       data: null,
       success: true,
@@ -120,7 +73,7 @@ export const usersApi = {
 
   // Récupérer les séries disponibles
   getSeries: async (): Promise<string[]> => {
-    await delay(200);
+    // Si l'API n'a pas d'endpoint pour les séries, on retourne les constantes
     return [...SERIES_BAC_TOGO];
   },
 };

@@ -71,7 +71,7 @@ const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
                 <Typography variant="body2">{formatDate(demande.dateCreation)}</Typography>
             </TableCell>
             <TableCell>
-                <StatusChip status={demande.statut.toLowerCase()} label={getStatutLabel(demande.statut)} />
+                <StatusChip status={demande.valide.toLowerCase()} label={getStatutLabel(demande.valide)} />
             </TableCell>
             <TableCell align="center">
                 <Stack direction="row" spacing={1} justifyContent="center">
@@ -80,16 +80,20 @@ const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
                             <VisibilityIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Approuver">
-                        <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => onApprove(demande)}>
-                            <CheckCircleIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Rejeter">
-                        <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => onReject(demande)}>
-                            <CancelIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    {demande.valide === 'EN_ATTENTE' && (
+                        <>
+                            <Tooltip title="Approuver">
+                                <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => onApprove(demande)}>
+                                    <CheckCircleIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Rejeter">
+                                <IconButton size="small" sx={{ color: 'error.main', bgcolor: alpha(theme.palette.error.main, 0.05) }} onClick={() => onReject(demande)}>
+                                    <CancelIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    )}
                 </Stack>
             </TableCell>
         </TableRow>

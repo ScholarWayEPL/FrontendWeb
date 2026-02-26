@@ -11,7 +11,12 @@ import {
 import { SearchField } from '../../components/ui';
 import { ConfirmDialog } from '../../components';
 import { etablissementsApi } from '../../api/etablissements';
-import type { EtablissementEnAttente } from '../../types';
+import type { EtablissementEnAttente, StatutValidationEtablissement } from '../../types';
+import {
+    Tabs,
+    Tab,
+    Stack,
+} from '@mui/material';
 
 // Modular components
 import {
@@ -32,6 +37,7 @@ const ValidationInscriptions: React.FC = () => {
     const [detailDialogOpen, setDetailDialogOpen] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null);
+    const [statusFilter, setStatusFilter] = useState<StatutValidationEtablissement>('EN_ATTENTE');
 
     const fetchDemandes = useCallback(async () => {
         try {
@@ -39,7 +45,8 @@ const ValidationInscriptions: React.FC = () => {
             const response = await etablissementsApi.getPending({
                 page: page,
                 size: rowsPerPage,
-                sort: 'dateCreation,DESC'
+                sort: 'dateCreation,DESC',
+                valide: statusFilter
             });
             if (response.success) {
                 setDemandes(response.data);
@@ -54,11 +61,16 @@ const ValidationInscriptions: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, rowsPerPage]);
+    }, [page, rowsPerPage, statusFilter]);
 
     useEffect(() => {
         fetchDemandes();
     }, [fetchDemandes]);
+
+    const handleStatusChange = (_event: React.SyntheticEvent, newValue: StatutValidationEtablissement) => {
+        setStatusFilter(newValue);
+        setPage(0);
+    };
 
     const filteredDemandes = demandes.filter((demande) =>
         demande.nomEtablissement.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,9 +80,9 @@ const ValidationInscriptions: React.FC = () => {
 
     const stats = {
         total: totalElements,
-        enAttente: totalElements,
-        approuvees: 0,
-        rejetees: 0,
+        enAttente: statusFilter === 'EN_ATTENTE' ? totalElements : 0, // Simplified for now as we don't have total counts for all statuses at once
+        approuvees: statusFilter === 'ACTIF' ? totalElements : 0,
+        rejetees: statusFilter === 'REJETE' ? totalElements : 0,
     };
 
     const handleChangePage = (_event: unknown, newPage: number) => {
@@ -124,8 +136,9 @@ const ValidationInscriptions: React.FC = () => {
     const getStatutLabel = (statut: string) => {
         switch (statut) {
             case 'EN_ATTENTE': return 'En attente';
-            case 'ACTIF': return 'Approuvée';
-            case 'INACTIF': return 'Rejetée';
+            case 'ACTIF': return 'Approuvé';
+            case 'REJETE': return 'Rejeté';
+            case 'SUSPENDU': return 'Suspendu';
             default: return statut;
         }
     };
@@ -163,13 +176,31 @@ const ValidationInscriptions: React.FC = () => {
             {/* Filters */}
             <Card sx={{ mb: 4, borderRadius: '16px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', boxShadow: 'none' }}>
                 <CardContent sx={{ p: 2.5 }}>
-                    <SearchField
-                        value={searchTerm}
-                        onChange={setSearchTerm}
-                        placeholder="Rechercher un établissement, une ville ou un email..."
-                        fullWidth
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                    />
+                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
+                        <Tabs
+                            value={statusFilter}
+                            onChange={handleStatusChange}
+                            sx={{
+                                minHeight: 48,
+                                '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+                                borderBottom: '1px solid',
+                                borderColor: 'divider',
+                                flexShrink: 0
+                            }}
+                        >
+                            <Tab label="En attente" value="EN_ATTENTE" sx={{ fontWeight: 700, textTransform: 'none' }} />
+                            <Tab label="Approuvés" value="ACTIF" sx={{ fontWeight: 700, textTransform: 'none' }} />
+                            <Tab label="Rejetés" value="REJETE" sx={{ fontWeight: 700, textTransform: 'none' }} />
+                            <Tab label="Suspendus" value="SUSPENDU" sx={{ fontWeight: 700, textTransform: 'none' }} />
+                        </Tabs>
+                        <SearchField
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            placeholder="Rechercher un établissement, une ville ou un email..."
+                            fullWidth
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                        />
+                    </Stack>
                 </CardContent>
             </Card>
 

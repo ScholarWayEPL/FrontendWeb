@@ -17,11 +17,12 @@ const etablissements = [...mockEtablissements];
 let maxId = Math.max(...etablissements.map((e) => e.idEtablissement));
 
 export const etablissementsApi = {
-  // Récupérer les établissements en attente (Backend API)
+  // Récupérer les établissements (filtrables par statut de validation)
   getPending: async (params: {
     page: number;
     size: number;
     sort?: string;
+    valide?: string;
   }): Promise<ApiResponse<EtablissementEnAttente[]>> => {
     const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('/etablissements', {
       params

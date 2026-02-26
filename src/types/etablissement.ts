@@ -12,6 +12,8 @@ export type TypeEtablissementBackend =
     | 'GRANDE_ECOLE'
     | 'CENTRE_FORMATION';
 
+export type StatutValidationEtablissement = 'ACTIF' | 'EN_ATTENTE' | 'REJETE' | 'SUSPENDU';
+
 // 🏫 Établissement
 export interface Etablissement {
     idEtablissement: number;
@@ -45,7 +47,7 @@ export interface EtablissementBackend {
     telephonePro: string;
     documentAccreditationUrl?: string;
     scolariteGlobale?: string;
-    valide: boolean;
+    valide: StatutValidationEtablissement;
     utilisateur?: Utilisateur;
 }
 
@@ -74,7 +76,7 @@ export interface EtablissementEnAttente {
     scolariteGlobale: string | null;
     documentAccreditationUrl: string | null;
     typeEtablissement: TypeEtablissementBackend;
-    valide: boolean;
+    valide: StatutValidationEtablissement;
     dateValidationAdmin: string | null;
     statut: StatutCompte;
     dateCreation: string;

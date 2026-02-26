@@ -6,7 +6,7 @@ import {
     CheckCircle as CheckCircleIcon,
     Cancel as CancelIcon,
 } from '@mui/icons-material';
-import StatCard from '../../../components/StatCard';
+import StatCard from '../../../../components/StatCard';
 
 interface ValidationStatsProps {
     total: number;

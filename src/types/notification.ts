@@ -1,4 +1,4 @@
-import { Utilisateur } from './user';
+import type { Utilisateur } from './user';
 
 export type TypeNotification = 'admission' | 'info' | 'rappel' | 'alerte';
 

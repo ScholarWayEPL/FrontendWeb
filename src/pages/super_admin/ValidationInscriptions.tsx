@@ -95,11 +95,28 @@ const ValidationInscriptions: React.FC = () => {
         setConfirmDialogOpen(true);
     };
 
-    const handleConfirmAction = () => {
-        // TODO: Implémenter l'appel API pour valider/rejeter
+    const handleConfirmAction = async () => {
         if (selectedDemande && confirmAction) {
-            setDemandes((prev) => prev.filter((d) => d.idUtilisateur !== selectedDemande.idUtilisateur));
-            setTotalElements((prev) => prev - 1);
+            try {
+                setLoading(true);
+                const action = confirmAction === 'approve'
+                    ? etablissementsApi.validate(selectedDemande.idUtilisateur)
+                    : etablissementsApi.reject(selectedDemande.idUtilisateur);
+
+                const response = await action;
+
+                if (response.success) {
+                    // Mettre à jour la liste locale
+                    setDemandes((prev) => prev.filter((d) => d.idUtilisateur !== selectedDemande.idUtilisateur));
+                    setTotalElements((prev) => prev - 1);
+                    // On pourrait aussi afficher un message de succès ici si on avait un snackbar
+                }
+            } catch (err) {
+                console.error(`Erreur lors de l'action ${confirmAction}:`, err);
+                setError(`Impossible de ${confirmAction === 'approve' ? 'valider' : 'rejeter'} l'établissement.`);
+            } finally {
+                setLoading(false);
+            }
         }
         setConfirmDialogOpen(false);
         setSelectedDemande(null);

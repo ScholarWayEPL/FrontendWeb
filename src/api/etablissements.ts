@@ -23,7 +23,7 @@ export const etablissementsApi = {
     size: number;
     sort?: string;
   }): Promise<ApiResponse<EtablissementEnAttente[]>> => {
-    const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('etablissements', {
+    const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('/etablissements', {
       params
     });
 
@@ -159,5 +159,25 @@ export const etablissementsApi = {
   getTypes: async (): Promise<string[]> => {
     await delay(200);
     return ['Université', 'École', 'Institut'];
+  },
+
+  // Valider un établissement
+  validate: async (id: number): Promise<ApiResponse<null>> => {
+    const response = await client.patch<null>(`/admin/etablissements/${id}/valider`);
+    return {
+      success: true,
+      data: response.data,
+      message: 'Établissement validé avec succès'
+    };
+  },
+
+  // Rejeter un établissement
+  reject: async (id: number): Promise<ApiResponse<null>> => {
+    const response = await client.patch<null>(`/admin/etablissements/${id}/rejeter`);
+    return {
+      success: true,
+      data: response.data,
+      message: 'Établissement rejeté avec succès'
+    };
   },
 };

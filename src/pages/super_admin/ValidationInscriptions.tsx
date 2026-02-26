@@ -38,6 +38,30 @@ const ValidationInscriptions: React.FC = () => {
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null);
     const [statusFilter, setStatusFilter] = useState<StatutValidationEtablissement>('EN_ATTENTE');
+    const [counts, setCounts] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+
+    const fetchStats = useCallback(async () => {
+        try {
+            const [pendingRes, activeRes, rejectedRes] = await Promise.all([
+                etablissementsApi.getPending({ page: 0, size: 1, valide: 'EN_ATTENTE' }),
+                etablissementsApi.getPending({ page: 0, size: 1, valide: 'ACTIF' }),
+                etablissementsApi.getPending({ page: 0, size: 1, valide: 'REJETE' }),
+            ]);
+
+            const pending = pendingRes.pagination?.total || 0;
+            const approved = activeRes.pagination?.total || 0;
+            const rejected = rejectedRes.pagination?.total || 0;
+
+            setCounts({
+                total: pending + approved + rejected,
+                pending,
+                approved,
+                rejected
+            });
+        } catch (err) {
+            console.error('Erreur lors du chargement des statistiques:', err);
+        }
+    }, []);
 
     const fetchDemandes = useCallback(async () => {
         try {
@@ -65,7 +89,8 @@ const ValidationInscriptions: React.FC = () => {
 
     useEffect(() => {
         fetchDemandes();
-    }, [fetchDemandes]);
+        fetchStats();
+    }, [fetchDemandes, fetchStats]);
 
     const handleStatusChange = (_event: React.SyntheticEvent, newValue: StatutValidationEtablissement) => {
         setStatusFilter(newValue);
@@ -77,13 +102,6 @@ const ValidationInscriptions: React.FC = () => {
         demande.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         demande.localisation.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    const stats = {
-        total: totalElements,
-        enAttente: statusFilter === 'EN_ATTENTE' ? totalElements : 0, // Simplified for now as we don't have total counts for all statuses at once
-        approuvees: statusFilter === 'ACTIF' ? totalElements : 0,
-        rejetees: statusFilter === 'REJETE' ? totalElements : 0,
-    };
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
@@ -116,9 +134,8 @@ const ValidationInscriptions: React.FC = () => {
                 const response = await action;
 
                 if (response.success) {
-                    // Mettre à jour la liste locale
-                    setDemandes((prev) => prev.filter((d) => d.idUtilisateur !== selectedDemande.idUtilisateur));
-                    setTotalElements((prev) => prev - 1);
+                    // Recharger les données et les stats
+                    await Promise.all([fetchDemandes(), fetchStats()]);
                     // On pourrait aussi afficher un message de succès ici si on avait un snackbar
                 }
             } catch (err) {
@@ -167,10 +184,10 @@ const ValidationInscriptions: React.FC = () => {
 
             {/* Stats */}
             <ValidationStats
-                total={stats.total}
-                pending={stats.enAttente}
-                approved={stats.approuvees}
-                rejected={stats.rejetees}
+                total={counts.total}
+                pending={counts.pending}
+                approved={counts.approved}
+                rejected={counts.rejected}
             />
 
             {/* Filters */}

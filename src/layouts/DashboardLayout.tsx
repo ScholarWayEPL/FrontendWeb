@@ -114,7 +114,7 @@ const getNotificationBgColor = (type: string) => {
   }
 };
 
-const DashboardLayout: React.FC = ({ children }) => {
+const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const theme = useTheme();
   const history = useHistory();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));

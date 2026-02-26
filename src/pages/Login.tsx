@@ -108,7 +108,7 @@ const Login: React.FC = () => {
 
                 // Redirection selon le rôle
                 if (role === 'ROLE_ADMINISTRATEUR') {
-                    history.push('/super-admin/dashboard');
+                    history.push('/dashboard');
                 } else if (role === 'ROLE_ETABLISSEMENT') {
                     history.push('/etablissement/dashboard');
                 } else {

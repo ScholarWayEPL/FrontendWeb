@@ -26,17 +26,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <Redirect to="/dashboard" />;
   }
 
-  // Redirection automatique pour admin_etablissement qui accède à la racine
-  if (user && user.role === 'ROLE_ETABLISSEMENT' && (location.pathname === '/' || location.pathname === '/dashboard')) {
-    return <Redirect to="/etablissement/dashboard" />;
+  // Redirection automatique vers le bon dashboard si on est à la racine
+  if (location.pathname === '/' || location.pathname === '/dashboard') {
+    if (user && user.role === 'ROLE_ETABLISSEMENT') {
+      return <Redirect to="/etablissement/dashboard" />;
+    }
+    // Pour ROLE_ADMINISTRATEUR, /dashboard est la bonne route
   }
 
-  // Redirection automatique pour super_admin qui accède aux routes admin établissement (pas /etablissements)
+  // Empêcher l'accès croisé entre les types d'admin
   if (user && user.role === 'ROLE_ADMINISTRATEUR' && location.pathname.startsWith('/etablissement/')) {
     return <Redirect to="/dashboard" />;
   }
 
-  // Redirection automatique pour admin_etablissement qui accède aux routes super admin
   if (user && user.role === 'ROLE_ETABLISSEMENT' && !location.pathname.startsWith('/etablissement') && location.pathname !== '/parametres') {
     return <Redirect to="/etablissement/dashboard" />;
   }

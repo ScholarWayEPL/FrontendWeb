@@ -56,13 +56,22 @@ const AppContent: React.FC = () => {
           </Route>
 
           <Route
-            path="/"
+            path={[
+              "/dashboard",
+              "/validations",
+              "/utilisateurs",
+              "/etablissements",
+              "/programmes",
+              "/notifications",
+              "/parametres",
+              "/logs",
+              "/etablissement"
+            ]}
             render={() => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Switch>
                     {/* Routes Super Admin */}
-                    <Route exact path="/" component={Dashboard} />
                     <Route exact path="/dashboard" component={Dashboard} />
                     <Route exact path="/validations" component={ValidationInscriptions} />
                     <Route exact path="/utilisateurs" component={Utilisateurs} />
@@ -80,13 +89,20 @@ const AppContent: React.FC = () => {
                     <Route exact path="/etablissement/candidatures" component={Candidatures} />
                     <Route exact path="/etablissement/resultats" component={Resultats} />
                     <Route exact path="/etablissement/notifications" component={EtablissementNotifications} />
-
-                    <Route component={NotFound} />
                   </Switch>
                 </DashboardLayout>
               </ProtectedRoute>
             )}
           />
+
+          <Route exact path="/">
+            <ProtectedRoute>
+              {/* Le ProtectedRoute gérera les redirections de la racine */}
+              <div />
+            </ProtectedRoute>
+          </Route>
+
+          <Route component={NotFound} />
         </Switch>
       </BrowserRouter>
       <GlobalSnackbar />

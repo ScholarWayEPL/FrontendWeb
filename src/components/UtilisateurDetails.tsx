@@ -90,7 +90,7 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
       maxWidth="md"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: 10, overflow: 'hidden' },
+        sx: { borderRadius: 4, overflow: 'hidden' },
       }}
     >
       {loading && (

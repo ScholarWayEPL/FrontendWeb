@@ -26,7 +26,7 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use((response) => response, (error) => {
   if (error && error.response && error.response.status === 401) {
     // Optionally: emit an event, clear storage, redirect to login
-    try { localStorage.removeItem('authToken'); } catch (e) { }
+    try { localStorage.removeItem('authToken'); } catch (e) { console.error(e); }
     // window.location.href = '/login'; // don't force navigation in library code
   }
   return Promise.reject(error);

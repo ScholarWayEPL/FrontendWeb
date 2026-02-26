@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   Box,
   Drawer,
@@ -114,9 +114,9 @@ const getNotificationBgColor = (type: string) => {
   }
 };
 
-const DashboardLayout: React.FC = () => {
+const DashboardLayout: React.FC = ({ children }) => {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const history = useHistory();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useAppDispatch();
   const { sidebarOpen } = useAppSelector((state) => state.ui);
@@ -390,9 +390,9 @@ const DashboardLayout: React.FC = () => {
               setNotifAnchor(null);
               // Redirige vers la page de notifications adaptée au rôle
               if (user && user.role === 'ROLE_ETABLISSEMENT') {
-                navigate('/etablissement/notifications');
+                history.push('/etablissement/notifications');
               } else {
-                navigate('/notifications');
+                history.push('/notifications');
               }
             }}
           >
@@ -472,7 +472,7 @@ const DashboardLayout: React.FC = () => {
           <ListItem
             onClick={() => {
               setProfileAnchor(null);
-              navigate('/parametres');
+              history.push('/parametres');
             }}
             sx={{
               cursor: 'pointer',
@@ -498,7 +498,7 @@ const DashboardLayout: React.FC = () => {
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);
-                navigate('/logs');
+                history.push('/logs');
               }}
               sx={{
                 cursor: 'pointer',
@@ -525,7 +525,7 @@ const DashboardLayout: React.FC = () => {
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);
-                navigate('/etablissement/mon-etablissement');
+                history.push('/etablissement/mon-etablissement');
               }}
               sx={{
                 cursor: 'pointer',
@@ -560,7 +560,7 @@ const DashboardLayout: React.FC = () => {
             onClick={() => {
               setProfileAnchor(null);
               dispatch(logout());
-              navigate('/login');
+              history.push('/login');
             }}
             sx={{
               borderRadius: 2,
@@ -636,7 +636,7 @@ const DashboardLayout: React.FC = () => {
           }),
         }}
       >
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );

@@ -33,7 +33,7 @@ import {
     Download as DownloadIcon,
     Publish as PublishIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useAppSelector } from '../../store/hooks';
 import { PageHeader, StatusChip } from '../../components/ui';
 
@@ -94,7 +94,7 @@ const mockActivites = [
 
 const EtablissementDashboard: React.FC = () => {
     const theme = useTheme();
-    const navigate = useNavigate();
+    const history = useHistory();
     const { user } = useAppSelector((state) => state.auth);
 
     const formatDate = (dateStr: string) => {
@@ -381,7 +381,7 @@ const EtablissementDashboard: React.FC = () => {
                                 <Button
                                     variant="contained"
                                     size="small"
-                                    onClick={() => navigate('/etablissement/offre')}
+                                    onClick={() => history.push('/etablissement/offre')}
                                     sx={{ borderRadius: 1.5 }}
                                 >
                                     Gérer les campagnes
@@ -436,7 +436,7 @@ const EtablissementDashboard: React.FC = () => {
                                                             <Button
                                                                 size="small"
                                                                 variant="outlined"
-                                                                onClick={() => navigate('/etablissement/candidatures')}
+                                                                onClick={() => history.push('/etablissement/candidatures')}
                                                                 sx={{ borderRadius: 1.5 }}
                                                             >
                                                                 Voir
@@ -444,7 +444,7 @@ const EtablissementDashboard: React.FC = () => {
                                                             <Button
                                                                 size="small"
                                                                 variant="contained"
-                                                                onClick={() => navigate('/etablissement/resultats')}
+                                                                onClick={() => history.push('/etablissement/resultats')}
                                                                 sx={{ borderRadius: 1.5 }}
                                                             >
                                                                 Publier
@@ -455,7 +455,7 @@ const EtablissementDashboard: React.FC = () => {
                                                         <Button
                                                             size="small"
                                                             variant="outlined"
-                                                            onClick={() => navigate('/etablissement/offre')}
+                                                            onClick={() => history.push('/etablissement/offre')}
                                                             sx={{ borderRadius: 1.5 }}
                                                         >
                                                             Configurer
@@ -465,7 +465,7 @@ const EtablissementDashboard: React.FC = () => {
                                                         <Button
                                                             size="small"
                                                             variant="text"
-                                                            onClick={() => navigate('/etablissement/resultats')}
+                                                            onClick={() => history.push('/etablissement/resultats')}
                                                             sx={{ borderRadius: 1.5 }}
                                                         >
                                                             Résultats
@@ -542,7 +542,7 @@ const EtablissementDashboard: React.FC = () => {
                                     fullWidth
                                     variant="outlined"
                                     startIcon={<MenuBookIcon />}
-                                    onClick={() => navigate('/etablissement/offre')}
+                                    onClick={() => history.push('/etablissement/offre')}
                                     sx={{
                                         justifyContent: 'flex-start',
                                         py: 1.5,
@@ -559,7 +559,7 @@ const EtablissementDashboard: React.FC = () => {
                                     fullWidth
                                     variant="outlined"
                                     startIcon={<DownloadIcon />}
-                                    onClick={() => navigate('/etablissement/candidatures')}
+                                    onClick={() => history.push('/etablissement/candidatures')}
                                     sx={{
                                         justifyContent: 'flex-start',
                                         py: 1.5,
@@ -576,7 +576,7 @@ const EtablissementDashboard: React.FC = () => {
                                     fullWidth
                                     variant="outlined"
                                     startIcon={<PublishIcon />}
-                                    onClick={() => navigate('/etablissement/resultats')}
+                                    onClick={() => history.push('/etablissement/resultats')}
                                     sx={{
                                         justifyContent: 'flex-start',
                                         py: 1.5,

@@ -195,7 +195,7 @@ const OffreFormation: React.FC = () => {
                 label={niveau}
                 size="small"
                 variant="outlined"
-                color={colors[niveau as keyof typeof colors] as any || 'default'}
+                color={((colors[niveau as keyof typeof colors]) as 'primary' | 'secondary' | 'error') || 'default'}
             />
         );
     };
@@ -348,7 +348,7 @@ const OffreFormation: React.FC = () => {
                     parcours: d.parcours.map(p => {
                         if (p.id === campaignParcoursId) {
                             const newStatut: StatutCampagne =
-                                campaignAction === 'close' ? 'CLOTUREE' : 'OUVERTE';
+                                campaignAction === 'close' ? 'CLOTUREE' : (campaignAction === 'reopen' ? 'OUVERTE' : 'OUVERTE');
                             return {
                                 ...p,
                                 statut: newStatut,

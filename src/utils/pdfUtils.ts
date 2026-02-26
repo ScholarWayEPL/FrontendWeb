@@ -139,7 +139,7 @@ export const generateCandidaturesPDF = (
     const doc = new jsPDF(PDF_CONFIG);
 
     // En-tête
-    let currentY = addHeader(
+    const currentY = addHeader(
         doc,
         'Liste des Candidatures',
         `Total: ${candidatures.length} candidature(s)`,
@@ -329,7 +329,7 @@ export const generateResultatsPDF = (
     const doc = new jsPDF(PDF_CONFIG);
 
     // En-tête
-    let currentY = addHeader(
+    const currentY = addHeader(
         doc,
         `Résultats - ${phase}`,
         `Total: ${resultats.length} candidat(s)`,

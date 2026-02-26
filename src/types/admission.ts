@@ -1,7 +1,7 @@
 import type { BachelierBackend } from './user';
 import type { ParcoursBackend } from './programme';
 
-export type StatutCampagne = 'OUVERTE' | 'FERMEE' | 'A_VENIR';
+export type StatutCampagne = 'OUVERTE' | 'CLOTUREE' | 'A_VENIR';
 export type StatutCandidature = 'EN_ATTENTE' | 'ACCEPTEE' | 'REJETEE' | 'LISTE_ATTENTE';
 export type TypeModification = 'CREATION' | 'MISE_A_JOUR' | 'SUPPRESSION' | 'VALIDATION' | 'REJET';
 export type StatutChecklist = 'done' | 'pending';

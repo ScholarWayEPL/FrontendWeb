@@ -12,11 +12,11 @@ import {
     Home as HomeIcon,
     SentimentDissatisfied as SadIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 const NotFound: React.FC = () => {
     const theme = useTheme();
-    const navigate = useNavigate();
+    const history = useHistory();
     const isDark = theme.palette.mode === 'dark';
 
     return (
@@ -136,7 +136,7 @@ const NotFound: React.FC = () => {
                         variant="contained"
                         size="large"
                         startIcon={<HomeIcon />}
-                        onClick={() => navigate('/')}
+                        onClick={() => history.push('/')}
                         sx={{
                             borderRadius: '18px',
                             px: 6,

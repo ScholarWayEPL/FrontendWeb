@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   Box,
   List,
@@ -65,7 +65,7 @@ const secondaryNavItems: NavItem[] = [
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const history = useHistory();
   const location = useLocation();
   const { user } = useAppSelector((state) => state.auth);
 
@@ -75,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     : superAdminMainNavItems;
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    history.push(path);
     if (onClose) {
       onClose();
     }

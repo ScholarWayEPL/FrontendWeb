@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -50,40 +50,44 @@ const AppContent: React.FC = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+        <Switch>
+          <Route path="/login">
+            <Login />
+          </Route>
+
           <Route
             path="/"
-            element={
+            render={() => (
               <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Routes Super Admin */}
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="validations" element={<ValidationInscriptions />} />
-            <Route path="utilisateurs" element={<Utilisateurs />} />
-            <Route path="etablissements" element={<Etablissements />} />
-            <Route path="programmes" element={<Programmes />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="parametres" element={<Parametres />} />
-            <Route path="logs" element={<Logs />} />
+                <DashboardLayout>
+                  <Switch>
+                    {/* Routes Super Admin */}
+                    <Route exact path="/" component={Dashboard} />
+                    <Route exact path="/dashboard" component={Dashboard} />
+                    <Route exact path="/validations" component={ValidationInscriptions} />
+                    <Route exact path="/utilisateurs" component={Utilisateurs} />
+                    <Route exact path="/etablissements" component={Etablissements} />
+                    <Route exact path="/programmes" component={Programmes} />
+                    <Route exact path="/notifications" component={Notifications} />
+                    <Route exact path="/parametres" component={Parametres} />
+                    <Route exact path="/logs" component={Logs} />
 
-            {/* Routes Admin Établissement */}
-            <Route path="etablissement">
-              <Route index element={<EtablissementDashboard />} />
-              <Route path="dashboard" element={<EtablissementDashboard />} />
-              <Route path="infos" element={<MonEtablissement />} />
-              <Route path="offre" element={<OffreFormation />} />
-              <Route path="candidatures" element={<Candidatures />} />
-              <Route path="resultats" element={<Resultats />} />
-              <Route path="notifications" element={<EtablissementNotifications />} />
-            </Route>
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+                    {/* Routes Admin Établissement */}
+                    <Route exact path="/etablissement" component={EtablissementDashboard} />
+                    <Route exact path="/etablissement/dashboard" component={EtablissementDashboard} />
+                    <Route exact path="/etablissement/infos" component={MonEtablissement} />
+                    <Route exact path="/etablissement/offre" component={OffreFormation} />
+                    <Route exact path="/etablissement/candidatures" component={Candidatures} />
+                    <Route exact path="/etablissement/resultats" component={Resultats} />
+                    <Route exact path="/etablissement/notifications" component={EtablissementNotifications} />
+
+                    <Route component={NotFound} />
+                  </Switch>
+                </DashboardLayout>
+              </ProtectedRoute>
+            )}
+          />
+        </Switch>
       </BrowserRouter>
       <GlobalSnackbar />
     </ThemeProvider>

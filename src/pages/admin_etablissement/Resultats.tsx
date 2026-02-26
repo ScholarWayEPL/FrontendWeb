@@ -29,13 +29,14 @@ import {
 } from '@mui/icons-material';
 import { PageHeader, StatusChip } from '../../components/ui';
 import { BORDER_RADIUS } from '../../constants';
+import type { StatutCampagne } from '../../types';
 import { readExcel, generateResultatsTemplate } from '../../utils/excelUtils';
 
 
 interface Campagne {
     id: number;
     parcours: string;
-    statut: 'OUVERTE' | 'A_VENIR' | 'CLOTUREE';
+    statut: StatutCampagne;
     candidatures: number;
     phase1Publiee: boolean;
     dateConcoursEcrit?: string;

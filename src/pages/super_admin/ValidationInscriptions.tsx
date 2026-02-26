@@ -4,7 +4,6 @@ import {
     Typography,
     Card,
     CardContent,
-    useTheme,
 } from '@mui/material';
 import {
     VerifiedUser as VerifiedUserIcon,
@@ -22,7 +21,6 @@ import {
 } from './validation/components';
 
 const ValidationInscriptions: React.FC = () => {
-    const theme = useTheme();
     const [demandes, setDemandes] = useState<EtablissementEnAttente[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

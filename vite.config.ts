@@ -5,12 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    target: 'es2020',
+    target: 'es2018',
   },
   optimizeDeps: {
     include: ['@reduxjs/toolkit', 'react-redux'],
-  },
-  ssr: {
-    noExternal: ['@reduxjs/toolkit'],
   },
 })

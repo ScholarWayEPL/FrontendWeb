@@ -5,7 +5,7 @@ import {
     useTheme,
     alpha,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setAuth, setError, setLoading } from '../store/slices/authSlice';
 import { authApi } from '../api';
@@ -31,7 +31,7 @@ interface InscriptionForm {
 const Login: React.FC = () => {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
-    const navigate = useNavigate();
+    const history = useHistory();
     const dispatch = useAppDispatch();
     const { loading, error } = useAppSelector((state) => state.auth);
 
@@ -107,12 +107,12 @@ const Login: React.FC = () => {
                 }));
 
                 // Redirection selon le rôle
-                if (role === 'ROLE_SUPER_ADMIN') {
-                    navigate('/super-admin/dashboard');
+                if (role === 'ROLE_ADMINISTRATEUR') {
+                    history.push('/super-admin/dashboard');
                 } else if (role === 'ROLE_ETABLISSEMENT') {
-                    navigate('/etablissement/dashboard');
+                    history.push('/etablissement/dashboard');
                 } else {
-                    navigate('/');
+                    history.push('/');
                 }
             } else {
                 dispatch(setError(response.message || 'Identifiants invalides'));

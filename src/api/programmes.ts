@@ -28,7 +28,7 @@ export const programmesApi = {
                     (p) =>
                         p.nomProgramme.toLowerCase().includes(searchLower) ||
                         p.domaine.toLowerCase().includes(searchLower) ||
-                        p.etablissementNom?.toLowerCase().includes(searchLower)
+                        p.etablissementNom && p.etablissementNom.toLowerCase().includes(searchLower)
                 );
             }
 

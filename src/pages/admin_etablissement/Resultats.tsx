@@ -30,7 +30,7 @@ import {
 import { PageHeader, StatusChip } from '../../components/ui';
 import { BORDER_RADIUS } from '../../constants';
 import { readExcel, generateResultatsTemplate } from '../../utils/excelUtils';
- 
+
 
 interface Campagne {
     id: number;
@@ -81,7 +81,7 @@ const Resultats: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
 
     const handlePhase1Upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const file = (event.target.files && event.target.files[0]);
         if (file) {
             try {
                 // Valider que c'est un fichier Excel
@@ -103,7 +103,7 @@ const Resultats: React.FC = () => {
     };
 
     const handlePhase2Upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const file = (event.target.files && event.target.files[0]);
         if (file) {
             try {
                 // Valider que c'est un fichier Excel
@@ -219,12 +219,12 @@ const Resultats: React.FC = () => {
                                             cursor: 'pointer',
                                             borderRadius: BORDER_RADIUS.md,
                                             borderWidth: 1,
-                                            borderColor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.18) : 'grey.200',
-                                            bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.03) : 'background.paper',
+                                            borderColor: (selectedCampagne && selectedCampagne.id === campagne.id) ? alpha(theme.palette.primary.main, 0.18) : 'grey.200',
+                                            bgcolor: (selectedCampagne && selectedCampagne.id === campagne.id) ? alpha(theme.palette.primary.main, 0.03) : 'background.paper',
                                             transition: 'all 0.12s ease-in-out',
                                             '&:hover': {
                                                 borderColor: alpha(theme.palette.primary.main, 0.28),
-                                                bgcolor: selectedCampagne?.id === campagne.id ? alpha(theme.palette.primary.main, 0.04) : alpha(theme.palette.action.hover, 0.04),
+                                                bgcolor: (selectedCampagne && selectedCampagne.id === campagne.id) ? alpha(theme.palette.primary.main, 0.04) : alpha(theme.palette.action.hover, 0.04),
                                                 transform: 'translateY(-2px)',
                                                 boxShadow: 1,
                                             },

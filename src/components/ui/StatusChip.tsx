@@ -16,7 +16,7 @@ interface StatusChipProps {
 }
 
 const getStatusConfig = (status: string): { color: ChipProps['color']; label: string } => {
-    const statusLower = status?.toLowerCase() || '';
+    const statusLower = (status && status.toLowerCase()) || '';
 
     switch (statusLower) {
         case 'active':

@@ -153,7 +153,7 @@ export const generateCandidaturesPDF = (
         c.parcours,
         c.filiere || '',
         c.serieBac,
-        c.moyenneBac?.toFixed(2) || '-',
+        c.moyenneBac !== undefined && c.moyenneBac !== null ? c.moyenneBac.toFixed(2) : '-',
         new Date(c.dateSoumission).toLocaleDateString('fr-FR'),
         c.statut,
     ]);
@@ -276,7 +276,7 @@ export const generateCandidaturesGroupedPDF = (
                     c.numeroCandidature,
                     `${c.nomCandidat} ${c.prenomCandidat}`,
                     c.serieBac,
-                    c.moyenneBac?.toFixed(2) || '-',
+                    c.moyenneBac !== undefined && c.moyenneBac !== null ? c.moyenneBac.toFixed(2) : '-',
                     new Date(c.dateSoumission).toLocaleDateString('fr-FR'),
                     c.statut,
                 ]);
@@ -341,7 +341,7 @@ export const generateResultatsPDF = (
         r.numeroCandidature,
         r.nomComplet,
         r.parcours,
-        r.moyenne?.toFixed(2) || '-',
+        r.moyenne !== undefined && r.moyenne !== null ? r.moyenne.toFixed(2) : '-',
         r.resultat,
     ]);
 

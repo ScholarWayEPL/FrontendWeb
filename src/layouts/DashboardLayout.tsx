@@ -283,7 +283,7 @@ const DashboardLayout: React.FC = () => {
                 },
               }}
             >
-              {user?.firstName?.charAt(0) || 'A'}
+              {(user && user.firstName) ? user.firstName.charAt(0) : 'A'}
             </Avatar>
           </IconButton>
         </Toolbar>
@@ -389,7 +389,7 @@ const DashboardLayout: React.FC = () => {
             onClick={() => {
               setNotifAnchor(null);
               // Redirige vers la page de notifications adaptée au rôle
-              if (user?.role === 'ROLE_ADMIN_ETABLISSEMENT') {
+              if (user && user.role === 'ROLE_ETABLISSEMENT') {
                 navigate('/etablissement/notifications');
               } else {
                 navigate('/notifications');
@@ -446,17 +446,17 @@ const DashboardLayout: React.FC = () => {
               boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
             }}
           >
-            {user?.firstName?.charAt(0) || 'A'}
+            {(user && user.firstName) ? user.firstName.charAt(0) : 'A'}
           </Avatar>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
-            {user?.firstName || 'Administrateur'} {user?.lastName || 'ScholarWay'}
+            {user ? user.firstName : 'Administrateur'} {user ? user.lastName : 'ScholarWay'}
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
-            {user?.email || 'admin@scholarway.tg'}
+            {user ? user.email : 'admin@scholarway.tg'}
           </Typography>
           <Chip
             icon={<AdminPanelSettings sx={{ fontSize: 16 }} />}
-            label={user?.role === 'ROLE_ADMIN_ETABLISSEMENT' ? 'Admin Établissement' : 'Super Admin'}
+            label={(user && user.role === 'ROLE_ETABLISSEMENT') ? 'Admin Établissement' : 'Super Admin'}
             size="small"
             sx={{
               bgcolor: 'rgba(255,255,255,0.2)',
@@ -494,7 +494,7 @@ const DashboardLayout: React.FC = () => {
           </ListItem>
 
           {/* Journal d'activité - Uniquement pour SUPER_ADMIN */}
-          {user?.role === 'ROLE_ADMINISTRATEUR' && (
+          {user && user.role === 'ROLE_ADMINISTRATEUR' && (
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);
@@ -521,7 +521,7 @@ const DashboardLayout: React.FC = () => {
           )}
 
           {/* Paramètres - Uniquement pour ADMIN_ETABLISSEMENT */}
-          {user?.role === 'ROLE_ADMIN_ETABLISSEMENT' && (
+          {user && user.role === 'ROLE_ETABLISSEMENT' && (
             <ListItem
               onClick={() => {
                 setProfileAnchor(null);

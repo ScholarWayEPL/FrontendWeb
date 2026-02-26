@@ -15,8 +15,11 @@ export const formatDate = (
 ): string => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('fr-TG', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
     ...options,
   }).format(date);
 };
@@ -28,17 +31,21 @@ export const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
-  
+
   const minutes = Math.floor(diff / (1000 * 60));
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
+
   if (minutes < 1) return 'À l\'instant';
   if (minutes < 60) return `Il y a ${minutes} min`;
   if (hours < 24) return `Il y a ${hours}h`;
   if (days < 7) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
-  
-  return formatDate(dateString, { dateStyle: 'short' });
+
+  return formatDate(dateString, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
 };
 
 /**
@@ -77,7 +84,7 @@ export const isValidPhoneTG = (phone: string): boolean => {
 export const formatPhoneTG = (phone: string): string => {
   const cleaned = phone.replace(/\D/g, '');
   const numbers = cleaned.startsWith('228') ? cleaned.slice(3) : cleaned;
-  
+
   if (numbers.length === 8) {
     return `+228 ${numbers.slice(0, 2)} ${numbers.slice(2, 4)} ${numbers.slice(4, 6)} ${numbers.slice(6, 8)}`;
   }
@@ -93,7 +100,7 @@ export const filterBySearch = <T extends Record<string, unknown>>(
   fields: (keyof T)[]
 ): T[] => {
   if (!search.trim()) return items;
-  
+
   const searchLower = search.toLowerCase();
   return items.filter((item) =>
     fields.some((field) => {
@@ -115,7 +122,7 @@ export const paginate = <T>(
   const totalPages = Math.ceil(total / limit);
   const start = (page - 1) * limit;
   const data = items.slice(start, start + limit);
-  
+
   return { data, total, totalPages };
 };
 
@@ -127,7 +134,7 @@ export const debounce = <T extends (...args: Parameters<T>) => ReturnType<T>>(
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: ReturnType<typeof setTimeout>;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -159,15 +166,15 @@ export const downloadCSV = (
   filename: string
 ): void => {
   if (data.length === 0) return;
-  
+
   const headers = Object.keys(data[0]);
   const csvContent = [
     headers.join(','),
     ...data.map((row) =>
-      headers.map((h) => JSON.stringify(row[h] ?? '')).join(',')
+      headers.map((h) => JSON.stringify(row[h] !== undefined && row[h] !== null ? row[h] : '')).join(',')
     ),
   ].join('\n');
-  
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

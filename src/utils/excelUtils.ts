@@ -59,7 +59,7 @@ export const readExcel = async (file: File): Promise<Record<string, any[]>> => {
 
         reader.onload = (e) => {
             try {
-                const data = e.target?.result;
+                const data = e && e.target && e.target.result;
                 const workbook = XLSX.read(data, { type: 'array' });
 
                 const result: Record<string, any[]> = {};

@@ -143,16 +143,16 @@ const Dashboard: React.FC = () => {
       {/* Cartes de Statistiques */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} lg={3}>
-          <StatCard title="Total Bacheliers" value={stats?.totalUsers || 0} growth={stats?.usersGrowth} icon={<PeopleIcon />} color="primary" />
+          <StatCard title="Total Bacheliers" value={(stats && stats.totalUsers) || 0} growth={stats ? stats.usersGrowth : undefined} icon={<PeopleIcon />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
-          <StatCard title="Établissements" value={stats?.totalEtablissements || 0} growth={stats?.etablissementsGrowth} icon={<SchoolIcon />} color="secondary" />
+          <StatCard title="Établissements" value={(stats && stats.totalEtablissements) || 0} growth={stats ? stats.etablissementsGrowth : undefined} icon={<SchoolIcon />} color="secondary" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
-          <StatCard title="Formations" value={stats?.totalProgrammes || 0} growth={stats?.programmesGrowth} icon={<MenuBookIcon />} color="info" />
+          <StatCard title="Formations" value={(stats && stats.totalProgrammes) || 0} growth={stats ? stats.programmesGrowth : undefined} icon={<MenuBookIcon />} color="info" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
-          <StatCard title="Notifications" value={stats?.totalNotifications || 0} icon={<NotificationsIcon />} color="warning" />
+          <StatCard title="Notifications" value={(stats && stats.totalNotifications) || 0} icon={<NotificationsIcon />} color="warning" />
         </Grid>
       </Grid>
 
@@ -170,7 +170,7 @@ const Dashboard: React.FC = () => {
               </Box>
               <Box sx={{ height: 320, width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats?.inscriptionsParMois || []}>
+                  <AreaChart data={(stats && stats.inscriptionsParMois) || []}>
                     <defs>
                       <linearGradient id="colorInscr" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.15} />
@@ -205,14 +205,14 @@ const Dashboard: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={stats?.repartitionParNiveau || []}
+                      data={(stats && stats.repartitionParNiveau) || []}
                       cx="50%" cy="50%"
                       innerRadius={70}
                       outerRadius={90}
                       paddingAngle={8}
                       dataKey="value"
                     >
-                      {stats?.repartitionParNiveau?.map((entry, index) => (
+                      {stats && stats.repartitionParNiveau && stats.repartitionParNiveau.map((entry, index) => (
                         <Cell key={index} fill={entry.color} stroke="none" />
                       ))}
                     </Pie>
@@ -233,7 +233,7 @@ const Dashboard: React.FC = () => {
             <CardContent>
               <Typography variant="h6" fontWeight={800} sx={{ mb: 3 }}>Activité Récente</Typography>
               <List disablePadding>
-                {stats?.recentActivity.slice(0, 6).map((activity, idx) => (
+                {stats && stats.recentActivity && stats.recentActivity.slice(0, 6).map((activity, idx) => (
                   <ListItem key={activity.id} sx={{ px: 0, py: 1.5, borderBottom: idx < 5 ? '1px solid' : 'none', borderColor: alpha(theme.palette.divider, 0.5) }}>
                     <ListItemIcon sx={{ minWidth: 44 }}>
                       <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(theme.palette[getActivityColor(activity.type)].main, 0.1), color: `${getActivityColor(activity.type)}.main`, border: `1px solid ${alpha(theme.palette[getActivityColor(activity.type)].main, 0.2)}` }}>
@@ -261,7 +261,7 @@ const Dashboard: React.FC = () => {
                 <Typography variant="h6" fontWeight={800}>Établissements Phares</Typography>
               </Stack>
               <Stack spacing={2.5}>
-                {stats?.topProgrammes?.slice(0, 5).map((prog, index) => (
+                {stats && stats.topProgrammes && stats.topProgrammes.slice(0, 5).map((prog, index) => (
                   <Box key={index}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                       <Stack direction="row" spacing={1.5} alignItems="center">
@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
             <CardContent>
               <Typography variant="h6" fontWeight={800} sx={{ mb: 3 }}>Résumé de Performance</Typography>
               <Grid container spacing={2}>
-                {stats?.statsRapides?.map((stat, index) => (
+                {stats && stats.statsRapides && stats.statsRapides.map((stat, index) => (
                   <Grid item xs={6} key={index}>
                     <Box sx={{ p: 2, borderRadius: '16px', bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
                       <Typography variant="h5" fontWeight={900} color="text.primary">{stat.value}</Typography>

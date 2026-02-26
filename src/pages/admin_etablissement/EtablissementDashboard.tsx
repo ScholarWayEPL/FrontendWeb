@@ -127,7 +127,7 @@ const EtablissementDashboard: React.FC = () => {
         <Box>
             {/* Header */}
             <PageHeader
-                title={`Bienvenue, ${user?.etablissementNom || 'Établissement'}`}
+                title={`Bienvenue, ${(user && user.etablissementNom) || 'Établissement'}`}
                 subtitle="Gérez vos campagnes d'admission et suivez vos candidatures"
                 icon={<SchoolIcon />}
                 iconColor={theme.palette.primary.main}
@@ -346,7 +346,7 @@ const EtablissementDashboard: React.FC = () => {
                                     <RechartsTooltip
                                         cursor={{ fill: 'transparent' }}
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        labelFormatter={(label, payload) => payload[0]?.payload?.fullName || label}
+                                        labelFormatter={(label, payload) => (payload[0] && payload[0].payload && payload[0].payload.fullName) || label}
                                     />
                                     <Bar
                                         dataKey="volume"

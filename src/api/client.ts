@@ -24,9 +24,9 @@ client.interceptors.request.use((config) => {
 
 // Response interceptor: handle 401 globally
 client.interceptors.response.use((response) => response, (error) => {
-  if (error?.response?.status === 401) {
+  if (error && error.response && error.response.status === 401) {
     // Optionally: emit an event, clear storage, redirect to login
-    try { localStorage.removeItem('authToken'); } catch (e) {}
+    try { localStorage.removeItem('authToken'); } catch (e) { }
     // window.location.href = '/login'; // don't force navigation in library code
   }
   return Promise.reject(error);

@@ -323,16 +323,16 @@ const OffreFormation: React.FC = () => {
     // Campaign management
     const handleOpenCampaignDialog = (domaineId: number, parcoursId: number, action: 'open' | 'close' | 'reopen') => {
         const domaine = domaines.find(d => d.id === domaineId);
-        const parcours = domaine?.parcours.find(p => p.id === parcoursId);
+        const parcours = (domaine && domaine.parcours) ? domaine.parcours.find(p => p.id === parcoursId) : undefined;
         setCampaignDomaineId(domaineId);
         setCampaignParcoursId(parcoursId);
         setCampaignAction(action);
         if (action === 'open' || action === 'reopen') {
             setCampaignDates({
-                dateOuverture: parcours?.dateOuverture || new Date().toISOString().split('T')[0],
-                dateCloture: parcours?.dateCloture || '',
-                anneeAcademique: parcours?.anneeAcademique || '2025-2026',
-                dateConcoursEcrit: parcours?.dateConcoursEcrit || '',
+                dateOuverture: (parcours && parcours.dateOuverture) || new Date().toISOString().split('T')[0],
+                dateCloture: (parcours && parcours.dateCloture) || '',
+                anneeAcademique: (parcours && parcours.anneeAcademique) || '2025-2026',
+                dateConcoursEcrit: (parcours && parcours.dateConcoursEcrit) || '',
             });
         }
         setCampaignDialogOpen(true);
@@ -384,8 +384,8 @@ const OffreFormation: React.FC = () => {
 
     const getCampaignParcoursName = () => {
         const domaine = domaines.find(d => d.id === campaignDomaineId);
-        const parcours = domaine?.parcours.find(p => p.id === campaignParcoursId);
-        return parcours?.nom || '';
+        const parcours = (domaine && domaine.parcours) ? domaine.parcours.find(p => p.id === campaignParcoursId) : undefined;
+        return (parcours && parcours.nom) || '';
     };
 
     return (

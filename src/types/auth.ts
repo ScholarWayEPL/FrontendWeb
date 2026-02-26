@@ -3,7 +3,7 @@ export type StatutCompte = 'ACTIF' | 'INACTIF' | 'SUSPENDU' | 'EN_ATTENTE';
 export type RoleUtilisateur =
     | 'ROLE_SUPER_ADMIN'
     | 'ROLE_ADMINISTRATEUR'
-    | 'ROLE_ADMIN_ETABLISSEMENT'
+    | 'ROLE_ETABLISSEMENT'
     | 'ROLE_BACHELIER';
 
 // Legacy User type for auth (updated with new roles)

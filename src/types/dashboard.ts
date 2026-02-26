@@ -1,20 +1,24 @@
 // 📊 Dashboard Stats
 export interface DashboardStats {
-    totalBacheliers: number;
+    totalUsers: number;
+    usersGrowth: number;
     totalEtablissements: number;
+    etablissementsGrowth: number;
     totalProgrammes: number;
-    totalAdmissions: number;
-    newCandidatures: number;
-    growthRate: number;
+    programmesGrowth: number;
+    totalNotifications: number;
+    inscriptionsParMois: ChartDataPoint[];
+    repartitionParNiveau: PieChartDataPoint[];
+    recentActivity: ActivityItem[];
+    topProgrammes: TopProgrammeData[];
+    statsRapides: Array<{ value: number | string; label: string }>;
 }
 
 export interface ActivityItem {
     id: number;
-    type: 'candidature' | 'inscription' | 'paiement';
-    user: string;
-    action: string;
-    time: string;
-    status: 'info' | 'success' | 'warning';
+    type: 'user_created' | 'etablissement_added' | 'programme_updated' | 'notification_sent';
+    description: string;
+    timestamp: string;
 }
 
 export interface ChartDataPoint {
@@ -29,9 +33,10 @@ export interface PieChartDataPoint {
 }
 
 export interface TopProgrammeData {
-    name: string;
-    admissions: number;
-    capacity: number;
+    nom: string;
+    etablissement: string;
+    candidatures: number;
+    taux: number;
 }
 
 // 🧠 Chatbot IA

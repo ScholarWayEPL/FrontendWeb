@@ -447,7 +447,7 @@ const Etablissements: React.FC = () => {
       <ConfirmDialog
         open={deleteDialogOpen}
         title="Supprimer l'établissement"
-        message={`Voulez-vous vraiment retirer "${etablissementToDelete?.nom}" de la plateforme ?`}
+        message={`Voulez-vous vraiment retirer "${etablissementToDelete ? etablissementToDelete.nom : ''}" de la plateforme ?`}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialogOpen(false)}
       />

@@ -130,7 +130,7 @@ export default function Logs() {
                 },
             });
             setLogs(response.data);
-            setTotal(response.pagination?.total || 0);
+            setTotal((response.pagination && response.pagination.total) || 0);
 
             const statsResponse = await logsApi.getStats();
             setStats(statsResponse.data.parType);

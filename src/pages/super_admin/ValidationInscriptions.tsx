@@ -208,7 +208,7 @@ const ValidationInscriptions: React.FC = () => {
                 open={confirmDialogOpen}
                 title={confirmAction === 'approve' ? 'Confirmer l\'approbation' : 'Confirmer le rejet'}
                 message={confirmAction === 'approve'
-                    ? `Souhaitez-vous valider l'entrée de "${selectedDemande?.nomEtablissement}" sur ScholarWay ? Un email d'activation sera envoyé.`
+                    ? `Souhaitez-vous valider l'entrée de "${selectedDemande ? selectedDemande.nomEtablissement : ''}" sur ScholarWay ? Un email d'activation sera envoyé.`
                     : `Confirmez-vous le rejet de cette demande ? L'établissement sera informé par email.`
                 }
                 onConfirm={handleConfirmAction}

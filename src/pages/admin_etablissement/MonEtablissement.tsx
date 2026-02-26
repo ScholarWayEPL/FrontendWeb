@@ -38,7 +38,7 @@ const MonEtablissement: React.FC = () => {
 
     // Données mockées de l'établissement (basées sur EtablissementBackend)
     const [etablissement, setEtablissement] = useState({
-        nom: user?.etablissementNom || 'Mon Établissement',
+        nom: (user && user.etablissementNom) || 'Mon Établissement',
         description: 'Établissement d\'enseignement supérieur reconnu par l\'État, offrant des formations de qualité dans divers domaines. Notre mission est de former les leaders de demain en leur fournissant les compétences nécessaires pour exceller dans un monde en constante évolution.',
         localisation: 'Lomé, Togo',
         telephonePro: '+228 22 XX XX XX',
@@ -61,9 +61,9 @@ const MonEtablissement: React.FC = () => {
 
     const InfoItem = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) => (
         <Stack direction="row" spacing={2} alignItems="flex-start">
-            <Avatar sx={{ 
-                bgcolor: alpha(color, 0.1), 
-                width: AVATAR_SIZES.md, 
+            <Avatar sx={{
+                bgcolor: alpha(color, 0.1),
+                width: AVATAR_SIZES.md,
                 height: AVATAR_SIZES.md,
                 '& .MuiSvgIcon-root': { color, fontSize: 20 },
             }}>
@@ -322,9 +322,9 @@ const MonEtablissement: React.FC = () => {
                                         helperText="Indiquez la fourchette de prix des programmes"
                                     />
                                 ) : (
-                                    <Box sx={{ 
-                                        bgcolor: alpha(theme.palette.success.main, 0.08), 
-                                        p: 2.5, 
+                                    <Box sx={{
+                                        bgcolor: alpha(theme.palette.success.main, 0.08),
+                                        p: 2.5,
                                         borderRadius: BORDER_RADIUS.sm,
                                         border: '1px solid',
                                         borderColor: alpha(theme.palette.success.main, 0.2),
@@ -366,8 +366,8 @@ const MonEtablissement: React.FC = () => {
                         )}
 
                         {/* Informations complémentaires */}
-                        <Card sx={{ 
-                            borderRadius: BORDER_RADIUS.md, 
+                        <Card sx={{
+                            borderRadius: BORDER_RADIUS.md,
                             boxShadow: SHADOWS.card,
                             bgcolor: alpha(theme.palette.info.main, 0.02),
                             border: '1px solid',
@@ -381,7 +381,7 @@ const MonEtablissement: React.FC = () => {
                                             Besoin d'aide ?
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                                            Les informations de votre établissement sont visibles par les bacheliers. 
+                                            Les informations de votre établissement sont visibles par les bacheliers.
                                             Assurez-vous qu'elles sont complètes et à jour.
                                         </Typography>
                                     </Box>

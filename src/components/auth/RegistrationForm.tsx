@@ -192,7 +192,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                                         {inscriptionForm.documentAccreditation ? 'Document prêt !' : 'Document d\'accréditation'}
                                     </Typography>
                                     <Typography variant="body2" sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'text.secondary' }}>
-                                        {inscriptionForm.documentAccreditation?.name || 'Joindre une preuve d\'existence légale (PDF, DOC)'}
+                                        {(inscriptionForm.documentAccreditation && inscriptionForm.documentAccreditation.name) || 'Joindre une preuve d\'existence légale (PDF, DOC)'}
                                     </Typography>
                                 </Box>
                                 <Box sx={{

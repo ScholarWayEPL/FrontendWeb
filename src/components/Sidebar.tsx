@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user } = useAppSelector((state) => state.auth);
 
   // Sélection du menu selon le rôle
-  const mainNavItems = user?.role === 'ROLE_ADMIN_ETABLISSEMENT'
+  const mainNavItems = (user && user.role === 'ROLE_ETABLISSEMENT')
     ? adminEtablissementMainNavItems
     : superAdminMainNavItems;
 
@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             ScholarWay
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-            {user?.role === 'ROLE_ADMIN_ETABLISSEMENT' ? 'Espace Établissement' : 'Administration'}
+            {(user && user.role === 'ROLE_ETABLISSEMENT') ? 'Espace Établissement' : 'Administration'}
           </Typography>
         </Box>
       </Box>

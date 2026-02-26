@@ -97,7 +97,7 @@ const Login: React.FC = () => {
                         id: String(response.data.userId || ''),
                         email: response.data.email || '',
                         role: role as any,
-                        firstName: response.data.email?.split('@')[0] || 'Utilisateur',
+                        firstName: (response.data.email && response.data.email.split('@')[0]) || 'Utilisateur',
                         lastName: '',
                         status: 'active',
                         createdAt: new Date().toISOString(),
@@ -109,7 +109,7 @@ const Login: React.FC = () => {
                 // Redirection selon le rôle
                 if (role === 'ROLE_SUPER_ADMIN') {
                     navigate('/super-admin/dashboard');
-                } else if (role === 'ROLE_ADMIN_ETABLISSEMENT') {
+                } else if (role === 'ROLE_ETABLISSEMENT') {
                     navigate('/etablissement/dashboard');
                 } else {
                     navigate('/');
@@ -118,7 +118,7 @@ const Login: React.FC = () => {
                 dispatch(setError(response.message || 'Identifiants invalides'));
             }
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || 'Une erreur est survenue lors de la connexion';
+            const errorMessage = (err.response && err.response.data && err.response.data.message) || 'Une erreur est survenue lors de la connexion';
             dispatch(setError(errorMessage));
         } finally {
             dispatch(setLoading(false));
@@ -161,7 +161,7 @@ const Login: React.FC = () => {
             };
             const response = await authApi.registerEtablissement(
                 data,
-                inscriptionForm.documentAccreditation ?? undefined,
+                inscriptionForm.documentAccreditation !== null ? inscriptionForm.documentAccreditation : undefined,
             );
 
             if (response.success) {
@@ -170,7 +170,7 @@ const Login: React.FC = () => {
                 dispatch(setError(response.message || 'Une erreur est survenue lors de l\'inscription'));
             }
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || 'Une erreur est survenue lors de l\'inscription';
+            const errorMessage = (err.response && err.response.data && err.response.data.message) || 'Une erreur est survenue lors de l\'inscription';
             dispatch(setError(errorMessage));
         } finally {
             setInscriptionLoading(false);

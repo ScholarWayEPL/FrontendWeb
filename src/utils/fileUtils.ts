@@ -26,7 +26,7 @@ export const downloadFile = (blob: Blob, filename: string): void => {
 export const readFile = (file: File): Promise<string | ArrayBuffer | null> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result || null);
+        reader.onload = (e) => resolve((e && e.target && e.target.result) || null);
         reader.onerror = (e) => reject(e);
         reader.readAsArrayBuffer(file);
     });

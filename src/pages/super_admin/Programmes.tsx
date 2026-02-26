@@ -341,7 +341,7 @@ const Programmes: React.FC = () => {
       )}
 
       <ProgrammeModal open={modalOpen} onClose={handleModalClose} onSuccess={handleModalSuccess} programme={selectedProgramme} />
-      <ConfirmDialog open={deleteDialogOpen} title="Supprimer le programme" message={`Voulez-vous vraiment retirer "${programmeToDelete?.nomProgramme}" du catalogue ?`} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteDialogOpen(false)} />
+      <ConfirmDialog open={deleteDialogOpen} title="Supprimer le programme" message={`Voulez-vous vraiment retirer "${programmeToDelete ? programmeToDelete.nomProgramme : ''}" du catalogue ?`} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteDialogOpen(false)} />
     </Box>
   );
 };

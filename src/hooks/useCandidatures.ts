@@ -83,8 +83,8 @@ export const useCandidatures = () => {
             if (grouped) exportCandidaturesGroupedExcel(dataToExport, filename + '_grouped');
             else exportCandidaturesToExcel(dataToExport, filename);
         } else {
-            if (grouped) generateCandidaturesGroupedPDF(dataToExport, filename + '_grouped', user?.etablissementNom);
-            else generateCandidaturesPDF(dataToExport, filename, user?.etablissementNom);
+            if (grouped) generateCandidaturesGroupedPDF(dataToExport, filename + '_grouped', user ? user.etablissementNom : undefined);
+            else generateCandidaturesPDF(dataToExport, filename, user ? user.etablissementNom : undefined);
         }
     };
 

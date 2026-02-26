@@ -23,7 +23,7 @@ export const etablissementsApi = {
     size: number;
     sort?: string;
   }): Promise<ApiResponse<EtablissementEnAttente[]>> => {
-    const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('/admin/etablissements/en-attente', {
+    const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('etablissements', {
       params
     });
 

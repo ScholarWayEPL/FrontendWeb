@@ -57,6 +57,7 @@ const AppContent: React.FC = () => {
 
           <Route
             path={[
+              "/",
               "/dashboard",
               "/validations",
               "/utilisateurs",
@@ -95,12 +96,6 @@ const AppContent: React.FC = () => {
             )}
           />
 
-          <Route exact path="/">
-            <ProtectedRoute>
-              {/* Le ProtectedRoute gérera les redirections de la racine */}
-              <div />
-            </ProtectedRoute>
-          </Route>
 
           <Route component={NotFound} />
         </Switch>

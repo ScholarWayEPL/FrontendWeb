@@ -27,20 +27,26 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   }
 
   // Redirection automatique vers le bon dashboard si on est à la racine
-  if (location.pathname === '/' || location.pathname === '/dashboard') {
+  if (location.pathname === '/') {
     if (user && user.role === 'ROLE_ETABLISSEMENT') {
       return <Redirect to="/etablissement/dashboard" />;
     }
-    // Pour ROLE_ADMINISTRATEUR, /dashboard est la bonne route
-  }
-
-  // Empêcher l'accès croisé entre les types d'admin
-  if (user && user.role === 'ROLE_ADMINISTRATEUR' && location.pathname.startsWith('/etablissement/')) {
     return <Redirect to="/dashboard" />;
   }
 
-  if (user && user.role === 'ROLE_ETABLISSEMENT' && !location.pathname.startsWith('/etablissement') && location.pathname !== '/parametres') {
-    return <Redirect to="/etablissement/dashboard" />;
+  // Empêcher l'accès croisé entre les types d'admin
+  if (user && user.role === 'ROLE_ADMINISTRATEUR') {
+    const isEtablissementSpecificRoute = location.pathname === '/etablissement' || location.pathname.startsWith('/etablissement/');
+    if (isEtablissementSpecificRoute) {
+      return <Redirect to="/dashboard" />;
+    }
+  }
+
+  if (user && user.role === 'ROLE_ETABLISSEMENT') {
+    const isEtablissementRoute = location.pathname === '/etablissement' || location.pathname.startsWith('/etablissement/');
+    if (!isEtablissementRoute && location.pathname !== '/parametres') {
+      return <Redirect to="/etablissement/dashboard" />;
+    }
   }
 
   return <>{children}</>;

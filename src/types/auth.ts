@@ -8,7 +8,9 @@ export type RoleUtilisateur =
 
 // Legacy User type for auth (updated with new roles)
 export interface User {
-    id: string;
+    id: string; // Legacy ID (idUtilisateur as string)
+    idUtilisateur: number;
+    nom: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -20,4 +22,5 @@ export interface User {
     // Champs spécifiques pour admin_etablissement
     etablissementId?: number;
     etablissementNom?: string;
+    etablissement?: any; // Full establishment object
 }

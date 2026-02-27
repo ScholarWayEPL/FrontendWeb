@@ -11,8 +11,10 @@ export interface LoginResponse {
     tokenType: string;
     userId: number;
     email: string;
+    nom: string;
     role: RoleUtilisateur;
     expiresAt: string;
+    etablissement?: any; // Full establishment object for ROLE_ETABLISSEMENT
 }
 
 // ─── Auth API ─────────────────────────────────────────────────────

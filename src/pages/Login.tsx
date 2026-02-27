@@ -95,13 +95,18 @@ const Login: React.FC = () => {
                 dispatch(setAuth({
                     user: {
                         id: String(response.data.userId || ''),
+                        idUtilisateur: response.data.userId,
+                        nom: response.data.nom || '',
                         email: response.data.email || '',
                         role: role as any,
-                        firstName: (response.data.email && response.data.email.split('@')[0]) || 'Utilisateur',
-                        lastName: '',
+                        firstName: response.data.nom ? response.data.nom.split(' ')[0] : 'Utilisateur',
+                        lastName: response.data.nom ? response.data.nom.split(' ').slice(1).join(' ') : '',
                         status: 'active',
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
+                        etablissement: response.data.etablissement,
+                        etablissementId: response.data.etablissement?.idUtilisateur,
+                        etablissementNom: response.data.etablissement?.nomEtablissement,
                     },
                     token: token
                 }));

@@ -280,12 +280,12 @@ const OffreFormation: React.FC = () => {
                 description: newDomaine.description.trim() || undefined,
             });
             setDomaines(prev => [...prev, {
-                id: created.id,
+                id: created.idDomaine ?? -(prev.length + 1),
                 nom: created.nomDomaine,
                 description: created.description || '',
                 parcours: [],
             }]);
-            setExpandedDomaines(prev => [...prev, created.id]);
+            setExpandedDomaines(prev => [...prev, created.idDomaine ?? -(prev.length)]);
             setNewDomaine({ nom: '', description: '' });
             setOpenDialog(null);
             dispatch(showSnackbar({ message: `Domaine « ${created.nomDomaine} » créé avec succès`, severity: 'success' }));

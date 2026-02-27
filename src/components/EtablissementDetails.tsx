@@ -26,13 +26,13 @@ import {
   OpenInNew,
   Description,
 } from '@mui/icons-material';
-import type { Etablissement } from '../types';
+import type { EtablissementLoginData, TypeEtablissementBackend } from '../types';
 
 interface EtablissementDetailsProps {
   open: boolean;
   onClose: () => void;
-  etablissement: Etablissement | null;
-  onEdit?: (etablissement: Etablissement) => void;
+  etablissement: EtablissementLoginData | null;
+  onEdit?: (etablissement: EtablissementLoginData) => void;
 }
 
 const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
@@ -84,7 +84,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
       {/* Header avec gradient */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${getTypeColor(etablissement.type)} 0%, ${alpha(getTypeColor(etablissement.type), 0.7)} 100%)`,
+          background: `linear-gradient(135deg, ${getTypeColor(etablissement.typeEtablissement)} 0%, ${alpha(getTypeColor(etablissement.typeEtablissement), 0.7)} 100%)`,
           color: 'white',
           p: 3,
           position: 'relative',
@@ -103,12 +103,12 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
         </IconButton>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <Avatar
+          <Avatar src={etablissement.logoUrl || ''}
             sx={{
               width: 80,
               height: 80,
               bgcolor: 'white',
-              color: getTypeColor(etablissement.type),
+              color: getTypeColor(etablissement.typeEtablissement),
               fontSize: '1.5rem',
               fontWeight: 700,
               boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
@@ -118,12 +118,12 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
           </Avatar>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h5" fontWeight={700}>
-              {etablissement.nom}
+              {etablissement.nomEtablissement}
             </Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
               <Chip
                 icon={getTypeIcon(etablissement.type)}
-                label={etablissement.type}
+                label={getTypeLabel(etablissement.typeEtablissement)}
                 size="small"
                 sx={{
                   bgcolor: 'rgba(255,255,255,0.2)',
@@ -158,7 +158,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
 
             <Stack spacing={2.5} sx={{ mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
+                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
                   <Email sx={{ color: 'primary.main' }} />
                 </Avatar>
                 <Box>
@@ -174,7 +174,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: alpha('#4caf50', 0.1), width: 40, height: 40 }}>
+                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#4caf50', 0.1), width: 40, height: 40 }}>
                   <Phone sx={{ color: '#4caf50' }} />
                 </Avatar>
                 <Box>
@@ -182,14 +182,14 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
                     Téléphone
                   </Typography>
                   <Typography variant="body1" fontWeight={500}>
-                    {etablissement.telephone}
+                    {etablissement.telephonePro}
                   </Typography>
                 </Box>
               </Box>
 
               {etablissement.siteWeb && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: alpha('#9c27b0', 0.1), width: 40, height: 40 }}>
+                  <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#9c27b0', 0.1), width: 40, height: 40 }}>
                     <Language sx={{ color: '#9c27b0' }} />
                   </Avatar>
                   <Box>
@@ -213,7 +213,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               )}
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: alpha('#ff9800', 0.1), width: 40, height: 40 }}>
+                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#ff9800', 0.1), width: 40, height: 40 }}>
                   <LocationOn sx={{ color: '#ff9800' }} />
                 </Avatar>
                 <Box>
@@ -236,8 +236,8 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
 
             <Stack spacing={2.5} sx={{ mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: alpha(getTypeColor(etablissement.type), 0.1), width: 40, height: 40 }}>
-                  {React.cloneElement(getTypeIcon(etablissement.type), { sx: { color: getTypeColor(etablissement.type) } })}
+                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha(getTypeColor(etablissement.typeEtablissement), 0.1), width: 40, height: 40 }}>
+                  {React.cloneElement(getTypeIcon(etablissement.type), { sx: { color: getTypeColor(etablissement.typeEtablissement) } })}
                 </Avatar>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
@@ -250,7 +250,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: alpha('#00897b', 0.1), width: 40, height: 40 }}>
+                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#00897b', 0.1), width: 40, height: 40 }}>
                   <School sx={{ color: '#00897b' }} />
                 </Avatar>
                 <Box>
@@ -267,7 +267,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
+                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
                   <Business sx={{ color: '#1976d2' }} />
                 </Avatar>
                 <Box>
@@ -341,7 +341,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               size="small"
               startIcon={<Phone />}
               component="a"
-              href={`tel:${etablissement.telephone}`}
+              href={`tel:${etablissement.telephonePro}`}
             >
               Appeler
             </Button>

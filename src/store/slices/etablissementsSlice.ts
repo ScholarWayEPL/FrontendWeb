@@ -1,10 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Etablissement, PaginationParams, EtablissementFilters } from '../../types';
+import type { 
+  Etablissement, 
+  PaginationParams, 
+  EtablissementFilters,
+  EtablissementLoginData 
+} from '../../types';
 import { etablissementsApi } from '../../api/etablissements';
 
 interface EtablissementsState {
   etablissements: Etablissement[];
+  etablissementsValides: EtablissementLoginData[];
   selectedEtablissement: Etablissement | null;
   loading: boolean;
   error: string | null;
@@ -14,6 +20,7 @@ interface EtablissementsState {
 
 const initialState: EtablissementsState = {
   etablissements: [],
+  etablissementsValides: [],
   selectedEtablissement: null,
   loading: false,
   error: null,
@@ -39,6 +46,22 @@ export const fetchEtablissements = createAsyncThunk(
   ) => {
     try {
       const response = await etablissementsApi.getAll(params);
+      return response;
+    } catch (error: unknown) {
+      const err = error as Error;
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const fetchEtablissementsValides = createAsyncThunk(
+  'etablissements/fetchEtablissementsValides',
+  async (
+    params: { page: number; size: number; sort?: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await etablissementsApi.getValides(params);
       return response;
     } catch (error: unknown) {
       const err = error as Error;
@@ -118,6 +141,22 @@ const etablissementsSlice = createSlice({
         }
       })
       .addCase(fetchEtablissements.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Fetch Valides
+      .addCase(fetchEtablissementsValides.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchEtablissementsValides.fulfilled, (state, action) => {
+        state.loading = false;
+        state.etablissementsValides = action.payload.data;
+        if (action.payload.pagination) {
+          state.pagination = action.payload.pagination;
+        }
+      })
+      .addCase(fetchEtablissementsValides.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

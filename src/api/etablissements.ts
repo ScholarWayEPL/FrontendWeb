@@ -4,6 +4,7 @@ import type {
   ApiResponse,
   EtablissementFilters,
   EtablissementEnAttente,
+  EtablissementLoginData,
   PaginatedBackendResponse
 } from '../types';
 import { mockEtablissements } from './mockData';
@@ -25,6 +26,28 @@ export const etablissementsApi = {
     valide?: string;
   }): Promise<ApiResponse<EtablissementEnAttente[]>> => {
     const response = await client.get<PaginatedBackendResponse<EtablissementEnAttente>>('/etablissements', {
+      params
+    });
+
+    return {
+      success: true,
+      data: response.data.content,
+      pagination: {
+        page: response.data.page.number,
+        limit: response.data.page.size,
+        total: response.data.page.totalElements,
+        totalPages: response.data.page.totalPages
+      }
+    };
+  },
+
+  // Récupérer les établissements validés avec pagination et filtres
+  getValides: async (params: {
+    page: number;
+    size: number;
+    sort?: string;
+  }): Promise<ApiResponse<EtablissementLoginData[]>> => {
+    const response = await client.get<PaginatedBackendResponse<EtablissementLoginData>>('/etablissements/valides', {
       params
     });
 

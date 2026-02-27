@@ -42,13 +42,19 @@ import {
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  fetchEtablissements,
+  fetchEtablissementsValides,
   setFilters,
   resetFilters,
   deleteEtablissement,
 } from '../../store/slices/etablissementsSlice';
 import { showSnackbar } from '../../store/slices/uiSlice';
-import type { Etablissement, EtablissementFilters, TypeEtablissement } from '../../types';
+import type { 
+  Etablissement, 
+  EtablissementFilters, 
+  TypeEtablissement, 
+  EtablissementLoginData,
+  TypeEtablissementBackend
+} from '../../types';
 import EtablissementModal from '../../components/EtablissementModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { REGION_OPTIONS } from '../../constants';
@@ -69,27 +75,27 @@ const localisationOptions = [
 const Etablissements: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { etablissements, loading, pagination, filters } = useAppSelector(
+  const { etablissementsValides, loading, pagination, filters } = useAppSelector(
     (state) => state.etablissements
   );
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedEtablissement, setSelectedEtablissement] = useState<Etablissement | null>(null);
+  const [selectedEtablissement, setSelectedEtablissement] = useState<EtablissementLoginData | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [viewingEtablissement, setViewingEtablissement] = useState<Etablissement | null>(null);
+  const [viewingEtablissement, setViewingEtablissement] = useState<EtablissementLoginData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [etablissementToDelete, setEtablissementToDelete] = useState<Etablissement | null>(null);
+  const [etablissementToDelete, setEtablissementToDelete] = useState<EtablissementLoginData | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const loadData = useCallback(() => {
     dispatch(
-      fetchEtablissements({
+      fetchEtablissementsValides({
         page: pagination.page,
-        limit: pagination.limit,
-        filters,
+        size: pagination.limit,
+        sort: 'nomEtablissement,ASC',
       })
     );
-  }, [dispatch, pagination.page, pagination.limit, filters]);
+  }, [dispatch, pagination.page, pagination.limit]);
 
   useEffect(() => {
     loadData();
@@ -109,20 +115,20 @@ const Etablissements: React.FC = () => {
 
   const handlePageChange = (_: unknown, newPage: number) => {
     dispatch(
-      fetchEtablissements({
+      fetchEtablissementsValides({
         page: newPage + 1,
-        limit: pagination.limit,
-        filters,
+        size: pagination.limit,
+        sort: 'nomEtablissement,ASC',
       })
     );
   };
 
   const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(
-      fetchEtablissements({
+      fetchEtablissementsValides({
         page: 1,
-        limit: parseInt(event.target.value, 10),
-        filters,
+        size: parseInt(event.target.value, 10),
+        sort: 'nomEtablissement,ASC',
       })
     );
   };
@@ -132,12 +138,12 @@ const Etablissements: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleEdit = (etablissement: Etablissement) => {
+  const handleEdit = (etablissement: EtablissementLoginData) => {
     setSelectedEtablissement(etablissement);
     setModalOpen(true);
   };
 
-  const handleDeleteClick = (etablissement: Etablissement) => {
+  const handleDeleteClick = (etablissement: EtablissementLoginData) => {
     setEtablissementToDelete(etablissement);
     setDeleteDialogOpen(true);
   };
@@ -145,7 +151,7 @@ const Etablissements: React.FC = () => {
   const handleDeleteConfirm = async () => {
     if (etablissementToDelete) {
       try {
-        await dispatch(deleteEtablissement(etablissementToDelete.idEtablissement)).unwrap();
+        await dispatch(deleteEtablissement(etablissementToDelete.idUtilisateur)).unwrap();
         dispatch(showSnackbar({ message: 'Établissement supprimé avec succès', severity: 'success' }));
         loadData();
       } catch {
@@ -166,19 +172,23 @@ const Etablissements: React.FC = () => {
     handleModalClose();
   };
 
-  const handleViewDetails = (etablissement: Etablissement) => {
+  const handleViewDetails = (etablissement: EtablissementLoginData) => {
     setViewingEtablissement(etablissement);
     setDetailsOpen(true);
   };
 
-  const getTypeChip = (type: TypeEtablissement) => {
-    const typeConfig = {
-      'Université': { color: 'primary' as const },
-      'École': { color: 'secondary' as const },
-      'Institut': { color: 'info' as const },
+  const getTypeChip = (type: TypeEtablissementBackend) => {
+    const typeConfig: Record<TypeEtablissementBackend, { label: string; color: 'primary' | 'secondary' | 'info' | 'warning' | 'default' }> = {
+      'UNIVERSITE_PUBLIQUE': { label: 'Univ. Publique', color: 'primary' },
+      'UNIVERSITE_PRIVEE': { label: 'Univ. Privée', color: 'secondary' },
+      'ECOLE_PUBLIQUE': { label: 'École Publique', color: 'info' },
+      'ECOLE_PRIVEE': { label: 'École Privée', color: 'info' },
+      'INSTITUT_SUPERIEUR': { label: 'Institut Sup.', color: 'warning' },
+      'GRANDE_ECOLE': { label: 'Grande École', color: 'primary' },
+      'CENTRE_FORMATION': { label: 'Centre de Form.', color: 'default' },
     };
-    const config = typeConfig[type];
-    return <Chip label={type} color={config.color} size="small" sx={{ fontWeight: 700, borderRadius: '6px' }} />;
+    const config = typeConfig[type] || { label: type, color: 'default' };
+    return <Chip label={config.label} color={config.color} size="small" sx={{ fontWeight: 700, borderRadius: '6px' }} />;
   };
 
   return (
@@ -327,7 +337,7 @@ const Etablissements: React.FC = () => {
                   <CircularProgress size={32} />
                 </TableCell>
               </TableRow>
-            ) : etablissements.length === 0 ? (
+            ) : etablissementsValides.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                   <BusinessIcon sx={{ fontSize: 48, color: 'text.disabled', opacity: 0.3, mb: 2 }} />
@@ -337,39 +347,45 @@ const Etablissements: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              etablissements.map((etablissement: Etablissement) => (
+              etablissementsValides.map((etablissement: EtablissementLoginData) => (
                 <TableRow
-                  key={etablissement.idEtablissement}
+                  key={etablissement.idUtilisateur}
                   hover
                   sx={{ '&:last-child td': { border: 0 } }}
                 >
                   <TableCell>
                     <Box>
                       <Typography variant="body2" fontWeight={700}>
-                        {etablissement.nom}
+                        {etablissement.nomEtablissement}
                       </Typography>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 1,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          maxWidth: 300,
-                        }}
-                      >
-                        {etablissement.description}
-                      </Typography>
+                      {etablissement.description && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            maxWidth: 300,
+                          }}
+                        >
+                          {etablissement.description}
+                        </Typography>
+                      )}
                     </Box>
                   </TableCell>
-                  <TableCell>{getTypeChip(etablissement.type)}</TableCell>
+                  <TableCell>{getTypeChip(etablissement.typeEtablissement)}</TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight={500}>{etablissement.localisation}</Typography>
                   </TableCell>
                   <TableCell>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      {etablissement.email}
+                    </Typography>
+                    <br />
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {etablissement.contact}
+                      {etablissement.telephonePro}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -430,24 +446,24 @@ const Etablissements: React.FC = () => {
       </TableContainer>
 
       {/* Modals */}
-      <EtablissementModal
+      <EtablissementModal etablissement={null}
         open={modalOpen}
         onClose={handleModalClose}
         onSuccess={handleModalSuccess}
-        etablissement={selectedEtablissement}
+        etablissement={selectedEtablissement as any}
       />
 
       <EtablissementDetails
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
-        etablissement={viewingEtablissement}
-        onEdit={(etab) => { setDetailsOpen(false); handleEdit(etab); }}
+        etablissement={viewingEtablissement as any}
+        onEdit={(etab: any) => { setDetailsOpen(false); handleEdit(etab); }}
       />
 
       <ConfirmDialog
         open={deleteDialogOpen}
         title="Supprimer l'établissement"
-        message={`Voulez-vous vraiment retirer "${etablissementToDelete ? etablissementToDelete.nom : ''}" de la plateforme ?`}
+        message={`Voulez-vous vraiment retirer "${etablissementToDelete ? etablissementToDelete.nomEtablissement : ''}" de la plateforme ?`}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialogOpen(false)}
       />

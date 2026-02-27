@@ -1,9 +1,10 @@
 export * from './auth';
-export * from './auth';
 export * from './candidatures';
+export * from './domaines';
 export { default as apiClient } from './client';
 // API index - Export centralisé de toutes les APIs
 export { dashboardApi } from './dashboard';
+export { domainesApi } from './domaines';
 export { etablissementsApi } from './etablissements';
 export { logsApi } from './logs';
 export { notificationsApi } from './notifications';

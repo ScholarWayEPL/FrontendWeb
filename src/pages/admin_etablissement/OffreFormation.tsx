@@ -43,6 +43,9 @@ import {
 import { PageHeader, SearchField } from '../../components/ui';
 import { formatCFA } from '../../constants';
 import type { StatutCampagne } from '../../types';
+import { domainesApi } from '../../api/domaines';
+import { useAppDispatch } from '../../store/hooks';
+import { showSnackbar } from '../../store/slices/uiSlice';
 
 // Types alignés sur les models backend
 interface Filiere {
@@ -132,6 +135,7 @@ const initialDomaines: Domaine[] = [
 
 const OffreFormation: React.FC = () => {
     const theme = useTheme();
+    const dispatch = useAppDispatch();
     const [domaines, setDomaines] = useState<Domaine[]>(initialDomaines);
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedDomaines, setExpandedDomaines] = useState<number[]>([1]);
@@ -141,6 +145,7 @@ const OffreFormation: React.FC = () => {
     const [openDialog, setOpenDialog] = useState<'domaine' | 'parcours' | 'filiere' | null>(null);
     const [selectedDomaineId, setSelectedDomaineId] = useState<number | null>(null);
     const [selectedParcoursId, setSelectedParcoursId] = useState<number | null>(null);
+    const [isCreatingDomaine, setIsCreatingDomaine] = useState(false);
 
     // Form states
     const [newDomaine, setNewDomaine] = useState({ nom: '', description: '' });
@@ -225,18 +230,30 @@ const OffreFormation: React.FC = () => {
         });
     };
 
-    // Handle add domaine
-    const handleAddDomaine = () => {
-        if (newDomaine.nom.trim()) {
-            const newId = Math.max(...domaines.map(d => d.id), 0) + 1;
-            setDomaines([...domaines, {
-                id: newId,
-                nom: newDomaine.nom,
-                description: newDomaine.description,
-                parcours: []
+    // Handle add domaine — appel API réel POST /api/domaines
+    const handleAddDomaine = async () => {
+        if (!newDomaine.nom.trim()) return;
+        setIsCreatingDomaine(true);
+        try {
+            const created = await domainesApi.createDomaine({
+                nomDomaine: newDomaine.nom.trim(),
+                description: newDomaine.description.trim() || undefined,
+            });
+            setDomaines(prev => [...prev, {
+                id: created.id,
+                nom: created.nomDomaine,
+                description: created.description || '',
+                parcours: [],
             }]);
+            setExpandedDomaines(prev => [...prev, created.id]);
             setNewDomaine({ nom: '', description: '' });
             setOpenDialog(null);
+            dispatch(showSnackbar({ message: `Domaine « ${created.nomDomaine} » créé avec succès`, severity: 'success' }));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Erreur lors de la création du domaine';
+            dispatch(showSnackbar({ message, severity: 'error' }));
+        } finally {
+            setIsCreatingDomaine(false);
         }
     };
 
@@ -944,9 +961,21 @@ const OffreFormation: React.FC = () => {
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenDialog(null)}>Annuler</Button>
-                    <Button variant="contained" onClick={handleAddDomaine}>
-                        Créer
+                    <Button
+                        onClick={() => {
+                            setOpenDialog(null);
+                            setNewDomaine({ nom: '', description: '' });
+                        }}
+                        disabled={isCreatingDomaine}
+                    >
+                        Annuler
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleAddDomaine}
+                        disabled={!newDomaine.nom.trim() || isCreatingDomaine}
+                    >
+                        {isCreatingDomaine ? 'Création...' : 'Créer'}
                     </Button>
                 </DialogActions>
             </Dialog>

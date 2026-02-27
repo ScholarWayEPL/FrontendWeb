@@ -45,10 +45,11 @@ export const etablissementsApi = {
   getValides: async (params: {
     page: number;
     size: number;
-    sort?: string;
+    sort?: string[];
   }): Promise<ApiResponse<EtablissementLoginData[]>> => {
     const response = await client.get<PaginatedBackendResponse<EtablissementLoginData>>('/etablissements/valides', {
-      params
+      params,
+      paramsSerializer: { indexes: null },
     });
 
     return {

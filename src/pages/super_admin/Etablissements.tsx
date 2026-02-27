@@ -92,7 +92,7 @@ const Etablissements: React.FC = () => {
       fetchEtablissementsValides({
         page: pagination.page,
         size: pagination.limit,
-        sort: 'nomEtablissement,ASC',
+        sort: ['nomEtablissement,ASC'],
       })
     );
   }, [dispatch, pagination.page, pagination.limit]);
@@ -118,7 +118,7 @@ const Etablissements: React.FC = () => {
       fetchEtablissementsValides({
         page: newPage + 1,
         size: pagination.limit,
-        sort: 'nomEtablissement,ASC',
+        sort: ['nomEtablissement,ASC'],
       })
     );
   };
@@ -128,7 +128,7 @@ const Etablissements: React.FC = () => {
       fetchEtablissementsValides({
         page: 1,
         size: parseInt(event.target.value, 10),
-        sort: 'nomEtablissement,ASC',
+        sort: ['nomEtablissement,ASC'],
       })
     );
   };

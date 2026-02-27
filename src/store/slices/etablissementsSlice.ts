@@ -57,11 +57,15 @@ export const fetchEtablissements = createAsyncThunk(
 export const fetchEtablissementsValides = createAsyncThunk(
   'etablissements/fetchEtablissementsValides',
   async (
-    params: { page: number; size: number; sort?: string },
+    params: { page: number; size: number; sort?: string[] },
     { rejectWithValue }
   ) => {
     try {
-      const response = await etablissementsApi.getValides(params);
+      // Spring Pageable est 0-based : on soustrait 1 à la page du store
+      const response = await etablissementsApi.getValides({
+        ...params,
+        page: params.page - 1,
+      });
       return response;
     } catch (error: unknown) {
       const err = error as Error;

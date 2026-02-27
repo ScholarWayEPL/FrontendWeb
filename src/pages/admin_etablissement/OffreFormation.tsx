@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Card,
@@ -24,6 +24,7 @@ import {
     alpha,
     Tooltip,
     Alert,
+    CircularProgress,
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -146,6 +147,9 @@ const OffreFormation: React.FC = () => {
     const [selectedDomaineId, setSelectedDomaineId] = useState<number | null>(null);
     const [selectedParcoursId, setSelectedParcoursId] = useState<number | null>(null);
     const [isCreatingDomaine, setIsCreatingDomaine] = useState(false);
+    const [isLoadingDomaines, setIsLoadingDomaines] = useState(true);
+    const [deletingDomaineId, setDeletingDomaineId] = useState<number | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
     // Form states
     const [newDomaine, setNewDomaine] = useState({ nom: '', description: '' });
@@ -175,6 +179,42 @@ const OffreFormation: React.FC = () => {
         setExpandedParcours(prev =>
             prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
         );
+    };
+
+    // Chargement initial des domaines depuis l'API
+    useEffect(() => {
+        const loadDomaines = async () => {
+            try {
+                const data = await domainesApi.getDomaines();
+                setDomaines(data.map((d, i) => ({
+                    id: d.idDomaine ?? -(i + 1), // fallback si idDomaine est null
+                    nom: d.nomDomaine,
+                    description: d.description || '',
+                    parcours: [],
+                })));
+            } catch {
+                dispatch(showSnackbar({ message: 'Erreur lors du chargement des domaines', severity: 'error' }));
+            } finally {
+                setIsLoadingDomaines(false);
+            }
+        };
+        loadDomaines();
+    }, [dispatch]);
+
+    // Suppression d'un domaine
+    const handleDeleteDomaine = async (id: number) => {
+        setDeletingDomaineId(id);
+        try {
+            await domainesApi.deleteDomaine(id);
+            setDomaines(prev => prev.filter(d => d.id !== id));
+            dispatch(showSnackbar({ message: 'Domaine supprimé avec succès', severity: 'success' }));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+            dispatch(showSnackbar({ message, severity: 'error' }));
+        } finally {
+            setDeletingDomaineId(null);
+            setConfirmDeleteId(null);
+        }
     };
 
     // Get status chip
@@ -462,6 +502,11 @@ const OffreFormation: React.FC = () => {
             </Card>
 
             {/* Liste des domaines */}
+            {isLoadingDomaines ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+                    <CircularProgress />
+                </Box>
+            ) : (
             <Stack spacing={2}>
                 {filteredDomaines.map((domaine) => (
                     <Card key={domaine.id} variant="outlined">
@@ -525,6 +570,23 @@ const OffreFormation: React.FC = () => {
                                         }}
                                     >
                                         <EditIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Supprimer le domaine">
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirmDeleteId(domaine.id);
+                                        }}
+                                        disabled={deletingDomaineId === domaine.id}
+                                        sx={{
+                                            bgcolor: 'white',
+                                            color: 'error.main',
+                                            '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.08) },
+                                        }}
+                                    >
+                                        <DeleteIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
                             </Stack>
@@ -828,8 +890,9 @@ const OffreFormation: React.FC = () => {
                     </Card>
                 ))}
             </Stack>
+            )}
 
-            {filteredDomaines.length === 0 && (
+            {filteredDomaines.length === 0 && !isLoadingDomaines && (
                 <Card sx={{ p: 4, textAlign: 'center' }}>
                     <Typography color="text.secondary">
                         Aucun domaine trouvé
@@ -928,6 +991,38 @@ const OffreFormation: React.FC = () => {
                     >
                         {campaignAction === 'open' ? 'Ouvrir' :
                             campaignAction === 'close' ? 'Clôturer' : 'Réouvrir'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog: Confirmer suppression domaine */}
+            <Dialog
+                open={confirmDeleteId !== null}
+                onClose={() => setConfirmDeleteId(null)}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Supprimer le domaine</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Êtes-vous sûr de vouloir supprimer ce domaine ?
+                        Cette action est irréversible.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setConfirmDeleteId(null)}
+                        disabled={deletingDomaineId !== null}
+                    >
+                        Annuler
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => confirmDeleteId !== null && handleDeleteDomaine(confirmDeleteId)}
+                        disabled={deletingDomaineId !== null}
+                    >
+                        {deletingDomaineId !== null ? 'Suppression...' : 'Supprimer'}
                     </Button>
                 </DialogActions>
             </Dialog>

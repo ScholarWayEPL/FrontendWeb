@@ -47,7 +47,7 @@ import {
   PhotoCamera,
   Verified,
 } from '@mui/icons-material';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
 import { INDICATIF_TOGO } from '../../constants';
 
@@ -91,15 +91,16 @@ const TabPanel = ({ children, value, index }: { children: React.ReactNode; value
 const Parametres: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState(0);
 
   const [profile, setProfile] = useState<AdminProfile>({
-    nom: 'Mensah',
-    prenom: 'Kodjo',
-    email: 'admin@scholarway.tg',
+    nom: user?.lastName || user?.nom?.split(' ').slice(1).join(' ') || 'Mensah',
+    prenom: user?.firstName || user?.nom?.split(' ')[0] || 'Kodjo',
+    email: user?.email || 'admin@scholarway.tg',
     telephone: '90 00 00 00',
-    role: 'Super Administrateur',
-    dateCreation: '2024-01-01',
+    role: user?.role === 'ROLE_ADMINISTRATEUR' ? 'Administrateur' : 'Super Administrateur',
+    dateCreation: user?.createdAt?.split('T')[0] || '2024-01-01',
   });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editingProfile, setEditingProfile] = useState<AdminProfile>(profile);

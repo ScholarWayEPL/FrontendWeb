@@ -1,5 +1,5 @@
 import client from './client';
-import type { ApiResponse, User, RoleUtilisateur, RegisterEtablissementRequest, BachelierDTO } from '../types';
+import type { ApiResponse, User, RoleUtilisateur, RegisterEtablissementRequest, BachelierDTO, EtablissementLoginData } from '../types';
 
 // Re-export pour compatibilité des imports depuis `../api`
 export type { RegisterEtablissementRequest, BachelierDTO } from '../types';
@@ -14,7 +14,7 @@ export interface LoginResponse {
     nom: string;
     role: RoleUtilisateur;
     expiresAt: string;
-    etablissement?: any; // Full establishment object for ROLE_ETABLISSEMENT
+    etablissement?: EtablissementLoginData;
 }
 
 // ─── Auth API ─────────────────────────────────────────────────────

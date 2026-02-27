@@ -36,17 +36,17 @@ const MonEtablissement: React.FC = () => {
     const { user } = useAppSelector((state) => state.auth);
     const [isEditing, setIsEditing] = useState(false);
 
-    // Données mockées de l'établissement (basées sur EtablissementBackend)
+    // Données de l'établissement initialisées depuis le store Redux (réponse API login)
     const [etablissement, setEtablissement] = useState({
-        nom: (user && user.etablissementNom) || 'Mon Établissement',
-        description: 'Établissement d\'enseignement supérieur reconnu par l\'État, offrant des formations de qualité dans divers domaines. Notre mission est de former les leaders de demain en leur fournissant les compétences nécessaires pour exceller dans un monde en constante évolution.',
-        localisation: 'Lomé, Togo',
-        telephonePro: '+228 22 XX XX XX',
-        siteWeb: 'https://www.etablissement.tg',
-        logoUrl: '',
-        scolariteGlobale: '500 000 - 2 000 000 FCFA/an',
-        documentAccreditationUrl: 'https://example.com/accreditation.pdf',
-        valide: true,
+        nom: user?.etablissement?.nomEtablissement || user?.etablissementNom || 'Mon Établissement',
+        description: user?.etablissement?.description || '',
+        localisation: user?.etablissement?.localisation || '',
+        telephonePro: user?.etablissement?.telephonePro || '',
+        siteWeb: user?.etablissement?.siteWeb || '',
+        logoUrl: user?.etablissement?.logoUrl || '',
+        scolariteGlobale: user?.etablissement?.scolariteGlobale || '',
+        documentAccreditationUrl: user?.etablissement?.documentAccreditationUrl || '',
+        valide: user?.etablissement?.valide ?? false,
     });
 
     const handleSave = () => {

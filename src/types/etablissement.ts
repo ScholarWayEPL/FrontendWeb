@@ -63,6 +63,28 @@ export interface RegisterEtablissementRequest {
     typeEtablissement: TypeEtablissementBackend;
 }
 
+// 🏫 Données établissement telles que retournées dans la réponse de login
+export interface EtablissementLoginData {
+    idUtilisateur: number;
+    nomEtablissement: string;
+    description: string | null;
+    email: string;
+    logoUrl: string | null;
+    localisation: string;
+    siteWeb: string | null;
+    telephonePro: string;
+    scolariteGlobale: string | null;
+    documentAccreditationUrl: string | null;
+    typeEtablissement: TypeEtablissementBackend;
+    valide: boolean;
+    dateValidationAdmin: string | null;
+    statut: StatutValidationEtablissement;
+    dateCreation: string;
+    derniereConnexion: string | null;
+    nombreParcours: number;
+    nombreCampagnesActives: number;
+}
+
 // 🏫 Établissement en attente (Backend response for /api/admin/etablissements/en-attente)
 export interface EtablissementEnAttente {
     idUtilisateur: number;

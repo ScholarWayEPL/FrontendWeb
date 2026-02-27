@@ -1,3 +1,5 @@
+import type { EtablissementLoginData } from './etablissement';
+
 export type StatutCompte = 'ACTIF' | 'INACTIF' | 'SUSPENDU' | 'EN_ATTENTE';
 
 export type RoleUtilisateur =
@@ -22,5 +24,5 @@ export interface User {
     // Champs spécifiques pour admin_etablissement
     etablissementId?: number;
     etablissementNom?: string;
-    etablissement?: any; // Full establishment object
+    etablissement?: EtablissementLoginData; // Full establishment object from login
 }

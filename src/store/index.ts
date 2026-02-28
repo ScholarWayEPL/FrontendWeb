@@ -3,7 +3,6 @@ import authReducer from './slices/authSlice';
 import dashboardReducer from './slices/dashboardSlice';
 import etablissementsReducer from './slices/etablissementsSlice';
 import usersReducer from './slices/usersSlice';
-import programmesReducer from './slices/programmesSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import uiReducer from './slices/uiSlice';
 
@@ -13,7 +12,6 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     etablissements: etablissementsReducer,
     users: usersReducer,
-    programmes: programmesReducer,
     notifications: notificationsReducer,
     ui: uiReducer,
   },

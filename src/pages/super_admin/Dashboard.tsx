@@ -23,7 +23,7 @@ import {
 import {
   People as PeopleIcon,
   School as SchoolIcon,
-  MenuBook as MenuBookIcon,
+  CheckCircle as CheckCircleIcon,
   Notifications as NotificationsIcon,
   PersonAdd,
   Add,
@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
           <StatCard title="Établissements" value={(stats && stats.totalEtablissements) || 0} growth={stats ? stats.etablissementsGrowth : undefined} icon={<SchoolIcon />} color="secondary" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
-          <StatCard title="Formations" value={(stats && stats.totalProgrammes) || 0} growth={stats ? stats.programmesGrowth : undefined} icon={<MenuBookIcon />} color="info" />
+          <StatCard title="Dossiers validés" value={(stats && stats.totalDossiersValides) || 0} growth={stats ? stats.dossiersGrowth : undefined} icon={<CheckCircleIcon />} color="info" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard title="Notifications" value={(stats && stats.totalNotifications) || 0} icon={<NotificationsIcon />} color="warning" />
@@ -199,20 +199,20 @@ const Dashboard: React.FC = () => {
         <Grid item xs={12} lg={4}>
           <Card sx={{ borderRadius: '24px', height: '100%', border: '1px solid', borderColor: 'divider' }}>
             <CardContent>
-              <Typography variant="h6" fontWeight={800} gutterBottom>Niveaux d'Études</Typography>
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 4 }}>Répartition des nouveaux dossiers</Typography>
+              <Typography variant="h6" fontWeight={800} gutterBottom>Statut des Dossiers</Typography>
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 4 }}>Répartition par statut de traitement</Typography>
               <Box sx={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={(stats && stats.repartitionParNiveau) || []}
+                      data={(stats && stats.repartitionParStatut) || []}
                       cx="50%" cy="50%"
                       innerRadius={70}
                       outerRadius={90}
                       paddingAngle={8}
                       dataKey="value"
                     >
-                      {stats && stats.repartitionParNiveau && stats.repartitionParNiveau.map((entry, index) => (
+                      {stats && stats.repartitionParStatut && stats.repartitionParStatut.map((entry, index) => (
                         <Cell key={index} fill={entry.color} stroke="none" />
                       ))}
                     </Pie>

@@ -12,7 +12,6 @@ import {
   Dashboard,
   Utilisateurs,
   Etablissements,
-  Programmes,
   Notifications,
   Parametres,
   Logs,
@@ -62,7 +61,6 @@ const AppContent: React.FC = () => {
               "/validations",
               "/utilisateurs",
               "/etablissements",
-              "/programmes",
               "/notifications",
               "/parametres",
               "/logs",
@@ -77,7 +75,6 @@ const AppContent: React.FC = () => {
                     <Route exact path="/validations" component={ValidationInscriptions} />
                     <Route exact path="/utilisateurs" component={Utilisateurs} />
                     <Route exact path="/etablissements" component={Etablissements} />
-                    <Route exact path="/programmes" component={Programmes} />
                     <Route exact path="/notifications" component={Notifications} />
                     <Route exact path="/parametres" component={Parametres} />
                     <Route exact path="/logs" component={Logs} />

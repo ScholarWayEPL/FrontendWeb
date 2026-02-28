@@ -4,11 +4,11 @@ export interface DashboardStats {
     usersGrowth: number;
     totalEtablissements: number;
     etablissementsGrowth: number;
-    totalProgrammes: number;
-    programmesGrowth: number;
+    totalDossiersValides: number;
+    dossiersGrowth: number;
     totalNotifications: number;
     inscriptionsParMois: ChartDataPoint[];
-    repartitionParNiveau: PieChartDataPoint[];
+    repartitionParStatut: PieChartDataPoint[];
     recentActivity: ActivityItem[];
     topProgrammes: TopProgrammeData[];
     statsRapides: Array<{ value: number | string; label: string }>;

@@ -9,11 +9,11 @@ export const dashboardApi = {
     return {
       totalUsers: 1250,
       totalEtablissements: 45,
-      totalProgrammes: 180,
+      totalDossiersValides: 312,
       totalNotifications: 23,
       usersGrowth: 12.5,
       etablissementsGrowth: 8.3,
-      programmesGrowth: 15.2,
+      dossiersGrowth: 22.4,
       recentActivity: [
         {
           id: '1',
@@ -61,11 +61,12 @@ export const dashboardApi = {
         value: [450, 180, 220, 160, 240][index] || 100,
         color: ['#1976d2', '#9c27b0', '#2e7d32', '#ed6c02', '#0288d1'][index] || '#757575',
       })),
-      // Répartition par niveau d'études
-      repartitionParNiveau: [
-        { name: 'Licence', value: 680, color: '#1976d2' },
-        { name: 'Master', value: 420, color: '#9c27b0' },
-        { name: 'Doctorat', value: 150, color: '#2e7d32' },
+      // Répartition par statut de dossier
+      repartitionParStatut: [
+        { name: 'En attente', value: 320, color: '#f59e0b' },
+        { name: 'Validés', value: 480, color: '#10b981' },
+        { name: 'En cours', value: 250, color: '#4f46e5' },
+        { name: 'Rejetés', value: 85, color: '#ef4444' },
       ],
       // Performance hebdomadaire
       performanceHebdo: [
@@ -88,8 +89,8 @@ export const dashboardApi = {
       // Stats rapides
       statsRapides: [
         { label: 'Inscriptions ce mois', value: '+156', color: 'primary', trend: 12 },
-        { label: 'Programmes actifs', value: 142, color: 'secondary' },
-        { label: 'En attente de validation', value: 12, color: 'warning' },
+        { label: 'Dossiers en attente', value: 320, color: 'warning' },
+        { label: 'En attente de validation', value: 12, color: 'secondary' },
         { label: 'Taux de conversion', value: '68%', color: 'success', trend: 5 },
         { label: 'Dossiers complets', value: '89%', color: 'info' },
         { label: 'Demandes bourses', value: 45, color: 'error' },

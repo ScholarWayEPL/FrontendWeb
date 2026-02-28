@@ -16,7 +16,6 @@ import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   School as SchoolIcon,
-  MenuBook as MenuBookIcon,
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   History as HistoryIcon,
@@ -44,7 +43,6 @@ const superAdminMainNavItems: NavItem[] = [
   { title: 'Validation Inscriptions', path: '/validations', icon: <VerifiedUserIcon /> },
   { title: 'Utilisateurs', path: '/utilisateurs', icon: <PeopleIcon /> },
   { title: 'Établissements', path: '/etablissements', icon: <SchoolIcon /> },
-  { title: 'Programmes', path: '/programmes', icon: <MenuBookIcon /> },
   { title: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
   { title: 'Logs', path: '/logs', icon: <HistoryIcon /> },
 ];

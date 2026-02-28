@@ -8,6 +8,8 @@ export { domainesApi } from './domaines';
 export { etablissementsApi } from './etablissements';
 export { logsApi } from './logs';
 export { notificationsApi } from './notifications';
+export { offresApi } from './offres';
+export type { OffreBackend, CreateOffrePayload } from './offres';
 export { programmesApi } from './programmes';
 export { usersApi } from './users';
 

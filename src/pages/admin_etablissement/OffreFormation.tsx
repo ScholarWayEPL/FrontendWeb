@@ -13,10 +13,6 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
     Collapse,
     Paper,
     Divider,
@@ -45,7 +41,8 @@ import { PageHeader, SearchField } from '../../components/ui';
 import { formatCFA } from '../../constants';
 import type { StatutCampagne } from '../../types';
 import { domainesApi } from '../../api/domaines';
-import { useAppDispatch } from '../../store/hooks';
+import { offresApi } from '../../api/offres';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
 
 // Types alignés sur les models backend
@@ -57,14 +54,21 @@ interface Filiere {
 }
 
 interface Parcours {
-    id: number;
-    nom: string;
-    niveau: 'Licence' | 'Master' | 'Doctorat';
+    id: number;           // = offreId côté backend (utilisé pour DELETE)
+    nom: string;          // nomParcours
+    descriptionParcours?: string;
+    idDomaine: number;
+    niveau: string;       // niveauRequis (string libre)
     statut: StatutCampagne;
     anneeAcademique: string;
     dateOuverture?: string;
     dateCloture?: string;
     dateConcoursEcrit?: string;
+    fraisScolarite?: number;
+    conditionsAdmission?: string;
+    debouches?: string;
+    dureeAnnees?: number;
+    seriesAcceptees?: string[];
     filieres: Filiere[];
 }
 
@@ -75,71 +79,15 @@ interface Domaine {
     parcours: Parcours[];
 }
 
-// Données mock
-const initialDomaines: Domaine[] = [
-    {
-        id: 1,
-        nom: 'Sciences et Technologies',
-        description: 'Formations scientifiques et technologiques',
-        parcours: [
-            {
-                id: 1,
-                nom: 'Informatique',
-                niveau: 'Licence',
-                statut: 'OUVERTE',
-                anneeAcademique: '2025-2026',
-                dateOuverture: '2026-01-15',
-                dateCloture: '2026-06-30',
-                filieres: [
-                    { id: 1, nom: 'Génie Logiciel', fraisScolarite: 850000, places: 50 },
-                    { id: 2, nom: 'Réseaux & Systèmes', fraisScolarite: 850000, places: 40 },
-                    { id: 3, nom: 'Intelligence Artificielle', fraisScolarite: 950000, places: 30 },
-                ],
-            },
-            {
-                id: 2,
-                nom: 'Mathématiques Appliquées',
-                niveau: 'Master',
-                statut: 'A_VENIR',
-                anneeAcademique: '2025-2026',
-                dateOuverture: '2026-09-01',
-                dateCloture: '2026-12-15',
-                filieres: [
-                    { id: 4, nom: 'Data Science', fraisScolarite: 1200000, places: 25 },
-                    { id: 5, nom: 'Statistiques', fraisScolarite: 1100000, places: 30 },
-                ],
-            },
-        ],
-    },
-    {
-        id: 2,
-        nom: 'Sciences Économiques et Gestion',
-        description: 'Formations en économie et gestion',
-        parcours: [
-            {
-                id: 3,
-                nom: 'Gestion des Entreprises',
-                niveau: 'Licence',
-                statut: 'OUVERTE',
-                anneeAcademique: '2025-2026',
-                dateOuverture: '2026-01-15',
-                dateCloture: '2026-06-30',
-                filieres: [
-                    { id: 6, nom: 'Comptabilité', fraisScolarite: 750000, places: 60 },
-                    { id: 7, nom: 'Marketing', fraisScolarite: 750000, places: 50 },
-                    { id: 8, nom: 'Finance', fraisScolarite: 800000, places: 45 },
-                ],
-            },
-        ],
-    },
-];
-
 const OffreFormation: React.FC = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
-    const [domaines, setDomaines] = useState<Domaine[]>(initialDomaines);
+    const { user } = useAppSelector((state) => state.auth);
+    const etablissementId = user?.etablissement?.idUtilisateur ?? user?.idUtilisateur ?? 0;
+
+    const [domaines, setDomaines] = useState<Domaine[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [expandedDomaines, setExpandedDomaines] = useState<number[]>([1]);
+    const [expandedDomaines, setExpandedDomaines] = useState<number[]>([]);
     const [expandedParcours, setExpandedParcours] = useState<number[]>([1]);
 
     // Dialog states
@@ -147,13 +95,25 @@ const OffreFormation: React.FC = () => {
     const [selectedDomaineId, setSelectedDomaineId] = useState<number | null>(null);
     const [selectedParcoursId, setSelectedParcoursId] = useState<number | null>(null);
     const [isCreatingDomaine, setIsCreatingDomaine] = useState(false);
+    const [isCreatingParcours, setIsCreatingParcours] = useState(false);
     const [isLoadingDomaines, setIsLoadingDomaines] = useState(true);
     const [deletingDomaineId, setDeletingDomaineId] = useState<number | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+    const [deletingParcoursId, setDeletingParcoursId] = useState<number | null>(null);
+    const [confirmDeleteParcoursId, setConfirmDeleteParcoursId] = useState<{ domaineId: number; offreId: number } | null>(null);
 
     // Form states
     const [newDomaine, setNewDomaine] = useState({ nom: '', description: '' });
-    const [newParcours, setNewParcours] = useState<{ nom: string; niveau: 'Licence' | 'Master' | 'Doctorat' }>({ nom: '', niveau: 'Licence' });
+    const [newParcours, setNewParcours] = useState({
+        nom: '',
+        descriptionParcours: '',
+        niveauRequis: '',
+        fraisScolarite: 0,
+        conditionsAdmission: '',
+        debouches: '',
+        dureeAnnees: 3,
+        seriesAcceptees: '',
+    });
     const [newFiliere, setNewFiliere] = useState({ nom: '', fraisScolarite: 0, places: 0 });
 
     // Campaign dialog states
@@ -181,25 +141,65 @@ const OffreFormation: React.FC = () => {
         );
     };
 
-    // Chargement initial des domaines depuis l'API
+    // Chargement initial des domaines et des offres depuis l'API
     useEffect(() => {
-        const loadDomaines = async () => {
+        const loadData = async () => {
             try {
-                const data = await domainesApi.getDomaines();
-                setDomaines(data.map((d, i) => ({
-                    id: d.idDomaine ?? -(i + 1), // fallback si idDomaine est null
+                // 1. Charger les domaines
+                const domainesData = await domainesApi.getDomaines();
+                const domainesMapped: Domaine[] = domainesData.map((d, i) => ({
+                    id: d.idDomaine ?? -(i + 1),
                     nom: d.nomDomaine,
                     description: d.description || '',
                     parcours: [],
-                })));
+                }));
+
+                // 2. Charger les offres (parcours) de cet établissement
+                if (etablissementId) {
+                    try {
+                        const offres = await offresApi.getOffres(etablissementId);
+                        // Grouper les offres par idDomaine
+                        const offresMap: Record<number, typeof offres> = {};
+                        offres.forEach(o => {
+                            if (!offresMap[o.idDomaine]) offresMap[o.idDomaine] = [];
+                            offresMap[o.idDomaine].push(o);
+                        });
+                        // Injecter les offres dans chaque domaine
+                        domainesMapped.forEach(d => {
+                            const offresForDomaine = offresMap[d.id] || [];
+                            d.parcours = offresForDomaine.map(o => ({
+                                id: o.id,
+                                nom: o.nomParcours,
+                                descriptionParcours: o.descriptionParcours,
+                                idDomaine: o.idDomaine,
+                                niveau: o.niveauRequis,
+                                statut: o.campagneOuverte ? 'OUVERTE' : 'A_VENIR',
+                                anneeAcademique: '2025-2026',
+                                fraisScolarite: o.fraisScolarite,
+                                conditionsAdmission: o.conditionsAdmission,
+                                debouches: o.debouches,
+                                dureeAnnees: o.dureeAnnees,
+                                seriesAcceptees: o.seriesAcceptees,
+                                filieres: [],
+                            }));
+                        });
+                    } catch {
+                        // Les offres peuvent être vides — pas bloquant
+                    }
+                }
+
+                setDomaines(domainesMapped);
+                if (domainesMapped.length > 0) {
+                    setExpandedDomaines([domainesMapped[0].id]);
+                }
             } catch {
-                dispatch(showSnackbar({ message: 'Erreur lors du chargement des domaines', severity: 'error' }));
+                dispatch(showSnackbar({ message: 'Erreur lors du chargement des données', severity: 'error' }));
             } finally {
                 setIsLoadingDomaines(false);
             }
         };
-        loadDomaines();
-    }, [dispatch]);
+        loadData();
+    }, [dispatch, etablissementId]);
 
     // Suppression d'un domaine
     const handleDeleteDomaine = async (id: number) => {
@@ -230,17 +230,12 @@ const OffreFormation: React.FC = () => {
 
     // Get niveau chip
     const getNiveauChip = (niveau: string) => {
-        const colors = {
-            'Licence': 'primary',
-            'Master': 'secondary',
-            'Doctorat': 'error',
-        };
         return (
             <Chip
-                label={niveau}
+                label={niveau || 'N/A'}
                 size="small"
                 variant="outlined"
-                color={((colors[niveau as keyof typeof colors]) as 'primary' | 'secondary' | 'error') || 'default'}
+                color="primary"
             />
         );
     };
@@ -297,29 +292,80 @@ const OffreFormation: React.FC = () => {
         }
     };
 
-    // Handle add parcours
-    const handleAddParcours = () => {
-        if (newParcours.nom.trim() && selectedDomaineId) {
-            setDomaines(domaines.map(d => {
+    // Handle add parcours — appel API réel POST /api/etablissements/{id}/offres
+    const handleAddParcours = async () => {
+        if (!newParcours.nom.trim() || selectedDomaineId === null) return;
+        setIsCreatingParcours(true);
+        try {
+            const created = await offresApi.createOffre(etablissementId, {
+                idParcours: 0,
+                nomParcours: newParcours.nom.trim(),
+                descriptionParcours: newParcours.descriptionParcours.trim() || undefined,
+                idDomaine: selectedDomaineId,
+                fraisScolarite: newParcours.fraisScolarite,
+                conditionsAdmission: newParcours.conditionsAdmission.trim() || undefined,
+                debouches: newParcours.debouches.trim() || undefined,
+                dureeAnnees: newParcours.dureeAnnees,
+                niveauRequis: newParcours.niveauRequis.trim(),
+                seriesAcceptees: newParcours.seriesAcceptees
+                    ? newParcours.seriesAcceptees.split(',').map(s => s.trim()).filter(Boolean)
+                    : [],
+            });
+            setDomaines(prev => prev.map(d => {
                 if (d.id === selectedDomaineId) {
-                    const newId = Math.max(...d.parcours.map(p => p.id), 0) + 1;
                     return {
                         ...d,
                         parcours: [...d.parcours, {
-                            id: newId,
-                            nom: newParcours.nom,
-                            niveau: newParcours.niveau,
+                            id: created.id,
+                            nom: created.nomParcours,
+                            descriptionParcours: created.descriptionParcours,
+                            idDomaine: created.idDomaine,
+                            niveau: created.niveauRequis,
                             statut: 'A_VENIR' as const,
                             anneeAcademique: '2025-2026',
+                            fraisScolarite: created.fraisScolarite,
+                            conditionsAdmission: created.conditionsAdmission,
+                            debouches: created.debouches,
+                            dureeAnnees: created.dureeAnnees,
+                            seriesAcceptees: created.seriesAcceptees,
                             filieres: [],
-                        }]
+                        }],
                     };
                 }
                 return d;
             }));
-            setNewParcours({ nom: '', niveau: 'Licence' });
+            dispatch(showSnackbar({ message: `Parcours « ${created.nomParcours} » créé avec succès`, severity: 'success' }));
+            setNewParcours({ nom: '', descriptionParcours: '', niveauRequis: '', fraisScolarite: 0, conditionsAdmission: '', debouches: '', dureeAnnees: 3, seriesAcceptees: '' });
             setOpenDialog(null);
             setSelectedDomaineId(null);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Erreur lors de la création du parcours';
+            dispatch(showSnackbar({ message, severity: 'error' }));
+        } finally {
+            setIsCreatingParcours(false);
+        }
+    };
+
+    // Handle delete parcours — appel API réel DELETE /api/etablissements/{id}/offres/{offreId}
+    const handleDeleteParcours = async () => {
+        if (!confirmDeleteParcoursId) return;
+        const { domaineId, offreId } = confirmDeleteParcoursId;
+        setDeletingParcoursId(offreId);
+        try {
+            await offresApi.deleteOffre(etablissementId, offreId);
+            setDomaines(prev => prev.map(d => {
+                if (d.id === domaineId) {
+                    return { ...d, parcours: d.parcours.filter(p => p.id !== offreId) };
+                }
+                return d;
+            }));
+            dispatch(showSnackbar({ message: 'Parcours supprimé avec succès', severity: 'success' }));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+            dispatch(showSnackbar({ message, severity: 'error' }));
+        } finally {
+            setDeletingParcoursId(null);
+            setConfirmDeleteParcoursId(null);
         }
     };
 
@@ -772,6 +818,25 @@ const OffreFormation: React.FC = () => {
                                                                 <EditIcon fontSize="small" />
                                                             </IconButton>
                                                         </Tooltip>
+                                                        <Tooltip title="Supprimer le parcours">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setConfirmDeleteParcoursId({ domaineId: domaine.id, offreId: parcours.id });
+                                                                }}
+                                                                disabled={deletingParcoursId === parcours.id}
+                                                                sx={{
+                                                                    bgcolor: alpha(theme.palette.error.main, 0.08),
+                                                                    color: theme.palette.error.main,
+                                                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.18) },
+                                                                }}
+                                                            >
+                                                                {deletingParcoursId === parcours.id
+                                                                    ? <CircularProgress size={14} color="error" />
+                                                                    : <DeleteIcon fontSize="small" />}
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </Stack>
                                                 </Box>
 
@@ -1027,6 +1092,36 @@ const OffreFormation: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Dialog: Confirmer suppression parcours */}
+            <Dialog
+                open={confirmDeleteParcoursId !== null}
+                onClose={() => { if (!deletingParcoursId) setConfirmDeleteParcoursId(null); }}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Supprimer le parcours</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Êtes-vous sûr de vouloir supprimer ce parcours ?
+                        Cette action supprimera également toutes les campagnes associées.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmDeleteParcoursId(null)} disabled={!!deletingParcoursId}>
+                        Annuler
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDeleteParcours}
+                        disabled={!!deletingParcoursId}
+                        startIcon={deletingParcoursId ? <CircularProgress size={16} /> : undefined}
+                    >
+                        {deletingParcoursId ? 'Suppression...' : 'Supprimer'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Dialog: Nouveau Domaine */}
             <Dialog
                 open={openDialog === 'domaine'}
@@ -1078,7 +1173,7 @@ const OffreFormation: React.FC = () => {
             {/* Dialog: Nouveau Parcours */}
             <Dialog
                 open={openDialog === 'parcours'}
-                onClose={() => { setOpenDialog(null); setSelectedDomaineId(null); }}
+                onClose={() => { if (!isCreatingParcours) { setOpenDialog(null); setSelectedDomaineId(null); } }}
                 maxWidth="sm"
                 fullWidth
             >
@@ -1086,35 +1181,82 @@ const OffreFormation: React.FC = () => {
                 <DialogContent>
                     <Stack spacing={2} sx={{ mt: 1 }}>
                         <TextField
-                            label="Nom du parcours"
+                            label="Nom du parcours *"
                             fullWidth
                             value={newParcours.nom}
                             onChange={(e) => setNewParcours({ ...newParcours, nom: e.target.value })}
                             placeholder="Ex: Informatique"
                         />
-                        <FormControl fullWidth>
-                            <InputLabel>Niveau</InputLabel>
-                            <Select
-                                value={newParcours.niveau}
-                                label="Niveau"
-                                onChange={(e) => setNewParcours({
-                                    ...newParcours,
-                                    niveau: e.target.value as 'Licence' | 'Master' | 'Doctorat'
-                                })}
-                            >
-                                <MenuItem value="Licence">Licence</MenuItem>
-                                <MenuItem value="Master">Master</MenuItem>
-                                <MenuItem value="Doctorat">Doctorat</MenuItem>
-                            </Select>
-                        </FormControl>
+                        <TextField
+                            label="Description"
+                            fullWidth
+                            multiline
+                            rows={2}
+                            value={newParcours.descriptionParcours}
+                            onChange={(e) => setNewParcours({ ...newParcours, descriptionParcours: e.target.value })}
+                            placeholder="Description du parcours"
+                        />
+                        <TextField
+                            label="Niveau requis *"
+                            fullWidth
+                            value={newParcours.niveauRequis}
+                            onChange={(e) => setNewParcours({ ...newParcours, niveauRequis: e.target.value })}
+                            placeholder="Ex: BAC, BAC+2, Terminale..."
+                        />
+                        <TextField
+                            label="Frais de scolarité (FCFA)"
+                            fullWidth
+                            type="number"
+                            value={newParcours.fraisScolarite || ''}
+                            onChange={(e) => setNewParcours({ ...newParcours, fraisScolarite: parseInt(e.target.value) || 0 })}
+                            placeholder="Ex: 850000"
+                        />
+                        <TextField
+                            label="Durée (années) *"
+                            fullWidth
+                            type="number"
+                            inputProps={{ min: 1, max: 10 }}
+                            value={newParcours.dureeAnnees}
+                            onChange={(e) => setNewParcours({ ...newParcours, dureeAnnees: parseInt(e.target.value) || 1 })}
+                        />
+                        <TextField
+                            label="Séries acceptées"
+                            fullWidth
+                            value={newParcours.seriesAcceptees}
+                            onChange={(e) => setNewParcours({ ...newParcours, seriesAcceptees: e.target.value })}
+                            placeholder="Ex: D, C, E (séparées par des virgules)"
+                        />
+                        <TextField
+                            label="Conditions d'admission"
+                            fullWidth
+                            multiline
+                            rows={2}
+                            value={newParcours.conditionsAdmission}
+                            onChange={(e) => setNewParcours({ ...newParcours, conditionsAdmission: e.target.value })}
+                            placeholder="Ex: Avoir le BAC série D avec mention..."
+                        />
+                        <TextField
+                            label="Débouchés"
+                            fullWidth
+                            multiline
+                            rows={2}
+                            value={newParcours.debouches}
+                            onChange={(e) => setNewParcours({ ...newParcours, debouches: e.target.value })}
+                            placeholder="Ex: Ingénieur logiciel, Data Scientist..."
+                        />
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => { setOpenDialog(null); setSelectedDomaineId(null); }}>
+                    <Button onClick={() => { setOpenDialog(null); setSelectedDomaineId(null); }} disabled={isCreatingParcours}>
                         Annuler
                     </Button>
-                    <Button variant="contained" onClick={handleAddParcours}>
-                        Créer
+                    <Button
+                        variant="contained"
+                        onClick={handleAddParcours}
+                        disabled={isCreatingParcours || !newParcours.nom.trim()}
+                        startIcon={isCreatingParcours ? <CircularProgress size={16} /> : undefined}
+                    >
+                        {isCreatingParcours ? 'Création...' : 'Créer'}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -38,12 +38,12 @@ const SearchField: React.FC<SearchFieldProps> = ({
                 minWidth: fullWidth ? 'auto' : 280,
                 '& .MuiOutlinedInput-root': {
                     borderRadius: BORDER_RADIUS.sm,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'action.hover',
                     '&:hover': {
-                        bgcolor: 'grey.100',
+                        bgcolor: 'action.selected',
                     },
                     '&.Mui-focused': {
-                        bgcolor: 'white',
+                        bgcolor: 'background.paper',
                     },
                 },
                 ...sx,

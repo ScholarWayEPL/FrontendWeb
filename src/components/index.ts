@@ -3,6 +3,7 @@ export { default as ConfirmDialog } from './ConfirmDialog';
 export { default as EtablissementDetails } from './EtablissementDetails';
 export { default as EtablissementModal } from './EtablissementModal';
 export { default as GlobalSnackbar } from './GlobalSnackbar';
+export { default as NotificationList } from './NotificationList';
 export { default as NotificationModal } from './NotificationModal';
 export { default as ProgrammeModal } from './ProgrammeModal';
 export { default as ProtectedRoute } from './ProtectedRoute';

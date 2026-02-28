@@ -71,16 +71,25 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
     return '#9e9e9e';
   };
 
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('fr-TG', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(new Date(dateString));
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Non renseigné';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Date invalide';
+      return new Intl.DateTimeFormat('fr-TG', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+    } catch {
+      return 'Date invalide';
+    }
   };
 
-  const getInitials = (nom: string, prenom: string) => {
-    return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
+  const getInitials = (nom: string | undefined, prenom: string | undefined) => {
+    const p = prenom?.charAt(0) || '';
+    const n = nom?.charAt(0) || '';
+    return (p + n).toUpperCase() || '?';
   };
 
   return (

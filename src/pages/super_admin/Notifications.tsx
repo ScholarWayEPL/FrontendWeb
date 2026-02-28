@@ -1,153 +1,211 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Button,
   IconButton,
-  Chip,
   Tooltip,
-  Pagination,
   Stack,
+  Grid,
+  Card,
+  CardContent,
   Avatar,
   alpha,
   useTheme,
-  Paper,
-  Grid,
-  Tab,
-  Tabs,
-  Badge,
-  Divider,
 } from '@mui/material';
 import {
-  Delete as DeleteIcon,
   Refresh as RefreshIcon,
   Notifications as NotificationsIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  CheckCircle as SuccessIcon,
-  Info as InfoIcon,
-  AccessTime as TimeIcon,
-  PersonAdd,
-  Payment,
-  Security,
-  Storage,
-  Sync,
   MarkEmailRead,
+  Info as InfoIcon,
+  Person as PersonIcon,
+  Business as BusinessIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
-import ConfirmDialog from '../../components/ConfirmDialog';
-import { formatRelativeTime } from '../../utils/helpers';
-
-// Types de notifications admin
-type AdminNotifType = 'info' | 'success' | 'warning' | 'error';
-
-interface AdminNotification {
-  id: number;
-  type: AdminNotifType;
-  category: 'system' | 'user' | 'security' | 'payment' | 'sync';
-  title: string;
-  message: string;
-  date: string;
-  read: boolean;
-  actionRequired?: boolean;
-}
-
-// Mock données notifications admin
-const mockAdminNotifications: AdminNotification[] = [
-  {
-    id: 1,
-    type: 'success',
-    category: 'user',
-    title: 'Nouvelle inscription validée',
-    message: 'Kofi Mensah a été inscrit avec succès en Licence Informatique à l\'Université de Lomé',
-    date: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    read: false,
-    actionRequired: false,
-  },
-  {
-    id: 2,
-    type: 'warning',
-    category: 'payment',
-    title: '3 paiements en attente',
-    message: 'Des paiements nécessitent votre validation. Montant total: 1 500 000 F CFA',
-    date: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    read: false,
-    actionRequired: true,
-  },
-  {
-    id: 3,
-    type: 'info',
-    category: 'user',
-    title: 'Nouvel établissement proposé',
-    message: 'Demande d\'ajout reçue: Institut Polytechnique de Kara. En attente de validation.',
-    date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    read: false,
-    actionRequired: true,
-  },
-  {
-    id: 4,
-    type: 'error',
-    category: 'sync',
-    title: 'Échec de synchronisation',
-    message: 'La synchronisation avec le serveur externe a échoué. Dernière tentative il y a 3h.',
-    date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    read: true,
-    actionRequired: true,
-  },
-  {
-    id: 5,
-    type: 'success',
-    category: 'payment',
-    title: 'Paiement confirmé',
-    message: 'Paiement de 350 000 F CFA reçu de Ama Amegah pour le programme Master IA',
-    date: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    read: true,
-    actionRequired: false,
-  },
-  {
-    id: 6,
-    type: 'warning',
-    category: 'security',
-    title: 'Tentative de connexion suspecte',
-    message: 'Une connexion depuis une nouvelle adresse IP (41.207.xx.xx) a été détectée',
-    date: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-    read: true,
-    actionRequired: false,
-  },
-  {
-    id: 7,
-    type: 'info',
-    category: 'system',
-    title: 'Maintenance programmée',
-    message: 'Une maintenance du système est prévue le 10/02/2026 de 02h à 04h (heure de Lomé)',
-    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    read: true,
-    actionRequired: false,
-  },
-  {
-    id: 8,
-    type: 'success',
-    category: 'sync',
-    title: 'Sauvegarde réussie',
-    message: 'Sauvegarde automatique de la base de données effectuée avec succès',
-    date: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
-    read: true,
-    actionRequired: false,
-  },
-];
+import { ConfirmDialog, NotificationList } from '../../components';
+import { notificationsApi } from '../../api/notifications';
+import type { Notification, TypeNotificationBackend } from '../../types';
 
 const Notifications: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const [notifications, setNotifications] = useState<AdminNotification[]>(mockAdminNotifications);
+  const { user } = useAppSelector((state) => state.auth);
+  const userId = user?.idUtilisateur ?? 0;
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [notificationToDelete, setNotificationToDelete] = useState<AdminNotification | null>(null);
+  const [notificationToDelete, setNotificationToDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState(0);
-  const pageSize = 5;
+  const pageSize = 10;
+
+  const fetchNotifications = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    try {
+      const { data, pagination } = await notificationsApi.getByUser(userId, {
+        page: currentPage - 1,
+        size: pageSize,
+      });
+      setNotifications(data);
+      setTotalPages(pagination.totalPages);
+    } catch (err) {
+      console.error('Erreur chargement notifications:', err);
+      dispatch(showSnackbar({ message: 'Erreur lors du chargement des notifications', severity: 'error' }));
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, currentPage, dispatch]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const filteredNotifications = notifications.filter((n) => {
+    if (activeTab === 1) return !n.estLue;
+    return true;
+  });
+
+  const unreadCount = notifications.filter((n) => !n.estLue).length;
+
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications((prev) => prev.map((n) => (n.idNotification === id ? { ...n, estLue: true } : n)));
+    } catch {
+      dispatch(showSnackbar({ message: 'Erreur lors de la mise à jour', severity: 'error' }));
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead(userId);
+      setNotifications((prev) => prev.map((n) => ({ ...n, estLue: true })));
+      dispatch(showSnackbar({ message: 'Toutes les notifications marquées comme lues', severity: 'success' }));
+    } catch {
+      dispatch(showSnackbar({ message: 'Erreur lors de la mise à jour', severity: 'error' }));
+    }
+  };
+
+  const handleDeleteClick = (id: number) => {
+    setNotificationToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (notificationToDelete) {
+      try {
+        await notificationsApi.delete(notificationToDelete);
+        setNotifications((prev) => prev.filter((n) => n.idNotification !== notificationToDelete));
+        dispatch(showSnackbar({ message: 'Notification supprimée', severity: 'success' }));
+      } catch {
+        dispatch(showSnackbar({ message: 'Erreur lors de la suppression', severity: 'error' }));
+      }
+    }
+    setDeleteDialogOpen(false);
+    setNotificationToDelete(null);
+  };
+
+  const getTypeConfig = (type: TypeNotificationBackend) => {
+    const configs: Record<TypeNotificationBackend, { icon: typeof InfoIcon; color: string; label: string }> = {
+      SYSTEME: { icon: InfoIcon, color: theme.palette.info.main, label: 'Système' },
+      UTILISATEUR: { icon: PersonIcon, color: theme.palette.primary.main, label: 'Utilisateur' },
+      ETABLISSEMENT: { icon: BusinessIcon, color: theme.palette.secondary.main, label: 'Établissement' },
+      CANDIDATURE: { icon: WarningIcon, color: theme.palette.warning.main, label: 'Candidature' },
+    };
+    return configs[type] || configs.SYSTEME;
+  };
+
+  // Stats par type
+  const stats: Record<TypeNotificationBackend, number> = {
+    SYSTEME: notifications.filter((n) => n.type === 'SYSTEME').length,
+    UTILISATEUR: notifications.filter((n) => n.type === 'UTILISATEUR').length,
+    ETABLISSEMENT: notifications.filter((n) => n.type === 'ETABLISSEMENT').length,
+    CANDIDATURE: notifications.filter((n) => n.type === 'CANDIDATURE').length,
+  };
+
+  return (
+    <Box sx={{ p: { xs: 1, md: 3 } }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} sx={{ color: 'text.primary', mb: 1, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <NotificationsIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+            Notifications
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+            Suivi des activités et alertes de la plateforme
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1}>
+          {unreadCount > 0 && (
+            <Button variant="outlined" startIcon={<MarkEmailRead />} onClick={handleMarkAllAsRead} sx={{ borderRadius: '10px' }}>
+              Tout lire
+            </Button>
+          )}
+          <Tooltip title="Actualiser">
+            <IconButton onClick={fetchNotifications} sx={{ color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Box>
+
+      {/* Stats */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {(Object.entries(stats) as [TypeNotificationBackend, number][]).map(([type, count]) => {
+          const config = getTypeConfig(type);
+          const Icon = config.icon;
+          return (
+            <Grid item xs={6} sm={3} key={type}>
+              <Card sx={{ borderRadius: '16px', border: '1px solid', borderColor: alpha(config.color, 0.2), bgcolor: alpha(config.color, 0.02), boxShadow: 'none' }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: alpha(config.color, 0.1), color: config.color, width: 42, height: 42, border: `1px solid ${alpha(config.color, 0.1)}` }}>
+                      <Icon sx={{ fontSize: 20 }} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h5" fontWeight={800} sx={{ color: config.color }}>{count}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase' }}>{config.label}</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
+      </Grid>
+
+      {/* Liste des notifications */}
+      <NotificationList
+        notifications={filteredNotifications}
+        loading={loading}
+        activeTab={activeTab}
+        onTabChange={(tab) => { setActiveTab(tab); setCurrentPage(1); }}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        onMarkAsRead={handleMarkAsRead}
+        onDelete={handleDeleteClick}
+        unreadCount={unreadCount}
+      />
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Supprimer la notification"
+        message="Voulez-vous vraiment effacer cette notification ?"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
+    </Box>
+  );
+};
+
+export default Notifications;
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const actionRequiredCount = notifications.filter((n) => n.actionRequired && !n.read).length;

@@ -55,18 +55,18 @@ export const notificationsApi = {
 
     /**
      * Marquer une notification comme lue
-     * PUT /api/notifications/{notificationId}/lire
+     * PATCH /api/notifications/{id}/lire
      */
     markAsRead: async (notificationId: number): Promise<void> => {
-        await apiClient.put(`/notifications/${notificationId}/lire`);
+        await apiClient.patch(`/notifications/${notificationId}/lire`);
     },
 
     /**
      * Marquer toutes les notifications comme lues
-     * PUT /api/notifications/utilisateur/{userId}/lire-tout
+     * PATCH /api/notifications/utilisateur/{userId}/tout-lire
      */
     markAllAsRead: async (userId: number): Promise<void> => {
-        await apiClient.put(`/notifications/utilisateur/${userId}/lire-tout`);
+        await apiClient.patch(`/notifications/utilisateur/${userId}/tout-lire`);
     },
 
     /**
@@ -78,13 +78,39 @@ export const notificationsApi = {
     },
 
     /**
+     * Récupérer les notifications non lues
+     * GET /api/notifications/utilisateur/{userId}/non-lues
+     */
+    getUnread: async (
+        userId: number,
+        params: GetNotificationsParams = {}
+    ): Promise<{ data: Notification[]; pagination: NotificationPage }> => {
+        const { page = 0, size = 20, sort = 'dateEnvoi,DESC' } = params;
+        
+        const response = await apiClient.get<{ data: NotificationsResponse }>(
+            `/notifications/utilisateur/${userId}/non-lues`,
+            {
+                params: { page, size, sort: [sort] },
+                paramsSerializer: { indexes: null },
+            }
+        );
+
+        const { content, page: pageData } = response.data.data;
+        
+        return {
+            data: content.map(transformNotification),
+            pagination: pageData,
+        };
+    },
+
+    /**
      * Compter les notifications non lues
-     * GET /api/notifications/utilisateur/{userId}/non-lues/count
+     * GET /api/notifications/utilisateur/{userId}/count
      */
     getUnreadCount: async (userId: number): Promise<number> => {
         try {
             const response = await apiClient.get<{ data: number }>(
-                `/notifications/utilisateur/${userId}/non-lues/count`
+                `/notifications/utilisateur/${userId}/count`
             );
             return response.data.data;
         } catch {

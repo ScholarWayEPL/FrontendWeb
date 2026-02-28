@@ -26,7 +26,7 @@ import {
     AccessTime as TimeIcon,
 } from '@mui/icons-material';
 import type { Notification, TypeNotificationBackend } from '../../types';
-import { formatRelativeTime } from '../../utils/helpers';
+import { formatRelativeTime } from '../utils/helpers';
 
 interface NotificationListProps {
     notifications: Notification[];

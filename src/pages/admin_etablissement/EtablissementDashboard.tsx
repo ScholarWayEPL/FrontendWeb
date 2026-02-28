@@ -36,6 +36,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { useAppSelector } from '../../store/hooks';
 import { PageHeader, StatusChip } from '../../components/ui';
+import StatCard from '../../components/StatCard';
 
 // Données mockées pour le dashboard établissement
 const mockStats = {
@@ -134,136 +135,20 @@ const EtablissementDashboard: React.FC = () => {
             />
 
             {/* Stats Cards */}
-            <Stack direction="row" spacing={2} sx={{ mb: 4, flexWrap: 'wrap' }}>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        minWidth: 240,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: `${theme.palette.primary.main}08`,
-                        borderColor: 'primary.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: `${theme.palette.primary.main}15`,
-                        }}
-                    >
-                        <MenuBookIcon sx={{ fontSize: 28, color: 'primary.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="primary.main">
-                            {mockStats.totalParcours}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            Parcours actifs
-                        </Typography>
-                    </Box>
-                </Card>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        minWidth: 240,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: `${theme.palette.info.main}08`,
-                        borderColor: 'info.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: `${theme.palette.info.main}15`,
-                        }}
-                    >
-                        <GroupsIcon sx={{ fontSize: 28, color: 'info.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="info.main">
-                            {mockStats.totalCandidatures}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            Total candidatures
-                        </Typography>
-                    </Box>
-                </Card>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        minWidth: 240,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: `${theme.palette.warning.main}08`,
-                        borderColor: 'warning.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: `${theme.palette.warning.main}15`,
-                        }}
-                    >
-                        <DescriptionIcon sx={{ fontSize: 28, color: 'warning.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="warning.main">
-                            {mockStats.candidaturesEnAttente}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            En attente
-                        </Typography>
-                    </Box>
-                </Card>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        minWidth: 240,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: `${theme.palette.success.main}08`,
-                        borderColor: 'success.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: `${theme.palette.success.main}15`,
-                        }}
-                    >
-                        <AssessmentIcon sx={{ fontSize: 28, color: 'success.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="success.main">
-                            {mockStats.tauxAcceptation}%
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            Taux d'acceptation
-                        </Typography>
-                    </Box>
-                </Card>
-            </Stack>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Parcours actifs" value={mockStats.totalParcours} icon={<MenuBookIcon />} color="primary" />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Total candidatures" value={mockStats.totalCandidatures} icon={<GroupsIcon />} color="info" />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="En attente" value={mockStats.candidaturesEnAttente} icon={<DescriptionIcon />} color="warning" />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Taux d'acceptation" value={`${mockStats.tauxAcceptation}%`} icon={<AssessmentIcon />} color="success" />
+                </Grid>
+            </Grid>
 
             <Grid container spacing={3}>
                 {/* Graphique 1: État global des candidatures */}

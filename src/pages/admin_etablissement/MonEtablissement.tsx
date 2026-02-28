@@ -139,7 +139,7 @@ const MonEtablissement: React.FC = () => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         border: '2px dashed',
-                                        borderColor: 'grey.300',
+                                        borderColor: 'divider',
                                         cursor: isEditing ? 'pointer' : 'default',
                                         transition: 'all 0.2s',
                                         '&:hover': isEditing ? {

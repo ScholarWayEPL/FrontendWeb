@@ -575,9 +575,10 @@ const OffreFormation: React.FC = () => {
                                 <IconButton
                                     size="small"
                                     sx={{
-                                        bgcolor: 'white',
+                                        bgcolor: alpha(theme.palette.background.paper, 0.9),
                                         boxShadow: 1,
-                                        '&:hover': { bgcolor: 'white', boxShadow: 2 },
+                                        borderRadius: 1.5,
+                                        '&:hover': { bgcolor: 'action.hover', boxShadow: 2 },
                                     }}
                                 >
                                     {expandedDomaines.includes(domaine.id) ?
@@ -611,8 +612,10 @@ const OffreFormation: React.FC = () => {
                                         size="small"
                                         onClick={(e) => e.stopPropagation()}
                                         sx={{
-                                            bgcolor: 'white',
-                                            '&:hover': { bgcolor: 'white', color: 'primary.main' },
+                                            bgcolor: alpha(theme.palette.primary.main, 0.08),
+                                            borderRadius: 1.5,
+                                            color: 'primary.main',
+                                            '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.16) },
                                         }}
                                     >
                                         <EditIcon fontSize="small" />
@@ -627,9 +630,10 @@ const OffreFormation: React.FC = () => {
                                         }}
                                         disabled={deletingDomaineId === domaine.id}
                                         sx={{
-                                            bgcolor: 'white',
+                                            bgcolor: alpha(theme.palette.error.main, 0.08),
+                                            borderRadius: 1.5,
                                             color: 'error.main',
-                                            '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.08) },
+                                            '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.16) },
                                         }}
                                     >
                                         <DeleteIcon fontSize="small" />
@@ -663,10 +667,10 @@ const OffreFormation: React.FC = () => {
                                                         alignItems: 'center',
                                                         justifyContent: 'space-between',
                                                         p: 2,
-                                                        bgcolor: alpha(theme.palette.grey[50], 0.8),
+                                                        bgcolor: alpha(theme.palette.action.hover, 0.5),
                                                         cursor: 'pointer',
                                                         transition: 'all 0.2s',
-                                                        '&:hover': { bgcolor: alpha(theme.palette.grey[100], 0.9) },
+                                                        '&:hover': { bgcolor: 'action.hover' },
                                                     }}
                                                     onClick={() => toggleParcours(parcours.id)}
                                                 >
@@ -718,7 +722,7 @@ const OffreFormation: React.FC = () => {
                                                             label={`${parcours.filieres.length} filières`}
                                                             size="small"
                                                             sx={{
-                                                                bgcolor: 'white',
+                                                                bgcolor: alpha(theme.palette.background.paper, 0.9),
                                                                 fontWeight: 500,
                                                             }}
                                                         />
@@ -808,11 +812,10 @@ const OffreFormation: React.FC = () => {
                                                                 size="small"
                                                                 onClick={(e) => e.stopPropagation()}
                                                                 sx={{
-                                                                    bgcolor: 'white',
-                                                                    '&:hover': {
-                                                                        bgcolor: 'white',
-                                                                        color: 'primary.main',
-                                                                    },
+                                                                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                                                                    borderRadius: 1.5,
+                                                                    color: 'primary.main',
+                                                                    '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.16) },
                                                                 }}
                                                             >
                                                                 <EditIcon fontSize="small" />
@@ -828,8 +831,9 @@ const OffreFormation: React.FC = () => {
                                                                 disabled={deletingParcoursId === parcours.id}
                                                                 sx={{
                                                                     bgcolor: alpha(theme.palette.error.main, 0.08),
-                                                                    color: theme.palette.error.main,
-                                                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.18) },
+                                                                    borderRadius: 1.5,
+                                                                    color: 'error.main',
+                                                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.16) },
                                                                 }}
                                                             >
                                                                 {deletingParcoursId === parcours.id
@@ -843,7 +847,7 @@ const OffreFormation: React.FC = () => {
                                                 {/* Cards des filières */}
                                                 <Collapse in={expandedParcours.includes(parcours.id)}>
                                                     {parcours.filieres.length === 0 ? (
-                                                        <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
+                                                        <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'action.hover' }}>
                                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                                                                 Aucune filière dans ce parcours
                                                             </Typography>
@@ -861,7 +865,7 @@ const OffreFormation: React.FC = () => {
                                                             </Button>
                                                         </Box>
                                                     ) : (
-                                                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.grey[100], 0.3) }}>
+                                                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.action.hover, 0.3) }}>
                                                             <Stack spacing={1.5}>
                                                                 {parcours.filieres.map((filiere) => (
                                                                     <Card

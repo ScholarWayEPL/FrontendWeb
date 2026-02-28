@@ -220,7 +220,7 @@ const Resultats: React.FC = () => {
                                             cursor: 'pointer',
                                             borderRadius: BORDER_RADIUS.md,
                                             borderWidth: 1,
-                                            borderColor: (selectedCampagne && selectedCampagne.id === campagne.id) ? alpha(theme.palette.primary.main, 0.18) : 'grey.200',
+                                            borderColor: (selectedCampagne && selectedCampagne.id === campagne.id) ? alpha(theme.palette.primary.main, 0.18) : 'divider',
                                             bgcolor: (selectedCampagne && selectedCampagne.id === campagne.id) ? alpha(theme.palette.primary.main, 0.03) : 'background.paper',
                                             transition: 'all 0.12s ease-in-out',
                                             '&:hover': {
@@ -375,9 +375,9 @@ const Resultats: React.FC = () => {
                                                     sx={{
                                                         p: 3,
                                                         border: '2px dashed',
-                                                        borderColor: phase1File ? 'success.main' : 'grey.300',
+                                                        borderColor: phase1File ? 'success.main' : 'divider',
                                                         borderRadius: BORDER_RADIUS.sm,
-                                                        bgcolor: phase1File ? alpha(theme.palette.success.main, 0.05) : 'grey.50',
+                                                        bgcolor: phase1File ? alpha(theme.palette.success.main, 0.05) : 'action.hover',
                                                         textAlign: 'center',
                                                         mb: 2,
                                                     }}
@@ -534,9 +534,9 @@ const Resultats: React.FC = () => {
                                                     sx={{
                                                         p: 3,
                                                         border: '2px dashed',
-                                                        borderColor: phase2File ? 'success.main' : 'grey.300',
+                                                        borderColor: phase2File ? 'success.main' : 'divider',
                                                         borderRadius: BORDER_RADIUS.sm,
-                                                        bgcolor: phase2File ? alpha(theme.palette.success.main, 0.05) : 'grey.50',
+                                                        bgcolor: phase2File ? alpha(theme.palette.success.main, 0.05) : 'action.hover',
                                                         textAlign: 'center',
                                                         mb: 2,
                                                     }}

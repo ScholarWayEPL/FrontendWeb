@@ -52,6 +52,7 @@ import {
     ViewList as ViewListIcon,
 } from '@mui/icons-material';
 import { PageHeader, SearchField, StatusChip } from '../../components/ui';
+import StatCard from '../../components/StatCard';
 import { BORDER_RADIUS, AVATAR_SIZES } from '../../constants';
 import useCandidatures from '../../hooks/useCandidatures';
 
@@ -190,132 +191,20 @@ const Candidatures: React.FC = () => {
             />
 
             {/* Stats */}
-            <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.primary.main, 0.05),
-                        borderColor: 'primary.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        }}
-                    >
-                        <PersonIcon sx={{ fontSize: 28, color: 'primary.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="primary.main">
-                            {stats.total}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            Total candidatures
-                        </Typography>
-                    </Box>
-                </Card>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.warning.main, 0.05),
-                        borderColor: 'warning.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: alpha(theme.palette.warning.main, 0.1),
-                        }}
-                    >
-                        <HourglassIcon sx={{ fontSize: 28, color: 'warning.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="warning.main">
-                            {stats.enAttente}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            En attente
-                        </Typography>
-                    </Box>
-                </Card>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.success.main, 0.05),
-                        borderColor: 'success.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: alpha(theme.palette.success.main, 0.1),
-                        }}
-                    >
-                        <CheckCircleIcon sx={{ fontSize: 28, color: 'success.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="success.main">
-                            {stats.acceptees}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            Acceptées
-                        </Typography>
-                    </Box>
-                </Card>
-                <Card
-                    variant="outlined"
-                    sx={{
-                        flex: 1,
-                        p: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.error.main, 0.05),
-                        borderColor: 'error.main',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: alpha(theme.palette.error.main, 0.1),
-                        }}
-                    >
-                        <CancelIcon sx={{ fontSize: 28, color: 'error.main' }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h4" fontWeight={700} color="error.main">
-                            {stats.refusees}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                            Refusées
-                        </Typography>
-                    </Box>
-                </Card>
-            </Stack>
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Total candidatures" value={stats.total} icon={<PersonIcon />} color="primary" />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="En attente" value={stats.enAttente} icon={<HourglassIcon />} color="warning" />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Acceptées" value={stats.acceptees} icon={<CheckCircleIcon />} color="success" />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                    <StatCard title="Refusées" value={stats.refusees} icon={<CancelIcon />} color="error" />
+                </Grid>
+            </Grid>
 
             {/* Filtres */}
             <Card
@@ -323,7 +212,7 @@ const Candidatures: React.FC = () => {
                 sx={{
                     borderRadius: 2,
                     mb: 3,
-                    bgcolor: alpha(theme.palette.grey[50], 0.5),
+                    bgcolor: alpha(theme.palette.action.hover, 0.5),
                 }}
             >
                 <CardContent sx={{ p: 2.5 }}>
@@ -346,7 +235,7 @@ const Candidatures: React.FC = () => {
                                 onChange={(e) => setSelectedParcours(e.target.value)}
                                 sx={{
                                     borderRadius: 1.5,
-                                    bgcolor: 'white',
+                                    bgcolor: 'background.paper',
                                 }}
                             >
                                 {mockParcours.map((p) => (
@@ -362,7 +251,7 @@ const Candidatures: React.FC = () => {
                                 onChange={(e) => setSelectedFiliere(e.target.value)}
                                 sx={{
                                     borderRadius: 1.5,
-                                    bgcolor: 'white',
+                                    bgcolor: 'background.paper',
                                 }}
                             >
                                 {mockFilieres.map((f) => (
@@ -378,7 +267,7 @@ const Candidatures: React.FC = () => {
                                 onChange={(e) => setSelectedStatut(e.target.value)}
                                 sx={{
                                     borderRadius: 1.5,
-                                    bgcolor: 'white',
+                                    bgcolor: 'background.paper',
                                 }}
                             >
                                 <MenuItem value="Tous">Tous les statuts</MenuItem>

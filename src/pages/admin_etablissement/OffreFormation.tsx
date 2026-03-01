@@ -156,9 +156,12 @@ const OffreFormation: React.FC = () => {
         setIsLoadingParcoursList(true);
         setIsLoadingSeries(true);
         try {
+            // Déterminer le code pays (TG par défaut pour le Togo)
+            const codePays = user?.etablissement?.localisation?.includes('Togo') || true ? 'TG' : 'BENIN';
+            
             const [parcoursData, seriesData] = await Promise.all([
                 offresApi.getParcoursByDomaine(domaineId),
-                seriesApi.getByPays('BENIN') // TODO: Dynamiser selon le pays de l'établissement
+                seriesApi.getByPays(codePays)
             ]);
             setParcoursList(parcoursData);
             setAvailableSeries(seriesData);

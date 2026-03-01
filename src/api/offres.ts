@@ -75,7 +75,8 @@ export const offresApi = {
 
   // POST /api/etablissements/{etablissementId}/offres
   createOffre: async (etablissementId: number, payload: CreateOffrePayload): Promise<OffreBackend> => {
-    console.log('🚀 PAYLOAD CRÉATION OFFRE:', JSON.stringify(payload, null, 2));
+    alert('DEBUG PAYLOAD (avant envoi): ' + JSON.stringify(payload, null, 2));
+    console.log('🚀 PAYLOAD CRÉATION OFFRE:', payload);
     const response = await client.post<{ success: boolean; data: OffreBackend }>(
       `/etablissements/${etablissementId}/offres`,
       payload

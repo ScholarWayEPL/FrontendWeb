@@ -57,6 +57,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import { formatCFA } from '../../constants';
 import UtilisateurDetails from '../../components/UtilisateurDetails';
 import { usersApi } from '../../api/users';
+import { getFileUrl } from '../../utils/helpers';
 
 const Utilisateurs: React.FC = () => {
   const theme = useTheme();
@@ -423,6 +424,7 @@ const Utilisateurs: React.FC = () => {
                   <TableCell>
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <Avatar
+                        src={getFileUrl(bachelier.avatar)}
                         sx={{
                           width: 42,
                           height: 42,

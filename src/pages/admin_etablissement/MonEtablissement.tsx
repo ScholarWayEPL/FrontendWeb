@@ -30,6 +30,7 @@ import {
 import { useAppSelector } from '../../store/hooks';
 import { PageHeader } from '../../components/ui';
 import { BORDER_RADIUS, SHADOWS, AVATAR_SIZES } from '../../constants';
+import { getFileUrl } from '../../utils/helpers';
 
 const MonEtablissement: React.FC = () => {
     const theme = useTheme();
@@ -149,7 +150,7 @@ const MonEtablissement: React.FC = () => {
                                     }}
                                 >
                                     {etablissement.logoUrl ? (
-                                        <img src={etablissement.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: BORDER_RADIUS.md }} />
+                                        <img src={getFileUrl(etablissement.logoUrl)} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: BORDER_RADIUS.md }} />
                                     ) : (
                                         <Stack alignItems="center" spacing={0.5}>
                                             <CloudUploadIcon sx={{ color: 'primary.main', fontSize: 40 }} />

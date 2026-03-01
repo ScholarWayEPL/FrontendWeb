@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import type { Bachelier } from '../types';
 import { formatCFA } from '../constants';
+import { getFileUrl } from '../utils/helpers';
 
 interface UtilisateurDetailsProps {
   open: boolean;
@@ -144,6 +145,7 @@ const UtilisateurDetails: React.FC<UtilisateurDetailsProps> = ({
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <Avatar
+            src={getFileUrl(utilisateur.avatar)}
             sx={{
               width: 80,
               height: 80,

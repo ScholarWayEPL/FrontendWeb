@@ -27,6 +27,7 @@ import {
   Description,
 } from '@mui/icons-material';
 import type { EtablissementLoginData, TypeEtablissementBackend } from '../types';
+import { getFileUrl } from '../utils/helpers';
 
 interface EtablissementDetailsProps {
   open: boolean;
@@ -103,7 +104,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
         </IconButton>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <Avatar src={etablissement.logoUrl || ''}
+          <Avatar src={getFileUrl(etablissement.logoUrl) || ''}
             sx={{
               width: 80,
               height: 80,
@@ -158,7 +159,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
 
             <Stack spacing={2.5} sx={{ mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
+                <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
                   <Email sx={{ color: 'primary.main' }} />
                 </Avatar>
                 <Box>
@@ -174,7 +175,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#4caf50', 0.1), width: 40, height: 40 }}>
+                <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha('#4caf50', 0.1), width: 40, height: 40 }}>
                   <Phone sx={{ color: '#4caf50' }} />
                 </Avatar>
                 <Box>
@@ -189,7 +190,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
 
               {etablissement.siteWeb && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#9c27b0', 0.1), width: 40, height: 40 }}>
+                  <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha('#9c27b0', 0.1), width: 40, height: 40 }}>
                     <Language sx={{ color: '#9c27b0' }} />
                   </Avatar>
                   <Box>
@@ -213,7 +214,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               )}
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#ff9800', 0.1), width: 40, height: 40 }}>
+                <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha('#ff9800', 0.1), width: 40, height: 40 }}>
                   <LocationOn sx={{ color: '#ff9800' }} />
                 </Avatar>
                 <Box>
@@ -236,7 +237,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
 
             <Stack spacing={2.5} sx={{ mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha(getTypeColor(etablissement.typeEtablissement), 0.1), width: 40, height: 40 }}>
+                <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha(getTypeColor(etablissement.typeEtablissement), 0.1), width: 40, height: 40 }}>
                   {React.cloneElement(getTypeIcon(etablissement.type), { sx: { color: getTypeColor(etablissement.typeEtablissement) } })}
                 </Avatar>
                 <Box>
@@ -250,7 +251,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#00897b', 0.1), width: 40, height: 40 }}>
+                <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha('#00897b', 0.1), width: 40, height: 40 }}>
                   <School sx={{ color: '#00897b' }} />
                 </Avatar>
                 <Box>
@@ -267,7 +268,7 @@ const EtablissementDetails: React.FC<EtablissementDetailsProps> = ({
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar src={etablissement.logoUrl || ''} sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
+                <Avatar src={getFileUrl(etablissement.logoUrl) || ''} sx={{ bgcolor: alpha('#1976d2', 0.1), width: 40, height: 40 }}>
                   <Business sx={{ color: '#1976d2' }} />
                 </Avatar>
                 <Box>

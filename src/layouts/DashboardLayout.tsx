@@ -41,6 +41,7 @@ import ThemeToggle from '../components/layout/ThemeToggle';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { toggleSidebar, setSidebarOpen } from '../store/slices/uiSlice';
 import { logout } from '../store/slices/authSlice';
+import { getFileUrl } from '../utils/helpers';
 
 const DRAWER_WIDTH = 280;
 
@@ -271,6 +272,7 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
             }}
           >
             <Avatar
+              src={getFileUrl(user?.avatar)}
               sx={{
                 bgcolor: 'primary.main',
                 width: 38,
@@ -434,6 +436,7 @@ const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children })
           }}
         >
           <Avatar
+            src={getFileUrl(user?.avatar)}
             sx={{
               width: 60,
               height: 60,

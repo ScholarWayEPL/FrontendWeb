@@ -319,6 +319,12 @@ const OffreFormation: React.FC = () => {
         if (isNewParcours && !newParcours.nom.trim()) return;
         if (!isNewParcours && !selectedParcoursFromList) return;
 
+        console.log('--- DEBUT handleAddParcours ---');
+        console.log('etablissementId:', etablissementId);
+        console.log('selectedDomaineId:', selectedDomaineId);
+        console.log('isNewParcours:', isNewParcours);
+        console.log('selectedParcoursFromList:', selectedParcoursFromList);
+
         setIsCreatingParcours(true);
         try {
             let parcoursIdToUse: number;
@@ -326,21 +332,27 @@ const OffreFormation: React.FC = () => {
             let descriptionToUse: string;
 
             if (isNewParcours) {
+                console.log('CRÉATION NOUVEAU PARCOURS GLOBAL...');
                 // 1. Créer d'abord le parcours global s'il est nouveau
                 const parcoursData = await offresApi.createParcours(etablissementId, {
                     idDomaine: selectedDomaineId,
                     nomParcours: newParcours.nom.trim(),
                     description: newParcours.descriptionParcours.trim(),
                 });
+                console.log('Parcours créé avec ID:', parcoursData.id);
                 parcoursIdToUse = parcoursData.id;
                 nomParcoursToUse = newParcours.nom.trim();
                 descriptionToUse = newParcours.descriptionParcours.trim();
             } else {
+                console.log('UTILISATION PARCOURS EXISTANT ID:', selectedParcoursFromList!.id);
                 // Utiliser le parcours sélectionné
                 parcoursIdToUse = selectedParcoursFromList!.id;
                 nomParcoursToUse = selectedParcoursFromList!.nomParcours;
                 descriptionToUse = selectedParcoursFromList!.description;
             }
+
+            console.log('CRÉATION OFFRE ÉTABLISSEMENT...');
+            console.log('Payload Offre - idParcours:', parcoursIdToUse, 'etablissementId:', etablissementId);
 
             // 2. Créer l'offre associée à l'établissement avec l'idParcours retourné
             const created = await offresApi.createOffre(etablissementId, {
@@ -354,6 +366,7 @@ const OffreFormation: React.FC = () => {
                     ? newParcours.seriesAcceptees.split(',').map(s => s.trim()).filter(Boolean)
                     : [],
             });
+            console.log('Offre créée avec succès:', created);
             setDomaines(prev => prev.map(d => {
                 if (d.id === selectedDomaineId) {
                     return {

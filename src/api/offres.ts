@@ -66,6 +66,7 @@ export const offresApi = {
 
   // POST /api/parcours/etablissements/{etablissementId}
   createParcours: async (etablissementId: number, payload: CreateParcoursPayload): Promise<{ id: number }> => {
+    console.log('API createParcours - URL: /parcours/etablissements/' + etablissementId, 'Payload:', payload);
     const response = await client.post<{ success: boolean; data: { id: number } }>(
       `/parcours/etablissements/${etablissementId}`,
       payload
@@ -75,6 +76,7 @@ export const offresApi = {
 
   // POST /api/etablissements/{etablissementId}/offres
   createOffre: async (etablissementId: number, payload: CreateOffrePayload): Promise<OffreBackend> => {
+    console.log('API createOffre - URL: /etablissements/' + etablissementId + '/offres', 'Payload:', payload);
     const response = await client.post<{ success: boolean; data: OffreBackend }>(
       `/etablissements/${etablissementId}/offres`,
       payload

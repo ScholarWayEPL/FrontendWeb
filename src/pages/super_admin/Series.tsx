@@ -45,11 +45,11 @@ const SeriesManagement: React.FC = () => {
     const [series, setSeries] = useState<SerieBac[]>([]);
     const [loading, setLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const [selectedPays, setSelectedPays] = useState('BENIN');
+    const [selectedPays, setSelectedPays] = useState('TG');
     
     const [formData, setFormData] = useState<SerieBac>({
         nomSerie: '',
-        pays: 'BENIN',
+        pays: 'TG',
         description: ''
     });
 
@@ -119,10 +119,10 @@ const SeriesManagement: React.FC = () => {
                                 label="Pays"
                                 onChange={(e) => setSelectedPays(e.target.value)}
                             >
-                                <MenuItem value="BENIN">Bénin</MenuItem>
-                                <MenuItem value="TOGO">Togo</MenuItem>
-                                <MenuItem value="COTE_D_IVOIRE">Côte d'Ivoire</MenuItem>
-                                <MenuItem value="SENEGAL">Sénégal</MenuItem>
+                                <MenuItem value="BJ">Bénin</MenuItem>
+                                <MenuItem value="TG">Togo</MenuItem>
+                                <MenuItem value="CI">Côte d'Ivoire</MenuItem>
+                                <MenuItem value="SN">Sénégal</MenuItem>
                             </Select>
                         </FormControl>
                         <IconButton onClick={loadSeries} disabled={loading}>
@@ -185,10 +185,10 @@ const SeriesManagement: React.FC = () => {
                                 label="Pays"
                                 onChange={(e) => setFormData({ ...formData, pays: e.target.value })}
                             >
-                                <MenuItem value="BENIN">Bénin</MenuItem>
-                                <MenuItem value="TOGO">Togo</MenuItem>
-                                <MenuItem value="COTE_D_IVOIRE">Côte d'Ivoire</MenuItem>
-                                <MenuItem value="SENEGAL">Sénégal</MenuItem>
+                                <MenuItem value="BJ">Bénin</MenuItem>
+                                <MenuItem value="TG">Togo</MenuItem>
+                                <MenuItem value="CI">Côte d'Ivoire</MenuItem>
+                                <MenuItem value="SN">Sénégal</MenuItem>
                             </Select>
                         </FormControl>
                         <TextField

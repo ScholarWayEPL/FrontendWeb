@@ -16,6 +16,7 @@ import {
   Parametres,
   Logs,
   ValidationInscriptions,
+  Series,
 } from './pages/super_admin';
 
 // Page 404
@@ -61,6 +62,7 @@ const AppContent: React.FC = () => {
               "/validations",
               "/utilisateurs",
               "/etablissements",
+              "/series",
               "/notifications",
               "/parametres",
               "/logs",
@@ -77,6 +79,7 @@ const AppContent: React.FC = () => {
                     <Route exact path="/etablissements" component={Etablissements} />
                     <Route exact path="/notifications" component={Notifications} />
                     <Route exact path="/parametres" component={Parametres} />
+                    <Route exact path="/series" component={Series} />
                     <Route exact path="/logs" component={Logs} />
 
                     {/* Routes Admin Établissement */}

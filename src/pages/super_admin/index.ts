@@ -7,3 +7,4 @@ export { default as Notifications } from './Notifications';
 export { default as Parametres } from './Parametres';
 export { default as Logs } from './Logs';
 export { default as ValidationInscriptions } from './ValidationInscriptions';
+export { default as Series } from './Series';

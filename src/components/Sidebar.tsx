@@ -43,6 +43,7 @@ const superAdminMainNavItems: NavItem[] = [
   { title: 'Validation Inscriptions', path: '/validations', icon: <VerifiedUserIcon /> },
   { title: 'Utilisateurs', path: '/utilisateurs', icon: <PeopleIcon /> },
   { title: 'Établissements', path: '/etablissements', icon: <SchoolIcon /> },
+  { title: 'Séries du BAC', path: '/series', icon: <AssignmentIcon /> },
   { title: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
   { title: 'Logs', path: '/logs', icon: <HistoryIcon /> },
 ];

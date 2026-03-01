@@ -45,6 +45,7 @@ import { formatCFA } from '../../constants';
 import type { StatutCampagne } from '../../types';
 import { domainesApi } from '../../api/domaines';
 import { offresApi, type ParcoursBackend } from '../../api/offres';
+import { seriesApi, type SerieBac } from '../../api/series';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
 
@@ -102,6 +103,8 @@ const OffreFormation: React.FC = () => {
     const [isLoadingDomaines, setIsLoadingDomaines] = useState(true);
     const [isLoadingParcoursList, setIsLoadingParcoursList] = useState(false);
     const [parcoursList, setParcoursList] = useState<ParcoursBackend[]>([]);
+    const [availableSeries, setAvailableSeries] = useState<SerieBac[]>([]);
+    const [isLoadingSeries, setIsLoadingSeries] = useState(false);
     const [deletingDomaineId, setDeletingDomaineId] = useState<number | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [deletingParcoursId, setDeletingParcoursId] = useState<number | null>(null);
@@ -119,7 +122,7 @@ const OffreFormation: React.FC = () => {
         conditionsAdmission: '',
         debouches: '',
         dureeAnnees: 3,
-        seriesAcceptees: '',
+        seriesAcceptees: [] as string[],
     });
     const [newFiliere, setNewFiliere] = useState({ nom: '', fraisScolarite: 0, places: 0 });
 
@@ -151,14 +154,20 @@ const OffreFormation: React.FC = () => {
     // Charger les parcours d'un domaine quand on ouvre le dialogue
     const loadParcoursForDomaine = async (domaineId: number) => {
         setIsLoadingParcoursList(true);
+        setIsLoadingSeries(true);
         try {
-            const data = await offresApi.getParcoursByDomaine(domaineId);
-            setParcoursList(data);
+            const [parcoursData, seriesData] = await Promise.all([
+                offresApi.getParcoursByDomaine(domaineId),
+                seriesApi.getByPays('BENIN') // TODO: Dynamiser selon le pays de l'établissement
+            ]);
+            setParcoursList(parcoursData);
+            setAvailableSeries(seriesData);
         } catch (error) {
-            console.error('Erreur lors du chargement des parcours:', error);
-            dispatch(showSnackbar({ message: 'Erreur lors du chargement des parcours existants', severity: 'error' }));
+            console.error('Erreur lors du chargement des données:', error);
+            dispatch(showSnackbar({ message: 'Erreur lors du chargement des données (parcours/séries)', severity: 'error' }));
         } finally {
             setIsLoadingParcoursList(false);
+            setIsLoadingSeries(false);
         }
     };
 
@@ -200,7 +209,7 @@ const OffreFormation: React.FC = () => {
                                 conditionsAdmission: o.conditionsAdmission,
                                 debouches: o.debouches,
                                 dureeAnnees: o.dureeAnnees,
-                                seriesAcceptees: o.seriesAcceptees,
+                                seriesAcceptees: o.seriesAcceptees || [],
                                 filieres: [],
                             }));
                         });
@@ -319,12 +328,6 @@ const OffreFormation: React.FC = () => {
         if (isNewParcours && !newParcours.nom.trim()) return;
         if (!isNewParcours && !selectedParcoursFromList) return;
 
-        console.log('--- DEBUT handleAddParcours ---');
-        console.log('etablissementId:', etablissementId);
-        console.log('selectedDomaineId:', selectedDomaineId);
-        console.log('isNewParcours:', isNewParcours);
-        console.log('selectedParcoursFromList:', selectedParcoursFromList);
-
         setIsCreatingParcours(true);
         try {
             let parcoursIdToUse: number;
@@ -332,27 +335,21 @@ const OffreFormation: React.FC = () => {
             let descriptionToUse: string;
 
             if (isNewParcours) {
-                console.log('CRÉATION NOUVEAU PARCOURS GLOBAL...');
                 // 1. Créer d'abord le parcours global s'il est nouveau
                 const parcoursData = await offresApi.createParcours(etablissementId, {
                     idDomaine: selectedDomaineId,
                     nomParcours: newParcours.nom.trim(),
                     description: newParcours.descriptionParcours.trim(),
                 });
-                console.log('Parcours créé avec ID:', parcoursData.id);
                 parcoursIdToUse = parcoursData.id;
                 nomParcoursToUse = newParcours.nom.trim();
                 descriptionToUse = newParcours.descriptionParcours.trim();
             } else {
-                console.log('UTILISATION PARCOURS EXISTANT ID:', selectedParcoursFromList!.id);
                 // Utiliser le parcours sélectionné
                 parcoursIdToUse = selectedParcoursFromList!.id;
                 nomParcoursToUse = selectedParcoursFromList!.nomParcours;
                 descriptionToUse = selectedParcoursFromList!.description;
             }
-
-            console.log('CRÉATION OFFRE ÉTABLISSEMENT...');
-            console.log('Payload Offre - idParcours:', parcoursIdToUse, 'etablissementId:', etablissementId);
 
             // 2. Créer l'offre associée à l'établissement avec l'idParcours retourné
             const created = await offresApi.createOffre(etablissementId, {
@@ -362,9 +359,7 @@ const OffreFormation: React.FC = () => {
                 debouches: newParcours.debouches.trim(),
                 dureeAnnees: newParcours.dureeAnnees,
                 niveauRequis: newParcours.niveauRequis.trim(),
-                seriesAcceptees: newParcours.seriesAcceptees
-                    ? newParcours.seriesAcceptees.split(',').map(s => s.trim()).filter(Boolean)
-                    : [],
+                seriesAcceptees: newParcours.seriesAcceptees,
             });
             console.log('Offre créée avec succès:', created);
             setDomaines(prev => prev.map(d => {
@@ -383,7 +378,7 @@ const OffreFormation: React.FC = () => {
                             conditionsAdmission: created.conditionsAdmission,
                             debouches: created.debouches,
                             dureeAnnees: created.dureeAnnees,
-                            seriesAcceptees: created.seriesAcceptees,
+                            seriesAcceptees: created.seriesAcceptees || [],
                             filieres: [],
                         }],
                     };
@@ -391,7 +386,7 @@ const OffreFormation: React.FC = () => {
                 return d;
             }));
             dispatch(showSnackbar({ message: `Offre pour « ${nomParcoursToUse} » créée avec succès`, severity: 'success' }));
-            setNewParcours({ nom: '', descriptionParcours: '', niveauRequis: '', fraisScolarite: 0, conditionsAdmission: '', debouches: '', dureeAnnees: 3, seriesAcceptees: '' });
+            setNewParcours({ nom: '', descriptionParcours: '', niveauRequis: '', fraisScolarite: 0, conditionsAdmission: '', debouches: '', dureeAnnees: 3, seriesAcceptees: [] });
             setSelectedParcoursFromList(null);
             setIsNewParcours(false);
             setOpenDialog(null);
@@ -1329,12 +1324,36 @@ const OffreFormation: React.FC = () => {
                             value={newParcours.dureeAnnees}
                             onChange={(e) => setNewParcours({ ...newParcours, dureeAnnees: parseInt(e.target.value) || 1 })}
                         />
-                        <TextField
-                            label="Séries acceptées"
-                            fullWidth
-                            value={newParcours.seriesAcceptees}
-                            onChange={(e) => setNewParcours({ ...newParcours, seriesAcceptees: e.target.value })}
-                            placeholder="Ex: D, C, E (séparées par des virgules)"
+                        <Autocomplete
+                            multiple
+                            options={availableSeries}
+                            getOptionLabel={(option) => option.nomSerie}
+                            value={availableSeries.filter(s => newParcours.seriesAcceptees.includes(s.nomSerie))}
+                            loading={isLoadingSeries}
+                            onChange={(_, newValue) => {
+                                setNewParcours({
+                                    ...newParcours,
+                                    seriesAcceptees: newValue.map(s => s.nomSerie)
+                                });
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Séries acceptées"
+                                    placeholder="Sélectionner les séries"
+                                    helperText="Séries du BAC autorisées pour ce parcours"
+                                />
+                            )}
+                            renderTags={(value, getTagProps) =>
+                                value.map((option, index) => (
+                                    <Chip
+                                        variant="outlined"
+                                        label={option.nomSerie}
+                                        size="small"
+                                        {...getTagProps({ index })}
+                                    />
+                                ))
+                            }
                         />
                         <TextField
                             label="Conditions d'admission"

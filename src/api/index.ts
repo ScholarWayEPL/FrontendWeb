@@ -12,6 +12,8 @@ export { offresApi } from './offres';
 export type { OffreBackend, CreateOffrePayload } from './offres';
 export { programmesApi } from './programmes';
 export { usersApi } from './users';
+export { seriesApi } from './series';
+export type { SerieBac } from './series';
 
 // Re-export mock data
 export * from './mockData';

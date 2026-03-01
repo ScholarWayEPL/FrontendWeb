@@ -1,5 +1,21 @@
 // Fonctions utilitaires partagées
 
+const API_FILES_BASE = 'https://scholarway.pepit.cloud/api/files/';
+
+/**
+ * Construire l'URL complète pour un fichier
+ * Évite la duplication du préfixe si l'URL est déjà absolue
+ */
+export const getFileUrl = (path: string | null | undefined): string | undefined => {
+  if (!path) return undefined;
+  // Si l'URL est déjà absolue, la retourner telle quelle
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  // Sinon, ajouter le préfixe
+  return `${API_FILES_BASE}${path}`;
+};
+
 /**
  * Simuler un délai réseau pour les API mock
  */

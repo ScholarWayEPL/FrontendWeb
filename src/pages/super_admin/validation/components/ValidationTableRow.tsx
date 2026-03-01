@@ -17,6 +17,7 @@ import {
     Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { StatusChip } from '../../../../components/ui';
+import { getFileUrl } from '../../../../utils/helpers';
 import type { EtablissementEnAttente } from '../../../../types';
 
 interface ValidationTableRowProps {
@@ -43,7 +44,7 @@ const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
             <TableCell>
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Avatar
-                        src={demande.logoUrl ? `https://scholarway.pepit.cloud/api/files/${demande.logoUrl}` : undefined}
+                        src={getFileUrl(demande.logoUrl)}
                         sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 700, border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}
                     >
                         {demande.nomEtablissement.charAt(0)}

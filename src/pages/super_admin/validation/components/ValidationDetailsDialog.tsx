@@ -26,6 +26,7 @@ import {
     CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { StatusChip } from '../../../../components/ui';
+import { getFileUrl } from '../../../../utils/helpers';
 import type { EtablissementEnAttente } from '../../../../types';
 
 interface ValidationDetailsDialogProps {
@@ -56,7 +57,7 @@ const ValidationDetailsDialog: React.FC<ValidationDetailsDialogProps> = ({
             <DialogTitle sx={{ p: 4, pb: 2 }}>
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Avatar
-                        src={selectedDemande.logoUrl ? `https://scholarway.pepit.cloud/api/files/${selectedDemande.logoUrl}` : undefined}
+                        src={getFileUrl(selectedDemande.logoUrl)}
                         sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), width: 64, height: 64, border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}` }}
                     >
                         <BusinessIcon color="primary" sx={{ fontSize: 36 }} />
@@ -122,7 +123,7 @@ const ValidationDetailsDialog: React.FC<ValidationDetailsDialogProps> = ({
                                 startIcon={<DownloadIcon />}
                                 sx={{ borderRadius: '8px', textTransform: 'none' }}
                                 disabled={!selectedDemande.documentAccreditationUrl}
-                                href={selectedDemande.documentAccreditationUrl ? `https://scholarway.pepit.cloud/api/files/${selectedDemande.documentAccreditationUrl}` : '#'}
+                                href={getFileUrl(selectedDemande.documentAccreditationUrl) || '#'}
                                 target="_blank"
                             >
                                 Visualiser le document

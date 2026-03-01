@@ -21,6 +21,9 @@ import {
     Tooltip,
     Alert,
     CircularProgress,
+    Autocomplete,
+    FormControlLabel,
+    Checkbox,
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -41,7 +44,7 @@ import { PageHeader, SearchField } from '../../components/ui';
 import { formatCFA } from '../../constants';
 import type { StatutCampagne } from '../../types';
 import { domainesApi } from '../../api/domaines';
-import { offresApi } from '../../api/offres';
+import { offresApi, type ParcoursBackend } from '../../api/offres';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
 
@@ -97,6 +100,8 @@ const OffreFormation: React.FC = () => {
     const [isCreatingDomaine, setIsCreatingDomaine] = useState(false);
     const [isCreatingParcours, setIsCreatingParcours] = useState(false);
     const [isLoadingDomaines, setIsLoadingDomaines] = useState(true);
+    const [isLoadingParcoursList, setIsLoadingParcoursList] = useState(false);
+    const [parcoursList, setParcoursList] = useState<ParcoursBackend[]>([]);
     const [deletingDomaineId, setDeletingDomaineId] = useState<number | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [deletingParcoursId, setDeletingParcoursId] = useState<number | null>(null);
@@ -104,6 +109,8 @@ const OffreFormation: React.FC = () => {
 
     // Form states
     const [newDomaine, setNewDomaine] = useState({ nom: '', description: '' });
+    const [isNewParcours, setIsNewParcours] = useState(false);
+    const [selectedParcoursFromList, setSelectedParcoursFromList] = useState<ParcoursBackend | null>(null);
     const [newParcours, setNewParcours] = useState({
         nom: '',
         descriptionParcours: '',
@@ -139,6 +146,20 @@ const OffreFormation: React.FC = () => {
         setExpandedParcours(prev =>
             prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
         );
+    };
+
+    // Charger les parcours d'un domaine quand on ouvre le dialogue
+    const loadParcoursForDomaine = async (domaineId: number) => {
+        setIsLoadingParcoursList(true);
+        try {
+            const data = await offresApi.getParcoursByDomaine(domaineId);
+            setParcoursList(data);
+        } catch (error) {
+            console.error('Erreur lors du chargement des parcours:', error);
+            dispatch(showSnackbar({ message: 'Erreur lors du chargement des parcours existants', severity: 'error' }));
+        } finally {
+            setIsLoadingParcoursList(false);
+        }
     };
 
     // Chargement initial des domaines et des offres depuis l'API
@@ -294,17 +315,39 @@ const OffreFormation: React.FC = () => {
 
     // Handle add parcours — appel API réel POST /api/etablissements/{id}/offres
     const handleAddParcours = async () => {
-        if (!newParcours.nom.trim() || selectedDomaineId === null) return;
+        if (selectedDomaineId === null) return;
+        if (isNewParcours && !newParcours.nom.trim()) return;
+        if (!isNewParcours && !selectedParcoursFromList) return;
+
         setIsCreatingParcours(true);
         try {
+            let parcoursIdToUse: number;
+            let nomParcoursToUse: string;
+            let descriptionToUse: string;
+
+            if (isNewParcours) {
+                // 1. Créer d'abord le parcours global s'il est nouveau
+                const parcoursData = await offresApi.createParcours(etablissementId, {
+                    idDomaine: selectedDomaineId,
+                    nomParcours: newParcours.nom.trim(),
+                    description: newParcours.descriptionParcours.trim(),
+                });
+                parcoursIdToUse = parcoursData.id;
+                nomParcoursToUse = newParcours.nom.trim();
+                descriptionToUse = newParcours.descriptionParcours.trim();
+            } else {
+                // Utiliser le parcours sélectionné
+                parcoursIdToUse = selectedParcoursFromList!.id;
+                nomParcoursToUse = selectedParcoursFromList!.nomParcours;
+                descriptionToUse = selectedParcoursFromList!.description;
+            }
+
+            // 2. Créer l'offre associée à l'établissement avec l'idParcours retourné
             const created = await offresApi.createOffre(etablissementId, {
-                idParcours: 0,
-                nomParcours: newParcours.nom.trim(),
-                descriptionParcours: newParcours.descriptionParcours.trim() || undefined,
-                idDomaine: selectedDomaineId,
+                idParcours: parcoursIdToUse,
                 fraisScolarite: newParcours.fraisScolarite,
-                conditionsAdmission: newParcours.conditionsAdmission.trim() || undefined,
-                debouches: newParcours.debouches.trim() || undefined,
+                conditionsAdmission: newParcours.conditionsAdmission.trim(),
+                debouches: newParcours.debouches.trim(),
                 dureeAnnees: newParcours.dureeAnnees,
                 niveauRequis: newParcours.niveauRequis.trim(),
                 seriesAcceptees: newParcours.seriesAcceptees
@@ -317,8 +360,8 @@ const OffreFormation: React.FC = () => {
                         ...d,
                         parcours: [...d.parcours, {
                             id: created.id,
-                            nom: created.nomParcours,
-                            descriptionParcours: created.descriptionParcours,
+                            nom: nomParcoursToUse,
+                            descriptionParcours: descriptionToUse,
                             idDomaine: created.idDomaine,
                             niveau: created.niveauRequis,
                             statut: 'A_VENIR' as const,
@@ -334,12 +377,14 @@ const OffreFormation: React.FC = () => {
                 }
                 return d;
             }));
-            dispatch(showSnackbar({ message: `Parcours « ${created.nomParcours} » créé avec succès`, severity: 'success' }));
+            dispatch(showSnackbar({ message: `Offre pour « ${nomParcoursToUse} » créée avec succès`, severity: 'success' }));
             setNewParcours({ nom: '', descriptionParcours: '', niveauRequis: '', fraisScolarite: 0, conditionsAdmission: '', debouches: '', dureeAnnees: 3, seriesAcceptees: '' });
+            setSelectedParcoursFromList(null);
+            setIsNewParcours(false);
             setOpenDialog(null);
             setSelectedDomaineId(null);
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Erreur lors de la création du parcours';
+            const message = err instanceof Error ? err.message : 'Erreur lors de la création de l\'offre';
             dispatch(showSnackbar({ message, severity: 'error' }));
         } finally {
             setIsCreatingParcours(false);
@@ -601,6 +646,7 @@ const OffreFormation: React.FC = () => {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedDomaineId(domaine.id);
+                                        loadParcoursForDomaine(domaine.id);
                                         setOpenDialog('parcours');
                                     }}
                                     sx={{ borderRadius: 1.5 }}
@@ -1174,32 +1220,79 @@ const OffreFormation: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Dialog: Nouveau Parcours */}
             <Dialog
                 open={openDialog === 'parcours'}
-                onClose={() => { if (!isCreatingParcours) { setOpenDialog(null); setSelectedDomaineId(null); } }}
+                onClose={() => {
+                    if (!isCreatingParcours) {
+                        setOpenDialog(null);
+                        setSelectedDomaineId(null);
+                        setIsNewParcours(false);
+                        setSelectedParcoursFromList(null);
+                    }
+                }}
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle>Nouveau Parcours</DialogTitle>
+                <DialogTitle>Nouveau Parcours / Offre</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} sx={{ mt: 1 }}>
-                        <TextField
-                            label="Nom du parcours *"
-                            fullWidth
-                            value={newParcours.nom}
-                            onChange={(e) => setNewParcours({ ...newParcours, nom: e.target.value })}
-                            placeholder="Ex: Informatique"
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={isNewParcours}
+                                    onChange={(e) => setIsNewParcours(e.target.checked)}
+                                />
+                            }
+                            label="Le parcours n'existe pas (créer un nouveau parcours)"
                         />
-                        <TextField
-                            label="Description"
-                            fullWidth
-                            multiline
-                            rows={2}
-                            value={newParcours.descriptionParcours}
-                            onChange={(e) => setNewParcours({ ...newParcours, descriptionParcours: e.target.value })}
-                            placeholder="Description du parcours"
-                        />
+
+                        {!isNewParcours ? (
+                            <Autocomplete
+                                options={parcoursList}
+                                getOptionLabel={(option) => option.nomParcours}
+                                loading={isLoadingParcoursList}
+                                value={selectedParcoursFromList}
+                                onChange={(_, newValue) => setSelectedParcoursFromList(newValue)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Sélectionner un parcours existant *"
+                                        placeholder="Rechercher un parcours..."
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {isLoadingParcoursList ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                        ) : (
+                            <>
+                                <TextField
+                                    label="Nom du parcours *"
+                                    fullWidth
+                                    value={newParcours.nom}
+                                    onChange={(e) => setNewParcours({ ...newParcours, nom: e.target.value })}
+                                    placeholder="Ex: Informatique"
+                                />
+                                <TextField
+                                    label="Description du parcours"
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    value={newParcours.descriptionParcours}
+                                    onChange={(e) => setNewParcours({ ...newParcours, descriptionParcours: e.target.value })}
+                                    placeholder="Description globale du parcours"
+                                />
+                            </>
+                        )}
+
+                        <Divider sx={{ my: 1 }}>Infos de l'offre (Etablissement)</Divider>
+
                         <TextField
                             label="Niveau requis *"
                             fullWidth
@@ -1208,7 +1301,7 @@ const OffreFormation: React.FC = () => {
                             placeholder="Ex: BAC, BAC+2, Terminale..."
                         />
                         <TextField
-                            label="Frais de scolarité (FCFA)"
+                            label="Frais de scolarité (FCFA) *"
                             fullWidth
                             type="number"
                             value={newParcours.fraisScolarite || ''}
@@ -1251,16 +1344,27 @@ const OffreFormation: React.FC = () => {
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => { setOpenDialog(null); setSelectedDomaineId(null); }} disabled={isCreatingParcours}>
+                    <Button
+                        onClick={() => {
+                            setOpenDialog(null);
+                            setSelectedDomaineId(null);
+                            setIsNewParcours(false);
+                            setSelectedParcoursFromList(null);
+                        }}
+                        disabled={isCreatingParcours}
+                    >
                         Annuler
                     </Button>
                     <Button
                         variant="contained"
                         onClick={handleAddParcours}
-                        disabled={isCreatingParcours || !newParcours.nom.trim()}
+                        disabled={
+                            isCreatingParcours ||
+                            (isNewParcours ? !newParcours.nom.trim() : !selectedParcoursFromList)
+                        }
                         startIcon={isCreatingParcours ? <CircularProgress size={16} /> : undefined}
                     >
-                        {isCreatingParcours ? 'Création...' : 'Créer'}
+                        {isCreatingParcours ? 'Création...' : (isNewParcours ? 'Créer Parcours & Offre' : 'Créer l\'Offre')}
                     </Button>
                 </DialogActions>
             </Dialog>

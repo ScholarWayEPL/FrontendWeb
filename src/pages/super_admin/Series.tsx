@@ -33,10 +33,10 @@ import {
     Edit as EditIcon,
     Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { seriesApi, type SerieBac } from '../../../api/series';
-import { useAppDispatch } from '../../../store/hooks';
-import { showSnackbar } from '../../../store/slices/uiSlice';
-import { PageHeader } from '../../../components/ui';
+import { seriesApi, type SerieBac } from '../../api/series';
+import { useAppDispatch } from '../../store/hooks';
+import { showSnackbar } from '../../store/slices/uiSlice';
+import { PageHeader } from '../../components/ui';
 
 const SeriesManagement: React.FC = () => {
     const theme = useTheme();

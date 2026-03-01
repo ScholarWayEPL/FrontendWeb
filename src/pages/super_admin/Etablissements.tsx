@@ -446,7 +446,7 @@ const Etablissements: React.FC = () => {
       </TableContainer>
 
       {/* Modals */}
-      <EtablissementModal etablissement={null}
+      <EtablissementModal
         open={modalOpen}
         onClose={handleModalClose}
         onSuccess={handleModalSuccess}

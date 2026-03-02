@@ -334,9 +334,10 @@ const OffreFormation: React.FC = () => {
                 nomParcoursToUse = newParcours.nom.trim();
                 descriptionToUse = newParcours.descriptionParcours.trim();
             } else {
-                parcoursIdToUse = selectedParcoursFromList!.id;
-                nomParcoursToUse = selectedParcoursFromList!.nomParcours;
-                descriptionToUse = selectedParcoursFromList!.description;
+                if (!selectedParcoursFromList) throw new Error("Parcours non sélectionné");
+                parcoursIdToUse = selectedParcoursFromList.id;
+                nomParcoursToUse = selectedParcoursFromList.nomParcours;
+                descriptionToUse = selectedParcoursFromList.description;
             }
 
             if (!parcoursIdToUse) {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box,
-    Typography,
     Card,
     CardContent,
     Button,
@@ -30,7 +29,6 @@ import {
 import {
     Add as AddIcon,
     Delete as DeleteIcon,
-    Edit as EditIcon,
     Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { seriesApi, type SerieBac } from '../../api/series';

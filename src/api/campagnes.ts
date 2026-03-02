@@ -11,7 +11,7 @@ export interface CreateCampagnePayload {
 
 export const campagnesApi = {
     createCampagne: async (etablissementId: number, data: CreateCampagnePayload) => {
-        const response = await client.post(`/api/campagnes/etablissements/${etablissementId}`, data);
+        const response = await client.post(`/campagnes/etablissements/${etablissementId}`, data);
         return response.data;
     },
     // Future methods pour cloturer etc. 

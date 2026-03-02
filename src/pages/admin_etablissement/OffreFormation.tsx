@@ -1127,14 +1127,18 @@ const OffreFormation: React.FC = () => {
                                 />
                             )}
                             renderTags={(value, getTagProps) =>
-                                value.map((option, index) => (
-                                    <Chip
-                                        variant="outlined"
-                                        label={option.nomSerie}
-                                        size="small"
-                                        {...getTagProps({ index })}
-                                    />
-                                ))
+                                value.map((option, index) => {
+                                    const { key, ...tagProps } = getTagProps({ index });
+                                    return (
+                                        <Chip
+                                            key={key}
+                                            variant="outlined"
+                                            label={option.nomSerie}
+                                            size="small"
+                                            {...tagProps}
+                                        />
+                                    );
+                                })
                             }
                         />
                         <TextField

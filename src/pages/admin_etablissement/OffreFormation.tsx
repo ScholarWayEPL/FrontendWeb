@@ -638,201 +638,117 @@ const OffreFormation: React.FC = () => {
                                     </Typography>
                                 </Box>
                             ) : (
-                                <Box sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.4) : alpha(theme.palette.primary.main, 0.02) }}>
-                                    <Grid container spacing={3}>
+                                <Box sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.4) : alpha(theme.palette.background.default, 0.5) }}>
+                                    <Grid container spacing={2}>
                                         {domaine.parcours.map((parcours) => (
-                                            <Grid item xs={12} md={6} key={parcours.id}>
+                                            <Grid item xs={12} md={6} lg={4} key={parcours.id}>
                                                 <Card 
-                                                    elevation={0}
+                                                    variant="outlined"
                                                     sx={{ 
                                                         height: '100%',
                                                         display: 'flex',
                                                         flexDirection: 'column',
-                                                        border: '1px solid',
-                                                        borderColor: alpha(theme.palette.divider, 0.6),
                                                         transition: 'all 0.2s ease-in-out',
                                                         '&:hover': { 
-                                                            boxShadow: theme.shadows[4],
-                                                            transform: 'translateY(-2px)',
+                                                            boxShadow: theme.shadows[2],
                                                             borderColor: theme.palette.primary.main,
                                                         },
-                                                        bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : 'white',
-                                                        borderRadius: 2,
-                                                        position: 'relative',
-                                                        overflow: 'visible'
+                                                        bgcolor: 'background.paper',
+                                                        borderRadius: 2
                                                     }}
                                                 >
-                                                    {/* Badge Campagne Absolue */}
-                                                    <Box sx={{ position: 'absolute', top: -12, right: 16 }}>
-                                                        {getStatusChip(parcours.statut)}
-                                                    </Box>
-
-                                                    <CardContent sx={{ p: 2.5, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                                                        {/* En-tête de la carte */}
-                                                        <Box sx={{ mb: 2, pr: 8 }}>
-                                                            <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 0.5, lineHeight: 1.3 }}>
-                                                                {parcours.nom}
-                                                            </Typography>
-                                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                    <Box sx={{ p: 1.5, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                                                        {/* Header: Titre + Statut inline */}
+                                                        <Box sx={{ mb: 1 }}>
+                                                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+                                                                <Typography variant="subtitle1" fontWeight={700} color="text.primary" sx={{ lineHeight: 1.2 }}>
+                                                                    {parcours.nom}
+                                                                </Typography>
+                                                                {getStatusChip(parcours.statut)}
+                                                            </Stack>
+                                                            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                                                                 {getNiveauChip(parcours.niveau)}
                                                             </Stack>
                                                         </Box>
 
                                                         {/* Description courte (optionnelle) */}
                                                         {parcours.descriptionParcours && (
-                                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                                                 {parcours.descriptionParcours}
                                                             </Typography>
                                                         )}
 
-                                                        <Divider sx={{ my: 1.5, borderColor: alpha(theme.palette.divider, 0.4) }} />
+                                                        {/* Informations compactes (Frais, Durée, Séries) */}
+                                                        <Stack direction="row" flexWrap="wrap" gap={1.5} sx={{ mb: 1.5, mt: 'auto' }}>
+                                                            <Stack direction="row" spacing={0.5} alignItems="center" color="text.secondary">
+                                                                <SchoolIcon sx={{ fontSize: 16 }} />
+                                                                <Typography variant="body2" fontWeight={500} color="primary.main">
+                                                                    {formatCFA(parcours.fraisScolarite || 0)}/an
+                                                                </Typography>
+                                                            </Stack>
+                                                            <Stack direction="row" spacing={0.5} alignItems="center" color="text.secondary">
+                                                                <CalendarIcon sx={{ fontSize: 16 }} />
+                                                                <Typography variant="body2">{parcours.dureeAnnees} an(s)</Typography>
+                                                            </Stack>
+                                                            <Stack direction="row" spacing={0.5} alignItems="center" color="text.secondary">
+                                                                <CategoryIcon sx={{ fontSize: 16 }} />
+                                                                <Typography variant="caption" noWrap sx={{ maxWidth: 150 }}>
+                                                                    {parcours.seriesAcceptees?.join(', ') || 'Toutes'}
+                                                                </Typography>
+                                                            </Stack>
+                                                        </Stack>
+                                                        
+                                                        <Divider sx={{ mb: 1 }} />
 
-                                                        {/* Informations clés en grille */}
-                                                        <Grid container spacing={2} sx={{ mb: 'auto' }}>
-                                                            <Grid item xs={6}>
-                                                                <Stack direction="row" spacing={1} alignItems="flex-start">
-                                                                    <Box sx={{ mt: 0.2, p: 0.5, bgcolor: alpha(theme.palette.primary.main, 0.1), borderRadius: 1, color: 'primary.main', display: 'flex' }}>
-                                                                        <SchoolIcon sx={{ fontSize: 16 }} />
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <Typography variant="caption" color="text.secondary" display="block">Frais / an</Typography>
-                                                                        <Typography variant="body2" fontWeight={600} color="primary.main">
-                                                                            {formatCFA(parcours.fraisScolarite || 0)}
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Stack>
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <Stack direction="row" spacing={1} alignItems="flex-start">
-                                                                    <Box sx={{ mt: 0.2, p: 0.5, bgcolor: alpha(theme.palette.secondary.main, 0.1), borderRadius: 1, color: 'secondary.main', display: 'flex' }}>
-                                                                        <CalendarIcon sx={{ fontSize: 16 }} />
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <Typography variant="caption" color="text.secondary" display="block">Durée</Typography>
-                                                                        <Typography variant="body2" fontWeight={600}>
-                                                                            {parcours.dureeAnnees} an(s)
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Stack>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <Stack direction="row" spacing={1} alignItems="flex-start">
-                                                                    <Box sx={{ mt: 0.2, p: 0.5, bgcolor: alpha(theme.palette.info.main, 0.1), borderRadius: 1, color: 'info.main', display: 'flex' }}>
-                                                                        <CategoryIcon sx={{ fontSize: 16 }} />
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <Typography variant="caption" color="text.secondary" display="block">Séries acceptées</Typography>
-                                                                        <Typography variant="body2" fontWeight={500}>
-                                                                            {parcours.seriesAcceptees && parcours.seriesAcceptees.length > 0 
-                                                                                ? parcours.seriesAcceptees.join(', ') 
-                                                                                : 'Toutes séries'}
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Stack>
-                                                            </Grid>
-                                                        </Grid>
+                                                        {/* Section Campagne & Actions dans le même bloc compact */}
+                                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                            <Box>
+                                                                {(parcours.statut === 'OUVERTE' || parcours.statut === 'A_VENIR') ? (
+                                                                    <Typography variant="caption" fontWeight={500} sx={{
+                                                                        display: 'flex', alignItems: 'center', gap: 0.5,
+                                                                        color: parcours.statut === 'OUVERTE' ? 'success.main' : 'warning.main'
+                                                                    }}>
+                                                                        <EventIcon sx={{ fontSize: 14 }} />
+                                                                        {parcours.statut === 'OUVERTE' 
+                                                                            ? `Fin: ${formatDate(parcours.dateCloture)}`
+                                                                            : `Début: ${formatDate(parcours.dateOuverture)}`
+                                                                        }
+                                                                    </Typography>
+                                                                ) : (
+                                                                    <Typography variant="caption" color="text.disabled" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                        <CloseIcon sx={{ fontSize: 14 }} /> Aucune campagne
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
 
-                                                        {/* Section Campagne & Dates */}
-                                                        <Box sx={{ mt: 2 }}>
-                                                            {(parcours.statut === 'OUVERTE' || parcours.statut === 'A_VENIR') ? (
-                                                                <Alert 
-                                                                    severity={parcours.statut === 'OUVERTE' ? "success" : "warning"}
-                                                                    icon={<EventIcon fontSize="small" />}
-                                                                    sx={{ 
-                                                                        py: 0, 
-                                                                        px: 1.5, 
-                                                                        '& .MuiAlert-message': { fontSize: '0.75rem', fontWeight: 500 },
-                                                                        bgcolor: alpha(parcours.statut === 'OUVERTE' ? theme.palette.success.main : theme.palette.warning.main, 0.05),
-                                                                        border: '1px solid',
-                                                                        borderColor: alpha(parcours.statut === 'OUVERTE' ? theme.palette.success.main : theme.palette.warning.main, 0.2),
-                                                                        borderRadius: 1.5
-                                                                    }}
-                                                                >
-                                                                    {parcours.statut === 'OUVERTE' 
-                                                                        ? `Fin des candidatures : ${formatDate(parcours.dateCloture)}`
-                                                                        : `Prochaine session : ${formatDate(parcours.dateOuverture)}`
-                                                                    }
-                                                                </Alert>
-                                                            ) : (
-                                                                <Alert 
-                                                                    severity="info"
-                                                                    icon={<CloseIcon fontSize="small" />}
-                                                                    sx={{ 
-                                                                        py: 0, 
-                                                                        px: 1.5, 
-                                                                        '& .MuiAlert-message': { fontSize: '0.75rem', fontWeight: 500, color: 'text.secondary' },
-                                                                        bgcolor: alpha(theme.palette.action.disabledBackground, 0.1),
-                                                                        border: '1px solid',
-                                                                        borderColor: alpha(theme.palette.divider, 0.2),
-                                                                        borderRadius: 1.5
-                                                                    }}
-                                                                >
-                                                                    Aucune campagne en cours
-                                                                </Alert>
-                                                            )}
-                                                        </Box>
-                                                    </CardContent>
-
-                                                    <Divider />
-                                                    
-                                                    {/* Actions du parcours */}
-                                                    <Box sx={{ 
-                                                        px: 2, 
-                                                        py: 1.5, 
-                                                        bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.5) : alpha(theme.palette.grey[50], 0.5),
-                                                        display: 'flex',
-                                                        justifyContent: 'flex-end',
-                                                        gap: 1
-                                                    }}>
-                                                        {parcours.statut === 'A_VENIR' && (
-                                                            <Tooltip title="Ouvrir la campagne">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleOpenCampaignDialog(domaine.id, parcours.id, 'open');
-                                                                    }}
-                                                                    sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), color: 'success.main', '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.2) } }}
-                                                                >
-                                                                    <OpenIcon fontSize="small" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                        {parcours.statut === 'OUVERTE' && (
-                                                            <Tooltip title="Clôturer la campagne">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleOpenCampaignDialog(domaine.id, parcours.id, 'close');
-                                                                    }}
-                                                                    sx={{ bgcolor: alpha(theme.palette.error.main, 0.1), color: 'error.main', '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.2) } }}
-                                                                >
-                                                                    <CloseIcon fontSize="small" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                        <Tooltip title="Modifier">
-                                                            <IconButton
-                                                                size="small"
-                                                                sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.2) } }}
-                                                            >
-                                                                <EditIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Supprimer">
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setConfirmDeleteParcoursId({ domaineId: domaine.id, offreId: parcours.id });
-                                                                }}
-                                                                disabled={deletingParcoursId === parcours.id}
-                                                                sx={{ bgcolor: alpha(theme.palette.error.main, 0.1), color: 'error.main', '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.2) } }}
-                                                            >
-                                                                <DeleteIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
+                                                            {/* Actions du parcours, discrètes */}
+                                                            <Stack direction="row" spacing={0.5}>
+                                                                {parcours.statut === 'A_VENIR' && (
+                                                                    <Tooltip title="Ouvrir la campagne">
+                                                                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleOpenCampaignDialog(domaine.id, parcours.id, 'open'); }} sx={{ color: 'success.main', p: 0.5 }}>
+                                                                            <OpenIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                )}
+                                                                {parcours.statut === 'OUVERTE' && (
+                                                                    <Tooltip title="Clôturer la campagne">
+                                                                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleOpenCampaignDialog(domaine.id, parcours.id, 'close'); }} sx={{ color: 'error.main', p: 0.5 }}>
+                                                                            <CloseIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                )}
+                                                                <Tooltip title="Modifier">
+                                                                    <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'primary.main' } }}>
+                                                                        <EditIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title="Supprimer">
+                                                                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); setConfirmDeleteParcoursId({ domaineId: domaine.id, offreId: parcours.id }); }} disabled={deletingParcoursId === parcours.id} sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}>
+                                                                        <DeleteIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </Stack>
+                                                        </Stack>
                                                     </Box>
                                                 </Card>
                                             </Grid>

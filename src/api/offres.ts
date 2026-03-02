@@ -48,16 +48,27 @@ export interface OffreBackend {
 export const offresApi = {
   // GET /api/parcours/domaines/{domaineId}
   getParcoursByDomaine: async (domaineId: number): Promise<ParcoursBackend[]> => {
-    const response = await client.get<{ success: boolean; data: any[] }>(
-      `/parcours/domaines/${domaineId}`,
-      { params: { size: 100 } }
-    );
-    // Le backend renvoie directement la liste dans 'data' (non paginée ou format différent)
-    // On mappe idParcours vers id pour la cohérence du frontend
-    return (response.data.data || []).map(p => ({
-        ...p,
-        id: p.idParcours || p.id
-    }));
+    try {
+        const response = await client.get<{ success: boolean; data: any }>(
+            `/parcours/domaines/${domaineId}`,
+            { params: { size: 100 } }
+        );
+        
+        // On récupère le tableau que ce soit dans .data ou .data.content
+        const rawData = response.data.data;
+        const list = Array.isArray(rawData) ? rawData : (rawData?.content || []);
+        
+        return list.map((p: any) => ({
+            ...p,
+            id: p.idParcours || p.id,
+            nomParcours: p.nomParcours,
+            description: p.description || '',
+            idDomaine: p.idDomaine
+        }));
+    } catch (error) {
+        console.error('API Error getParcoursByDomaine:', error);
+        return [];
+    }
   },
 
   // GET /api/etablissements/{etablissementId}/offres

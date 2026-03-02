@@ -157,17 +157,25 @@ const OffreFormation: React.FC = () => {
         setIsLoadingSeries(true);
         try {
             // Déterminer le code pays (TG par défaut pour le Togo)
-            const codePays = user?.etablissement?.localisation?.includes('Togo') || true ? 'TG' : 'BENIN';
+            const codePays = 'TG'; 
             
+            console.log('Fetching data for domaineId:', domaineId, 'country:', codePays);
             const [parcoursData, seriesData] = await Promise.all([
                 offresApi.getParcoursByDomaine(domaineId),
                 seriesApi.getByPays(codePays)
             ]);
-            setParcoursList(parcoursData);
-            setAvailableSeries(seriesData);
+            
+            console.log('Parcours fetched:', parcoursData);
+            console.log('Series fetched:', seriesData);
+
+            setParcoursList(parcoursData || []);
+            setAvailableSeries(seriesData || []);
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
-            dispatch(showSnackbar({ message: 'Erreur lors du chargement des données (parcours/séries)', severity: 'error' }));
+            dispatch(showSnackbar({ 
+                message: 'Erreur lors du chargement des données (parcours/séries)', 
+                severity: 'error' 
+            }));
         } finally {
             setIsLoadingParcoursList(false);
             setIsLoadingSeries(false);

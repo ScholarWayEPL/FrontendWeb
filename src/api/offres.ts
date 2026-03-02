@@ -48,12 +48,16 @@ export interface OffreBackend {
 export const offresApi = {
   // GET /api/parcours/domaines/{domaineId}
   getParcoursByDomaine: async (domaineId: number): Promise<ParcoursBackend[]> => {
-    const response = await client.get<{ success: boolean; data: { content: ParcoursBackend[] } }>(
+    const response = await client.get<{ success: boolean; data: any[] }>(
       `/parcours/domaines/${domaineId}`,
       { params: { size: 100 } }
     );
-    // Le backend semble renvoyer une structure paginée avec un champ 'content'
-    return response.data.data.content || [];
+    // Le backend renvoie directement la liste dans 'data' (non paginée ou format différent)
+    // On mappe idParcours vers id pour la cohérence du frontend
+    return (response.data.data || []).map(p => ({
+        ...p,
+        id: p.idParcours || p.id
+    }));
   },
 
   // GET /api/etablissements/{etablissementId}/offres

@@ -337,24 +337,33 @@ const OffreFormation: React.FC = () => {
             let nomParcoursToUse: string;
             let descriptionToUse: string;
 
+            // 1. Créer d'abord le parcours global s'il est nouveau
             if (isNewParcours) {
-                // 1. Créer d'abord le parcours global s'il est nouveau
-                const parcoursData = await offresApi.createParcours(etablissementId, {
+                const parcoursResp = await offresApi.createParcours(etablissementId, {
                     idDomaine: selectedDomaineId,
                     nomParcours: newParcours.nom.trim(),
                     description: newParcours.descriptionParcours.trim(),
                 });
-                parcoursIdToUse = parcoursData.id;
+                
+                // On récupère l'ID, que ce soit via 'id' ou un champ 'idParcours' renvoyé par le service
+                parcoursIdToUse = parcoursResp.id; 
                 nomParcoursToUse = newParcours.nom.trim();
                 descriptionToUse = newParcours.descriptionParcours.trim();
+                
+                console.log('✅ Nouvel ID parcours créé:', parcoursIdToUse);
             } else {
-                // Utiliser le parcours sélectionné
                 parcoursIdToUse = selectedParcoursFromList!.id;
                 nomParcoursToUse = selectedParcoursFromList!.nomParcours;
                 descriptionToUse = selectedParcoursFromList!.description;
+                
+                console.log('✅ Utilisation ID parcours existant:', parcoursIdToUse);
             }
 
-            // 2. Créer l'offre associée à l'établissement avec l'idParcours retourné
+            if (!parcoursIdToUse) {
+                throw new Error("Impossible de déterminer l'identifiant du parcours.");
+            }
+
+            // 2. Créer l'offre associée à l'établissement
             const created = await offresApi.createOffre(etablissementId, {
                 idParcours: parcoursIdToUse,
                 fraisScolarite: newParcours.fraisScolarite,

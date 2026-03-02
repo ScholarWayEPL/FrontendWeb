@@ -66,20 +66,33 @@ export const offresApi = {
 
   // POST /api/parcours/etablissements/{etablissementId}
   createParcours: async (etablissementId: number, payload: CreateParcoursPayload): Promise<{ id: number }> => {
-    const response = await client.post<{ success: boolean; data: { id: number } }>(
+    const response = await client.post<{ success: boolean; data: { idParcours: number; id: number } }>(
       `/parcours/etablissements/${etablissementId}`,
       payload
     );
-    return response.data.data;
+    // On s'assure de récupérer l'ID que ce soit 'id' ou 'idParcours' selon ce que renvoie l'API
+    const id = response.data.data.idParcours || response.data.data.id;
+    return { id };
   },
 
   // POST /api/etablissements/{etablissementId}/offres
   createOffre: async (etablissementId: number, payload: CreateOffrePayload): Promise<OffreBackend> => {
-    alert('DEBUG PAYLOAD (avant envoi): ' + JSON.stringify(payload, null, 2));
-    console.log('🚀 PAYLOAD CRÉATION OFFRE:', payload);
+    // Nettoyage du payload pour s'assurer que idParcours est présent et au bon format
+    const cleanedPayload = {
+      idParcours: Number(payload.idParcours),
+      fraisScolarite: Number(payload.fraisScolarite),
+      conditionsAdmission: payload.conditionsAdmission,
+      debouches: payload.debouches,
+      dureeAnnees: Number(payload.dureeAnnees),
+      niveauRequis: payload.niveauRequis,
+      seriesAcceptees: payload.seriesAcceptees || []
+    };
+
+    console.log('🚀 ENVOI OFFRE (Cleaned):', cleanedPayload);
+    
     const response = await client.post<{ success: boolean; data: OffreBackend }>(
       `/etablissements/${etablissementId}/offres`,
-      payload
+      cleanedPayload
     );
     return response.data.data;
   },

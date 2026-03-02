@@ -1,4 +1,5 @@
-import { client } from './client';
+import client from "./client";
+
 
 export interface CreateCampagnePayload {
     idEtablissementParcours: number;

@@ -40,6 +40,7 @@ const Notifications: React.FC = () => {
   const [notificationToDelete, setNotificationToDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
   const pageSize = 10;
 
@@ -53,6 +54,7 @@ const Notifications: React.FC = () => {
       });
       setNotifications(data);
       setTotalPages(pagination.totalPages);
+      setTotalElements(pagination.total);
     } catch (err) {
       console.error('Erreur chargement notifications:', err);
       dispatch(showSnackbar({ message: 'Erreur lors du chargement des notifications', severity: 'error' }));
@@ -188,6 +190,7 @@ const Notifications: React.FC = () => {
         onTabChange={(tab) => { setActiveTab(tab); setCurrentPage(1); }}
         currentPage={currentPage}
         totalPages={totalPages}
+        totalElements={totalElements}
         onPageChange={setCurrentPage}
         onMarkAsRead={handleMarkAsRead}
         onDelete={handleDeleteClick}

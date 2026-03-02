@@ -35,6 +35,7 @@ interface NotificationListProps {
     onTabChange: (tab: number) => void;
     currentPage: number;
     totalPages: number;
+    totalElements: number;
     onPageChange: (page: number) => void;
     onMarkAsRead: (id: number) => void;
     onDelete: (id: number) => void;
@@ -49,6 +50,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
     onTabChange,
     currentPage,
     totalPages,
+    totalElements,
     onPageChange,
     onMarkAsRead,
     onDelete,
@@ -109,7 +111,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
                         <Stack direction="row" spacing={1} alignItems="center">
                             <span>Toutes</span>
                             <Chip
-                                label={notifications.length}
+                                label={totalElements}
                                 size="small"
                                 sx={{ height: 20, bgcolor: 'action.hover', fontWeight: 700 }}
                             />

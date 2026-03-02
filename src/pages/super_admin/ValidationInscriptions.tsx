@@ -72,7 +72,7 @@ const ValidationInscriptions: React.FC = () => {
                 sort: 'dateCreation,DESC',
                 valide: statusFilter
             });
-            if (response.success) {
+            if (response.success && response.data) {
                 setDemandes(response.data);
                 if (response.pagination) {
                     setTotalElements(response.pagination.total);
@@ -98,9 +98,10 @@ const ValidationInscriptions: React.FC = () => {
     };
 
     const filteredDemandes = demandes.filter((demande) =>
-        demande.nomEtablissement.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        demande.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        demande.localisation.toLowerCase().includes(searchTerm.toLowerCase())
+        (searchTerm === '' || 
+        demande.nomEtablissement?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        demande.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        demande.localisation?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     const handleChangePage = (_event: unknown, newPage: number) => {

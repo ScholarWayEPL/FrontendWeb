@@ -44,6 +44,7 @@ import { formatCFA } from '../../constants';
 import type { StatutCampagne } from '../../types';
 import { domainesApi } from '../../api/domaines';
 import { offresApi, type ParcoursBackend } from '../../api/offres';
+import { campagnesApi } from '../../api/campagnes';
 import { seriesApi, type SerieBac } from '../../api/series';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { showSnackbar } from '../../store/slices/uiSlice';
@@ -116,6 +117,7 @@ const OffreFormation: React.FC = () => {
 
     // Campaign dialog states
     const [campaignDialogOpen, setCampaignDialogOpen] = useState(false);
+    const [isSubmittingCampaign, setIsSubmittingCampaign] = useState(false);
     const [campaignAction, setCampaignAction] = useState<'open' | 'close' | 'reopen' | null>(null);
     const [campaignDomaineId, setCampaignDomaineId] = useState<number | null>(null);
     const [campaignParcoursId, setCampaignParcoursId] = useState<number | null>(null);
@@ -428,39 +430,69 @@ const OffreFormation: React.FC = () => {
         setCampaignDialogOpen(true);
     };
 
-    const handleCampaignConfirm = () => {
+    const handleCampaignConfirm = async () => {
         if (campaignDomaineId === null || campaignParcoursId === null || !campaignAction) return;
 
-        setDomaines(domaines.map(d => {
-            if (d.id === campaignDomaineId) {
-                return {
-                    ...d,
-                    parcours: d.parcours.map(p => {
-                        if (p.id === campaignParcoursId) {
-                            const newStatut: StatutCampagne =
-                                campaignAction === 'close' ? 'CLOTUREE' : (campaignAction === 'reopen' ? 'OUVERTE' : 'OUVERTE');
-                            return {
-                                ...p,
-                                statut: newStatut,
-                                ...(campaignAction !== 'close' && {
-                                    dateOuverture: campaignDates.dateOuverture,
-                                    dateCloture: campaignDates.dateCloture,
-                                    anneeAcademique: campaignDates.anneeAcademique,
-                                    dateConcoursEcrit: campaignDates.dateConcoursEcrit || undefined,
-                                }),
-                            };
-                        }
-                        return p;
-                    })
-                };
+        setIsSubmittingCampaign(true);
+        try {
+            if (campaignAction === 'open' || campaignAction === 'reopen') {
+                // Call API directly to create the campaign
+                await campagnesApi.createCampagne(etablissementId, {
+                    idEtablissementParcours: campaignParcoursId,
+                    anneeAcademique: campaignDates.anneeAcademique,
+                    dateOuverture: campaignDates.dateOuverture,
+                    dateCloture: campaignDates.dateCloture,
+                    dateConcoursEcrit: campaignDates.dateConcoursEcrit || undefined,
+                });
+            } else if (campaignAction === 'close') {
+                // TODO: Implement close campaign endpoint if necessary in the future
             }
-            return d;
-        }));
 
-        setCampaignDialogOpen(false);
-        setCampaignDomaineId(null);
-        setCampaignParcoursId(null);
-        setCampaignAction(null);
+            // Mettre à jour l'interface locale après succès
+            setDomaines(domaines.map(d => {
+                if (d.id === campaignDomaineId) {
+                    return {
+                        ...d,
+                        parcours: d.parcours.map(p => {
+                            if (p.id === campaignParcoursId) {
+                                const newStatut: StatutCampagne =
+                                    campaignAction === 'close' ? 'CLOTUREE' : (campaignAction === 'reopen' ? 'OUVERTE' : 'OUVERTE');
+                                return {
+                                    ...p,
+                                    statut: newStatut,
+                                    ...(campaignAction !== 'close' && {
+                                        dateOuverture: campaignDates.dateOuverture,
+                                        dateCloture: campaignDates.dateCloture,
+                                        anneeAcademique: campaignDates.anneeAcademique,
+                                        dateConcoursEcrit: campaignDates.dateConcoursEcrit || undefined,
+                                    }),
+                                };
+                            }
+                            return p;
+                        })
+                    };
+                }
+                return d;
+            }));
+
+            dispatch(showSnackbar({
+                message: `Campagne ${campaignAction === 'close' ? 'clôturée' : 'ouverte'} avec succès`,
+                severity: 'success'
+            }));
+
+            setCampaignDialogOpen(false);
+            setCampaignDomaineId(null);
+            setCampaignParcoursId(null);
+            setCampaignAction(null);
+        } catch (error: any) {
+            console.error('Erreur lors de la gestion de la campagne:', error);
+            dispatch(showSnackbar({
+                message: error.response?.data?.message || 'Erreur lors de la modification de la campagne',
+                severity: 'error'
+            }));
+        } finally {
+            setIsSubmittingCampaign(false);
+        }
     };
 
     const getCampaignDialogTitle = () => {
@@ -844,22 +876,25 @@ const OffreFormation: React.FC = () => {
                     </Stack>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, py: 2 }}>
-                    <Button onClick={() => setCampaignDialogOpen(false)}>
+                    <Button onClick={() => setCampaignDialogOpen(false)} disabled={isSubmittingCampaign}>
                         Annuler
                     </Button>
                     <Button
                         variant="contained"
                         onClick={handleCampaignConfirm}
+                        disabled={isSubmittingCampaign}
                         color={
                             campaignAction === 'open' ? 'success' :
                                 campaignAction === 'close' ? 'error' : 'warning'
                         }
                         startIcon={
+                            isSubmittingCampaign ? <CircularProgress size={16} color="inherit" /> :
                             campaignAction === 'open' ? <OpenIcon /> :
                                 campaignAction === 'close' ? <CloseIcon /> : <ReopenIcon />
                         }
                     >
-                        {campaignAction === 'open' ? 'Ouvrir' :
+                        {isSubmittingCampaign ? 'Traitement...' :
+                            campaignAction === 'open' ? 'Ouvrir' :
                             campaignAction === 'close' ? 'Clôturer' : 'Réouvrir'}
                     </Button>
                 </DialogActions>

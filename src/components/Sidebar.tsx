@@ -26,6 +26,7 @@ import {
   VerifiedUser as VerifiedUserIcon,
 } from '@mui/icons-material';
 import { useAppSelector } from '../store/hooks';
+import { getFileUrl } from '../utils/helpers';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -125,13 +126,34 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`,
+            overflow: 'hidden',
           }}
         >
-          <SchoolIcon sx={{ color: 'white', fontSize: 24 }} />
+          {(user?.role === 'ROLE_ETABLISSEMENT' && user.etablissement?.logoUrl) ? (
+            <img
+              src={getFileUrl(user.etablissement.logoUrl)}
+              alt="Logo"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <SchoolIcon sx={{ color: 'white', fontSize: 24 }} />
+          )}
         </Box>
-        <Box>
-          <Typography variant="h6" fontWeight={800} sx={{ color: 'text.primary', lineHeight: 1.2 }}>
-            ScholarWay
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            variant="h6"
+            fontWeight={800}
+            sx={{
+              color: 'text.primary',
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            {(user?.role === 'ROLE_ETABLISSEMENT' && user.etablissement?.nomEtablissement)
+              ? user.etablissement.nomEtablissement
+              : 'ScholarWay'}
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             {(user && user.role === 'ROLE_ETABLISSEMENT') ? 'Espace Établissement' : 'Administration'}

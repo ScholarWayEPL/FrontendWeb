@@ -154,8 +154,8 @@ const EtablissementDashboard: React.FC = () => {
                 {/* Graphique 1: État global des candidatures */}
                 <Grid item xs={12} md={6} lg={4}>
                     <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, overflow: 'hidden' }}>
-                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.primary.main, 0.03), borderBottom: `1px solid ${theme.palette.divider}` }}>
-                            <Typography variant="subtitle1" fontWeight={700}>
+                        <Box sx={{ p: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                            <Typography variant="subtitle1" fontWeight={700} color="text.primary">
                                 Statut des candidatures
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -197,8 +197,8 @@ const EtablissementDashboard: React.FC = () => {
                 {/* Graphique 2: Top Parcours */}
                 <Grid item xs={12} md={6} lg={8}>
                     <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, overflow: 'hidden' }}>
-                        <Box sx={{ p: 2, bgcolor: alpha(theme.palette.secondary.main, 0.03), borderBottom: `1px solid ${theme.palette.divider}` }}>
-                            <Typography variant="subtitle1" fontWeight={700}>
+                        <Box sx={{ p: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                            <Typography variant="subtitle1" fontWeight={700} color="text.primary">
                                 Top 5 Parcours les plus demandés
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -253,10 +253,10 @@ const EtablissementDashboard: React.FC = () => {
                             overflow: 'hidden',
                         }}
                     >
-                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.primary.main, 0.05), borderBottom: `2px solid ${theme.palette.primary.main}` }}>
+                        <Box sx={{ p: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center">
                                 <Box>
-                                    <Typography variant="h6" fontWeight={700}>
+                                    <Typography variant="h6" fontWeight={700} color="text.primary">
                                         Campagnes d'admission
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
@@ -264,10 +264,10 @@ const EtablissementDashboard: React.FC = () => {
                                     </Typography>
                                 </Box>
                                 <Button
-                                    variant="contained"
+                                    variant="outlined"
                                     size="small"
                                     onClick={() => history.push('/etablissement/offre')}
-                                    sx={{ borderRadius: 1.5 }}
+                                    sx={{ borderRadius: 1.5, textTransform: 'none', fontWeight: 600 }}
                                 >
                                     Gérer les campagnes
                                 </Button>
@@ -375,8 +375,8 @@ const EtablissementDashboard: React.FC = () => {
                             overflow: 'hidden',
                         }}
                     >
-                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.info.main, 0.05), borderBottom: `2px solid ${theme.palette.info.main}` }}>
-                            <Typography variant="h6" fontWeight={700}>
+                        <Box sx={{ p: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                            <Typography variant="h6" fontWeight={700} color="text.primary">
                                 Activité récente
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -413,8 +413,8 @@ const EtablissementDashboard: React.FC = () => {
                             overflow: 'hidden',
                         }}
                     >
-                        <Box sx={{ p: 2.5, bgcolor: alpha(theme.palette.success.main, 0.05), borderBottom: `2px solid ${theme.palette.success.main}` }}>
-                            <Typography variant="h6" fontWeight={700}>
+                        <Box sx={{ p: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                            <Typography variant="h6" fontWeight={700} color="text.primary">
                                 Actions rapides
                             </Typography>
                             <Typography variant="body2" color="text.secondary">

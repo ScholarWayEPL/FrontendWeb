@@ -188,21 +188,13 @@ export const etablissementsApi = {
 
   // Valider un établissement
   validate: async (id: number): Promise<ApiResponse<null>> => {
-    const response = await client.patch<null>(`/admin/etablissements/${id}/valider`);
-    return {
-      success: true,
-      data: response.data,
-      message: 'Établissement validé avec succès'
-    };
+    const response = await client.patch<ApiResponse<null>>(`/admin/etablissements/${id}/valider`);
+    return response.data;
   },
 
   // Rejeter un établissement
   reject: async (id: number): Promise<ApiResponse<null>> => {
-    const response = await client.patch<null>(`/admin/etablissements/${id}/rejeter`);
-    return {
-      success: true,
-      data: response.data,
-      message: 'Établissement rejeté avec succès'
-    };
+    const response = await client.patch<ApiResponse<null>>(`/admin/etablissements/${id}/rejeter`);
+    return response.data;
   },
 };

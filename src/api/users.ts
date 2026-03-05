@@ -34,31 +34,20 @@ export const usersApi = {
 
   // Récupérer un bachelier par ID
   getById: async (id: number): Promise<ApiResponse<Bachelier>> => {
-    const response = await client.get<Bachelier>(`/bacheliers/${id}`);
-    return {
-      data: response.data,
-      success: true,
-    };
+    const response = await client.get<ApiResponse<Bachelier>>(`/bacheliers/${id}`);
+    return response.data;
   },
 
   // Créer un nouveau bachelier
   create: async (data: any): Promise<ApiResponse<Bachelier>> => {
-    const response = await client.post<Bachelier>('/bacheliers', data);
-    return {
-      data: response.data,
-      success: true,
-      message: 'Bachelier créé avec succès',
-    };
+    const response = await client.post<ApiResponse<Bachelier>>('/bacheliers', data);
+    return response.data;
   },
 
   // Mettre à jour un bachelier
   update: async (id: number, data: Partial<Bachelier>): Promise<ApiResponse<Bachelier>> => {
-    const response = await client.put<Bachelier>(`/bacheliers/${id}`, data);
-    return {
-      data: response.data,
-      success: true,
-      message: 'Bachelier modifié avec succès',
-    };
+    const response = await client.put<ApiResponse<Bachelier>>(`/bacheliers/${id}`, data);
+    return response.data;
   },
 
   // Supprimer un bachelier

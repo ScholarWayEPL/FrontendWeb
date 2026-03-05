@@ -92,7 +92,7 @@ const Candidatures: React.FC = () => {
     const exportMenuOpen = Boolean(exportMenuAnchor);
 
 
-    
+
 
     return (
         <Box>
@@ -208,11 +208,13 @@ const Candidatures: React.FC = () => {
 
             {/* Filtres */}
             <Card
-                variant="outlined"
                 sx={{
-                    borderRadius: 2,
+                    borderRadius: 3,
                     mb: 3,
-                    bgcolor: alpha(theme.palette.action.hover, 0.5),
+                    bgcolor: 'background.paper',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.03)',
+                    border: '1px solid',
+                    borderColor: 'divider',
                 }}
             >
                 <CardContent sx={{ p: 2.5 }}>
@@ -293,15 +295,15 @@ const Candidatures: React.FC = () => {
                 <TableContainer>
                     <Table>
                         <TableHead>
-                            <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
-                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>N° Candidature</TableCell>
-                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Candidat</TableCell>
-                                <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Parcours / Filière</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Série Bac</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Moyenne</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Date</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Statut</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Actions</TableCell>
+                            <TableRow sx={{ bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+                                <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>N° Candidature</TableCell>
+                                <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Candidat</TableCell>
+                                <TableCell sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Parcours / Filière</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Série Bac</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Moyenne</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Date</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Statut</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chip } from '@mui/material';
+import { Chip, alpha } from '@mui/material';
 import type { ChipProps } from '@mui/material';
 import { BORDER_RADIUS } from '../../constants';
 
@@ -81,12 +81,41 @@ const StatusChip: React.FC<StatusChipProps> = ({ status, label, size = 'small' }
     return (
         <Chip
             label={formatLabel(label || config.label)}
-            color={config.color}
-            size={size}
             sx={{
+                minWidth: 100,
                 borderRadius: BORDER_RADIUS.xs,
-                fontWeight: 500,
+                fontWeight: 700,
+                fontSize: '0.65rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                bgcolor: alpha(
+                    config.color === 'default' ? '#9e9e9e' :
+                        config.color === 'primary' ? '#1976d2' :
+                            config.color === 'success' ? '#2e7d32' :
+                                config.color === 'error' ? '#d32f2f' :
+                                    config.color === 'warning' ? '#ed6c02' :
+                                        config.color === 'info' ? '#0288d1' : '#9e9e9e',
+                    0.12
+                ),
+                color: (theme) => {
+                    if (config.color === 'default' || config.color === undefined) return theme.palette.text.secondary;
+                    const colorKey = config.color as 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+                    return theme.palette[colorKey].main;
+                },
+                border: '1px solid',
+                borderColor: (theme) => {
+                    if (config.color === 'default' || config.color === undefined) return alpha(theme.palette.divider, 0.5);
+                    const colorKey = config.color as 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+                    const mainColor = theme.palette[colorKey].main;
+                    return alpha(mainColor, 0.3);
+                },
+                '& .MuiChip-label': {
+                    px: 1,
+                    width: '100%',
+                    textAlign: 'center',
+                }
             }}
+            size={size}
         />
     );
 };

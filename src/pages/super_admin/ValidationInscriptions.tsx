@@ -97,12 +97,21 @@ const ValidationInscriptions: React.FC = () => {
         setPage(0);
     };
 
-    const filteredDemandes = demandes.filter((demande) =>
-        (searchTerm === '' || 
-        demande.nomEtablissement?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        demande.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        demande.localisation?.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredDemandes = demandes.filter((demande) => {
+        const matchesSearch = searchTerm === '' ||
+            demande.nomEtablissement?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            demande.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            demande.localisation?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Sécurité supplémentaire : filtrage côté client par statut
+        const currentStatut = typeof demande.valide === 'boolean'
+            ? (demande.valide ? 'ACTIF' : 'EN_ATTENTE')
+            : String(demande.valide || 'EN_ATTENTE').toUpperCase();
+
+        const matchesStatus = currentStatut === statusFilter;
+
+        return matchesSearch && matchesStatus;
+    });
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);

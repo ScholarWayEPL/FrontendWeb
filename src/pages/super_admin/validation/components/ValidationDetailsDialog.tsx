@@ -143,16 +143,18 @@ const ValidationDetailsDialog: React.FC<ValidationDetailsDialogProps> = ({
             <DialogActions sx={{ p: 4, pt: 0 }}>
                 <Button onClick={onClose} sx={{ fontWeight: 700, px: 3 }}>Fermer</Button>
                 <Box sx={{ flexGrow: 1 }} />
-                <Stack direction="row" spacing={2}>
-                    <Button variant="outlined" color="error" startIcon={<CancelIcon />} sx={{ borderRadius: '10px', fontWeight: 700 }}
-                        onClick={() => { onReject(selectedDemande); }}>
-                        Rejeter le dossier
-                    </Button>
-                    <Button variant="contained" color="success" startIcon={<CheckCircleIcon />} sx={{ borderRadius: '10px', fontWeight: 700, boxShadow: `0 8px 16px ${alpha(theme.palette.success.main, 0.25)}` }}
-                        onClick={() => { onApprove(selectedDemande); }}>
-                        Valider l'établissement
-                    </Button>
-                </Stack>
+                {(typeof selectedDemande.valide === 'boolean' ? !selectedDemande.valide : selectedDemande.valide === 'EN_ATTENTE') && (
+                    <Stack direction="row" spacing={2}>
+                        <Button variant="outlined" color="error" startIcon={<CancelIcon />} sx={{ borderRadius: '10px', fontWeight: 700 }}
+                            onClick={() => { onReject(selectedDemande); }}>
+                            Rejeter le dossier
+                        </Button>
+                        <Button variant="contained" color="success" startIcon={<CheckCircleIcon />} sx={{ borderRadius: '10px', fontWeight: 700, boxShadow: `0 8px 16px ${alpha(theme.palette.success.main, 0.25)}` }}
+                            onClick={() => { onApprove(selectedDemande); }}>
+                            Valider l'établissement
+                        </Button>
+                    </Stack>
+                )}
             </DialogActions>
         </Dialog>
     );

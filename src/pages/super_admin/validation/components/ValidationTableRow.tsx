@@ -91,7 +91,7 @@ const ValidationTableRow: React.FC<ValidationTableRowProps> = ({
                             <VisibilityIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
-                    {demande.valide === 'EN_ATTENTE' && (
+                    {(typeof demande.valide === 'boolean' ? !demande.valide : demande.valide === 'EN_ATTENTE') && (
                         <>
                             <Tooltip title="Validation rapide">
                                 <IconButton size="small" sx={{ color: 'success.main', bgcolor: alpha(theme.palette.success.main, 0.05) }} onClick={() => onQuickApprove(demande)}>
